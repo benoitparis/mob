@@ -2,6 +2,11 @@ package paris.benoit.mob.message;
 
 import org.json.JSONObject;
 
+/**
+ * Message provenant du client.
+ * @author ben
+ *
+ */
 public class ClientMessage {
     
     // INFO on met quoi? des ACKs de choses? 

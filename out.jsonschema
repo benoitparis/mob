@@ -2,12 +2,6 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "loopback_index": {
-      "type": "string"
-    },
-    "actor_identity ": {
-      "type": "string"
-    },
     "table_name": {
       "type": "string"
     },

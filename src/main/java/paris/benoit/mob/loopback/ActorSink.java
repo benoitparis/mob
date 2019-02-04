@@ -8,19 +8,17 @@ import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
 
-import co.paralleluniverse.actors.ActorRegistry;
 import co.paralleluniverse.actors.ActorRef;
-
-import paris.benoit.mob.message.OutputRow;
+import co.paralleluniverse.actors.ActorRegistry;
 
 @SuppressWarnings("serial")
-public class ActorLoopBackSink extends RichSinkFunction<Row> {
+public class ActorSink extends RichSinkFunction<Row> {
     
     public static ArrayBlockingQueue<Integer> registerQueue = new ArrayBlockingQueue<Integer>(50);
 
     JsonRowSerializationSchema jrs = null;
     
-    public ActorLoopBackSink(TypeInformation<Row> jsonTypeInfo) {
+    public ActorSink(TypeInformation<Row> jsonTypeInfo) {
         this.jrs = new JsonRowSerializationSchema(jsonTypeInfo);
     }
 
@@ -33,11 +31,15 @@ public class ActorLoopBackSink extends RichSinkFunction<Row> {
     @Override
     public void invoke(Row row) throws Exception {
         
-        Row root = (Row) row.getField(0);
+        String loopbackIndex = (String) row.getField(0);
+        // on check une assumption ici avec le loopbackIndex?
         // par convention? faudrait faire par nom?
-        String identity = (String) root.getField(1);
+        String identity = (String) row.getField(1);
+        // arreter de faire par convention, le vrai schema est pas loin
+        Row payload = (Row) row.getField(2);
+        String payloadString = new String(jrs.serialize(payload));
         // call to send: not blocking or dropping the message, as his mailbox is unbounded
-        ((ActorRef<OutputRow>)ActorRegistry.getActor(identity)).send(new OutputRow(row.toString()));
+        ((ActorRef<String>)ActorRegistry.getActor(identity)).send(payloadString);
 
         System.out.println("new msg in sink: " + row);
     }

@@ -37,6 +37,7 @@ function wsOnClose(evt) {
 function wsOnMessage(evt) {
 	console.log("WS ON MSG");
 	console.log(evt);
+	console.log(JSON.parse(evt.data));
 }
 
 </script>

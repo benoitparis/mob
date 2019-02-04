@@ -15,7 +15,7 @@ import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 
 import co.paralleluniverse.fibers.SuspendExecution;
-import paris.benoit.mob.loopback.JsonActorEntrySource;
+import paris.benoit.mob.loopback.ActorSource;
 
 public class JsonTableSource implements StreamTableSource<Row> {
     
@@ -24,16 +24,16 @@ public class JsonTableSource implements StreamTableSource<Row> {
     //   faudrait se faire une liste de ce qui est par acteur, par thread, par info métier, 
     //     de par qui va se faire serializer, de timeline sur objet, de convention, etc
     //       un peu à la TLAps où une solution est une state machine bien simple
-    JsonActorEntrySource actorFunction;
+    ActorSource actorFunction;
     TypeInformation<Row> jsonTypeInfo;
     JsonRowDeserializationSchema jrds;
     
     static JsonTableSource it;
     static volatile int parallelism = -1;
-    static CopyOnWriteArrayList<JsonActorEntrySource> childFunctions = new CopyOnWriteArrayList<>();
+    static CopyOnWriteArrayList<ActorSource> childFunctions = new CopyOnWriteArrayList<>();
     
     public JsonTableSource(String schema) {
-        actorFunction = new JsonActorEntrySource(this);
+        actorFunction = new ActorSource(this);
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
         // singleton for now, we'll see later about available tables to actors
@@ -87,7 +87,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
             root.setField(2, payloadRow);
             
             int index = ThreadLocalRandom.current().nextInt(0, childFunctions.size());
-            JsonActorEntrySource chosenFunction = childFunctions.get(index);
+            ActorSource chosenFunction = childFunctions.get(index);
             
             chosenFunction.emitRow(root);
         } catch (IOException e) {
@@ -103,7 +103,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
         return it;
     }
     
-    public void registerChildFunction(JsonActorEntrySource sourceFunction) {
+    public void registerChildFunction(ActorSource sourceFunction) {
         childFunctions.add(sourceFunction);
     }
 

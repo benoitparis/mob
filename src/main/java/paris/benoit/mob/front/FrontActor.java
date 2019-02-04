@@ -13,7 +13,6 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
 import paris.benoit.mob.json2sql.JsonTableSource;
 import paris.benoit.mob.message.ClientMessage;
-import paris.benoit.mob.message.OutputRow;
 
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
@@ -78,10 +77,12 @@ public class FrontActor extends BasicActor<Object, Void> {
                 tableInstance.emitRow(getName(), cMsg.payload.toString());
             }
             // Message from LoopBackSink
-            else if (message instanceof OutputRow) {
-                OutputRow msg = (OutputRow) message;
+            // String pas ouf niveau typage? faudrait ptet un wrapper? Json ça fait un coup de serde en plus.. ou bien un Row?
+            //   on fait la serde où?? ptet ici non?
+            else if (message instanceof String) {
+                String msg = (String) message;
                 if (null != clientWSPort) {
-                    clientWSPort.send(new WebDataMessage(self(), msg.getPayload()));
+                    clientWSPort.send(new WebDataMessage(self(), msg));
                 } else {
                     System.out.println("Received a message from the cluster without having a WS Port to send it back to");
                 }

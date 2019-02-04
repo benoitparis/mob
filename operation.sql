@@ -1,8 +1,13 @@
 
 INSERT INTO outputTable 
 SELECT 
-  ROW(loopback_index, actor_identity, table_name, key_value)
-FROM inputTable
+  loopback_index, actor_identity, payload
+FROM (
+  SELECT
+    inputTable.*,
+    ROW(table_name, key_value) payload
+  FROM inputTable
+)
 
 -- talk nicely:
 -- 'payload.' ~ '' ?

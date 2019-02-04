@@ -2,7 +2,6 @@ package paris.benoit.mob.loopback;
 
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
-import org.apache.flink.table.sources.TableSource;
 import org.apache.flink.types.Row;
 
 import co.paralleluniverse.fibers.SuspendExecution;
@@ -14,7 +13,7 @@ import paris.benoit.mob.json2sql.JsonTableSource;
 
 // TODO rename après générique, le json deviendra T générique
 @SuppressWarnings("serial")
-public class JsonActorEntrySource extends RichParallelSourceFunction<Row> {
+public class ActorSource extends RichParallelSourceFunction<Row> {
     
     // ultra sale: on fait une élection plus tot pour remettre ça en static!
     private static Channel<Row> channelToSource = Channels.newChannel(1000000, OverflowPolicy.BACKOFF, false, false);
@@ -24,7 +23,7 @@ public class JsonActorEntrySource extends RichParallelSourceFunction<Row> {
     private Integer loopbackIndex = null;
     private static JsonTableSource parentTable;
     
-    public JsonActorEntrySource(JsonTableSource parentTableParam) {
+    public ActorSource(JsonTableSource parentTableParam) {
         super();
         parentTable = parentTableParam;
     }
@@ -33,7 +32,7 @@ public class JsonActorEntrySource extends RichParallelSourceFunction<Row> {
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         // Assumption: The number of Sources must be greater or equal to the number of Sinks on the same JVM.
-        loopbackIndex = ActorLoopBackSink.registerQueue.take();
+        loopbackIndex = ActorSink.registerQueue.take();
         parentTable.registerChildFunction(this);
         
     }

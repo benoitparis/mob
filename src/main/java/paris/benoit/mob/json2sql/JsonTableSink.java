@@ -10,7 +10,7 @@ import org.apache.flink.table.sinks.AppendStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.types.Row;
 
-import paris.benoit.mob.loopback.ActorLoopBackSink;
+import paris.benoit.mob.loopback.ActorSink;
 
 public class JsonTableSink implements AppendStreamTableSink<Row> {
 
@@ -20,8 +20,16 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     public JsonTableSink(String schema) {
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
-        fieldNames = new String[] { "payloadOut" };
-        fieldTypes = new TypeInformation[] { jsonTypeInfo };
+        fieldNames = new String[] { 
+            "loopback_index", 
+            "actor_identity",
+            "payload" 
+        };
+        fieldTypes = new TypeInformation[] {
+            Types.STRING(),
+            Types.STRING(),
+            jsonTypeInfo
+        };
 
         System.out.println(jsonTypeInfo);
         System.out.println(Arrays.asList(fieldTypes));
@@ -29,14 +37,12 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     @Override
     public TableSink<Row> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
-        this.fieldNames = fieldNames;
-        this.fieldTypes = fieldTypes;
-        return this;
+        throw new UnsupportedOperationException("This class is configured through its constructor");
     }
 
     @Override
     public String[] getFieldNames() {
-        return new String[] { "payloadOut" };
+        return fieldNames;
     }
 
     @Override
@@ -51,8 +57,7 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     @Override
     public void emitDataStream(DataStream<Row> ds) {
-        ds.addSink(new ActorLoopBackSink(jsonTypeInfo));
-
+        ds.addSink(new ActorSink(jsonTypeInfo));
     }
 
 }
