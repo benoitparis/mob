@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "col1": {
+      "type": "string"
+    },
+    "col2": {
+      "type": "object",
+      "properties": {
+        "colA": {
+          "type": "integer"
+        },
+        "colB": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "colA",
+        "colB"
+      ]
+    }
+  },
+  "required": [
+    "col1",
+    "col2"
+  ]
+}

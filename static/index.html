@@ -1,0 +1,44 @@
+<html>
+<head></head>
+<body>
+HELLO
+<button onclick="wsConnect()">Connect WS</button>
+<button onclick="query()">Query</button>
+<script type="text/javascript">
+
+function query () {
+	var payload = {	
+		INTENT: 'QUERY', 
+		PAYLOAD: {
+			'table': 'comment', 
+			'key': '1'
+		} 
+	}; 
+    ws.send(JSON.stringify(payload));
+}
+
+function wsConnect () {
+	var mypath = "/service"
+	var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+    ws = new WebSocket(wsUrl);
+    ws.onopen = wsOnOpen;
+    ws.onmessage = wsOnMessage;
+    ws.onclose = wsOnClose;
+    
+}
+function wsOnOpen(evt) {
+	console.log("WS OPEN");
+	console.log(evt);
+}
+function wsOnClose(evt) {
+	console.log("WS CLOSE");
+	console.log(evt);
+}
+function wsOnMessage(evt) {
+	console.log("WS ON MSG");
+	console.log(evt);
+}
+
+</script>
+</body>
+</html>
