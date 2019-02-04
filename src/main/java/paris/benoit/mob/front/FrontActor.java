@@ -11,22 +11,21 @@ import co.paralleluniverse.comsat.webactors.WebDataMessage;
 import co.paralleluniverse.comsat.webactors.WebSocketOpened;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
-import paris.benoit.mob.loopback.JsonActorEntrySource;
+import paris.benoit.mob.json2sql.JsonTableSource;
 import paris.benoit.mob.message.ClientMessage;
-import paris.benoit.mob.message.ClusterMessage;
-import paris.benoit.mob.message.Message;
+import paris.benoit.mob.message.OutputRow;
 
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
 public class FrontActor extends BasicActor<Object, Void> {
-    // TODO use properly
-//    static Logger LOG = LoggerFactory.getLogger(FrontActor.class);
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
+    static JsonTableSource tableInstance;
     
-    public FrontActor() {
+    public FrontActor() throws InterruptedException {
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+        tableInstance = JsonTableSource.getInstance();
     }
 
     @Override
@@ -75,13 +74,14 @@ public class FrontActor extends BasicActor<Object, Void> {
                 //       en tout cas pas contraint par les schemas flink; tu en fera un par table
                 // ici on s'envoie a soi-même, alors que c'est business.
                 //   faudra mettre le renvoi à soi-même dans le SQL
-                JsonActorEntrySource.send(new ClusterMessage(getName(), new Message(cMsg.payload.toString())));
+                
+                tableInstance.emitRow(getName(), cMsg.payload.toString());
             }
             // Message from LoopBackSink
-            else if (message instanceof ClusterMessage) {
-                ClusterMessage msg = (ClusterMessage) message;
+            else if (message instanceof OutputRow) {
+                OutputRow msg = (OutputRow) message;
                 if (null != clientWSPort) {
-                    clientWSPort.send(new WebDataMessage(self(), msg.getPayload().getContent()));
+                    clientWSPort.send(new WebDataMessage(self(), msg.getPayload()));
                 } else {
                     System.out.println("Received a message from the cluster without having a WS Port to send it back to");
                 }

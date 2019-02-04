@@ -1,7 +1,7 @@
 
 INSERT INTO outputTable 
 SELECT 
-  ROW(table_name, key_value)
+  ROW(loopback_index, actor_identity, table_name, key_value)
 FROM inputTable
 
 -- talk nicely:

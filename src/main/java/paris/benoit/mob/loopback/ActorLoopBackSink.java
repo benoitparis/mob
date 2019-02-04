@@ -3,15 +3,15 @@ package paris.benoit.mob.loopback;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
 
 import co.paralleluniverse.actors.ActorRegistry;
-import paris.benoit.mob.message.ClusterMessage;
 import co.paralleluniverse.actors.ActorRef;
+
+import paris.benoit.mob.message.OutputRow;
 
 @SuppressWarnings("serial")
 public class ActorLoopBackSink extends RichSinkFunction<Row> {
@@ -32,10 +32,14 @@ public class ActorLoopBackSink extends RichSinkFunction<Row> {
     
     @Override
     public void invoke(Row row) throws Exception {
+        
+        Row root = (Row) row.getField(0);
+        // par convention? faudrait faire par nom?
+        String identity = (String) root.getField(1);
         // call to send: not blocking or dropping the message, as his mailbox is unbounded
-//        ((ActorRef<ClusterMessage>)ActorRegistry.getActor(value.f1.loopbackAdress)).send(value.f1);
+        ((ActorRef<OutputRow>)ActorRegistry.getActor(identity)).send(new OutputRow(row.toString()));
 
-        System.out.println("new msg in sink: " + new String(jrs.serialize((Row) row.getField(0))));
+        System.out.println("new msg in sink: " + row);
     }
 
 }
