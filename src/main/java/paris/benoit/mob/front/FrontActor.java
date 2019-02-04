@@ -11,7 +11,7 @@ import co.paralleluniverse.comsat.webactors.WebDataMessage;
 import co.paralleluniverse.comsat.webactors.WebSocketOpened;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
-import paris.benoit.mob.loopback.ActorEntrySource;
+import paris.benoit.mob.loopback.JsonActorEntrySource;
 import paris.benoit.mob.message.ClientMessage;
 import paris.benoit.mob.message.ClusterMessage;
 import paris.benoit.mob.message.Message;
@@ -64,8 +64,18 @@ public class FrontActor extends BasicActor<Object, Void> {
                     break;
                 }
                 
-                
-                ActorEntrySource.send(new ClusterMessage(getName(), new Message("ClusterMessage!" + msg.getStringBody())));
+                // clunky, badly named, et en plus on seri/déséri deux fois
+                // faudrait ptet deux niveau de jsonschema?
+                //   l'un technique, qui prend une ref de l'autre
+                //   et on map ici, on fait du tech ici, avant d'envoyer à l'inputTable
+                //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
+                //   avec pitetre un resolver que tu fais toi-même et que tu inline la chose
+                //   au lieu de $ref, le nom $param serait plus approprié?
+                //     et tu peux même typer sur plusieurs flux de tables ici?
+                //       en tout cas pas contraint par les schemas flink; tu en fera un par table
+                // ici on s'envoie a soi-même, alors que c'est business.
+                //   faudra mettre le renvoi à soi-même dans le SQL
+                JsonActorEntrySource.send(new ClusterMessage(getName(), new Message(cMsg.payload.toString())));
             }
             // Message from LoopBackSink
             else if (message instanceof ClusterMessage) {

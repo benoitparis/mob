@@ -12,6 +12,8 @@ import org.apache.flink.table.sinks.AppendStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.types.Row;
 
+import paris.benoit.mob.loopback.ActorLoopBackSink;
+
 public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     String[] fieldNames;
@@ -51,18 +53,7 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     @Override
     public void emitDataStream(DataStream<Row> ds) {
-        ds.addSink(new RichSinkFunction<Row>() {
-
-            JsonRowSerializationSchema jrs = new JsonRowSerializationSchema(jsonTypeInfo);
-
-            @Override
-            public void invoke(Row row, Context context) throws Exception {
-
-                System.out.println(new String(jrs.serialize((Row) row.getField(0))));
-
-            }
-
-        });
+        ds.addSink(new ActorLoopBackSink(jsonTypeInfo));
 
     }
 

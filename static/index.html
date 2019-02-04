@@ -10,8 +10,8 @@ function query () {
 	var payload = {	
 		INTENT: 'QUERY', 
 		PAYLOAD: {
-			'table': 'comment', 
-			'key': '1'
+			'table_name': 'comment', 
+			'key_value': '1'
 		} 
 	}; 
     ws.send(JSON.stringify(payload));

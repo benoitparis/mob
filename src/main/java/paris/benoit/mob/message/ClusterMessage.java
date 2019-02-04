@@ -2,6 +2,9 @@ package paris.benoit.mob.message;
 
 public class ClusterMessage {
     
+    // on connait pas le loopback à la formation du message, serait à peine bien pour le sink
+    // en tout cas, il nous faut une notion de message in sous forme de row bien foutue
+    //   [on supprime le loobpack pour que compile passe: tuple2(int,row)->row; et on perd info identité
     public String loopbackAdress;
     Message payload;
     

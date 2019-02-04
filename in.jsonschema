@@ -2,27 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "col1": {
+    "table_name": {
       "type": "string"
     },
-    "col2": {
-      "type": "object",
-      "properties": {
-        "colA": {
-          "type": "integer"
-        },
-        "colB": {
-          "type": "integer"
-        }
-      },
-      "required": [
-        "colA",
-        "colB"
-      ]
+    "key_value": {
+      "type": "string"
     }
-  },
-  "required": [
-    "col1",
-    "col2"
-  ]
+  }
 }

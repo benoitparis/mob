@@ -11,6 +11,8 @@ import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 
+import paris.benoit.mob.loopback.JsonActorEntrySource;
+
 public class JsonTableSource implements StreamTableSource<Row> {
     
     TypeInformation<Row> jsonTypeInfo;
@@ -36,27 +38,9 @@ public class JsonTableSource implements StreamTableSource<Row> {
             .build();
     }
 
-    @SuppressWarnings("serial")
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment execEnv) {
-        
-        return execEnv.addSource(new SourceFunction<Row>() {
-            
-            JsonRowDeserializationSchema jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
-
-            @Override
-            public void cancel() {
-            }
-
-            @Override
-            public void run(SourceContext<Row> sc) throws Exception {
-                Row root = new Row(1);
-                Row payload = jrds.deserialize("{ \"col1\" : \"dasdasdas\", \"col2\": { \"colA\":111, \"colB\": 222}} ".getBytes());
-                root.setField(0, payload);
-                sc.collect(root);
-            }
-            
-        }, getReturnType());
+        return execEnv.addSource(new JsonActorEntrySource(jsonTypeInfo), getReturnType());
     }
 
 }
