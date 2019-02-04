@@ -1,6 +1,4 @@
-package paris.benoit.mob.loopback;
-
-import java.util.concurrent.ArrayBlockingQueue;
+package paris.benoit.mob.cluster.loopback;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
@@ -10,13 +8,13 @@ import org.apache.flink.types.Row;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.ActorRegistry;
+import paris.benoit.mob.cluster.RegistryWeaver;
 
 @SuppressWarnings("serial")
 public class ActorSink extends RichSinkFunction<Row> {
     
-    public static ArrayBlockingQueue<Integer> registerQueue = new ArrayBlockingQueue<Integer>(50);
-
-    JsonRowSerializationSchema jrs = null;
+    private JsonRowSerializationSchema jrs = null;
+    private Integer loopbackIndex = -1;
     
     public ActorSink(TypeInformation<Row> jsonTypeInfo) {
         this.jrs = new JsonRowSerializationSchema(jsonTypeInfo);
@@ -25,14 +23,17 @@ public class ActorSink extends RichSinkFunction<Row> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        registerQueue.put(getRuntimeContext().getIndexOfThisSubtask());
+        loopbackIndex = RegistryWeaver.registerSink(this);
     }
     
     @Override
     public void invoke(Row row) throws Exception {
         
         String loopbackIndex = (String) row.getField(0);
-        // on check une assumption ici avec le loopbackIndex?
+        if (Integer.parseInt(loopbackIndex) != this.loopbackIndex) {
+            // Logging
+            System.out.println("Assumption broken on lookbackIndex");
+        }
         // par convention? faudrait faire par nom?
         String identity = (String) row.getField(1);
         // arreter de faire par convention, le vrai schema est pas loin

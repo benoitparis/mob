@@ -1,8 +1,4 @@
-package paris.benoit.mob.json2sql;
-
-import java.io.IOException;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
+package paris.benoit.mob.cluster.json2sql;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
@@ -14,8 +10,7 @@ import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 
-import co.paralleluniverse.fibers.SuspendExecution;
-import paris.benoit.mob.loopback.ActorSource;
+import paris.benoit.mob.cluster.loopback.ActorSource;
 
 public class JsonTableSource implements StreamTableSource<Row> {
     
@@ -28,16 +23,10 @@ public class JsonTableSource implements StreamTableSource<Row> {
     TypeInformation<Row> jsonTypeInfo;
     JsonRowDeserializationSchema jrds;
     
-    static JsonTableSource it;
-    static volatile int parallelism = -1;
-    static CopyOnWriteArrayList<ActorSource> childFunctions = new CopyOnWriteArrayList<>();
-    
     public JsonTableSource(String schema) {
         actorFunction = new ActorSource(this);
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
-        // singleton for now, we'll see later about available tables to actors
-        it = this;
     }
 
     @Override
@@ -73,38 +62,11 @@ public class JsonTableSource implements StreamTableSource<Row> {
 
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
-        parallelism = sEnv.getParallelism();
         return sEnv.addSource(actorFunction, getReturnType());
     }
     
-    public void emitRow(String identity, String payload) throws SuspendExecution, InterruptedException {
-
-        try {
-            Row payloadRow = jrds.deserialize(payload.getBytes());
-            Row root = new Row(3);
-            // 0 is loopbackIndex, by convention; to be set by the function
-            root.setField(1, identity);
-            root.setField(2, payloadRow);
-            
-            int index = ThreadLocalRandom.current().nextInt(0, childFunctions.size());
-            ActorSource chosenFunction = childFunctions.get(index);
-            
-            chosenFunction.emitRow(root);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-    }
-    
-    public static JsonTableSource getInstance() throws InterruptedException {
-        do {
-            Thread.sleep(100);
-        } while (childFunctions.size() != parallelism);
-        return it;
-    }
-    
-    public void registerChildFunction(ActorSource sourceFunction) {
-        childFunctions.add(sourceFunction);
+    public JsonRowDeserializationSchema getJsonRowDeserializationSchema() {
+        return jrds;
     }
 
 }

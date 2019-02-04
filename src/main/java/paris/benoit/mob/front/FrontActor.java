@@ -11,7 +11,8 @@ import co.paralleluniverse.comsat.webactors.WebDataMessage;
 import co.paralleluniverse.comsat.webactors.WebSocketOpened;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
-import paris.benoit.mob.json2sql.JsonTableSource;
+import paris.benoit.mob.cluster.RegistryWeaver;
+import paris.benoit.mob.cluster.json2sql.ClusterSender;
 import paris.benoit.mob.message.ClientMessage;
 
 @SuppressWarnings("serial")
@@ -20,11 +21,11 @@ public class FrontActor extends BasicActor<Object, Void> {
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
-    static JsonTableSource tableInstance;
+    private ClusterSender clusterSender;
     
     public FrontActor() throws InterruptedException {
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        tableInstance = JsonTableSource.getInstance();
+        clusterSender = RegistryWeaver.getClusterSender(getName());
     }
 
     @Override
@@ -74,7 +75,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 // ici on s'envoie a soi-même, alors que c'est business.
                 //   faudra mettre le renvoi à soi-même dans le SQL
                 
-                tableInstance.emitRow(getName(), cMsg.payload.toString());
+                clusterSender.send(getName(), cMsg.payload.toString());
             }
             // Message from LoopBackSink
             // String pas ouf niveau typage? faudrait ptet un wrapper? Json ça fait un coup de serde en plus.. ou bien un Row?

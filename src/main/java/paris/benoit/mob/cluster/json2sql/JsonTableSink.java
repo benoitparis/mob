@@ -1,4 +1,4 @@
-package paris.benoit.mob.json2sql;
+package paris.benoit.mob.cluster.json2sql;
 
 import java.util.Arrays;
 
@@ -10,13 +10,13 @@ import org.apache.flink.table.sinks.AppendStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.types.Row;
 
-import paris.benoit.mob.loopback.ActorSink;
+import paris.benoit.mob.cluster.loopback.ActorSink;
 
 public class JsonTableSink implements AppendStreamTableSink<Row> {
 
-    String[] fieldNames;
-    TypeInformation<?>[] fieldTypes;
-    TypeInformation<Row> jsonTypeInfo;
+    private String[] fieldNames;
+    private TypeInformation<?>[] fieldTypes;
+    private TypeInformation<Row> jsonTypeInfo;
 
     public JsonTableSink(String schema) {
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
