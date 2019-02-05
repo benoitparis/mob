@@ -12,6 +12,8 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.StreamTableEnvironment;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.types.Row;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.strands.channels.Channel;
 import co.paralleluniverse.strands.channels.Channels;
@@ -25,6 +27,7 @@ import paris.benoit.mob.cluster.loopback.ActorSink;
 import paris.benoit.mob.cluster.loopback.ActorSource;
 
 public class RegistryWeaver {
+    private static final Logger logger = LoggerFactory.getLogger(RegistryWeaver.class);
     
     private static final int POLL_INTERVAL = 1000;
     
@@ -69,7 +72,7 @@ public class RegistryWeaver {
         int index = function.getRuntimeContext().getIndexOfThisSubtask();
         sinkCount.incrementAndGet();
         sinkSourceQueue.put(index);
-        System.out.println("Registered Sink #" + index);
+        logger.info("Registered Sink #" + index);
         return index;
     }
     public static NumberedReceivePort<Row> registerSource(ActorSource function) throws InterruptedException {
@@ -81,7 +84,7 @@ public class RegistryWeaver {
         sourceCount.incrementAndGet();
         Integer index = sinkSourceQueue.take();
 
-        System.out.println("Registered Source #" + index);
+        logger.info("Registered Source #" + index);
         return new NumberedReceivePort<Row>(receivePort, index);
     }
     
@@ -92,28 +95,27 @@ public class RegistryWeaver {
         
         new Thread(() -> {
             try {
-                System.out.println("Stream is being initialized. Execution plan: \n"+ sEnv.getExecutionPlan());
+                logger.info("Stream is being initialized. Execution plan: \n"+ sEnv.getExecutionPlan());
                 sEnv.execute();
                 // Launch
                 // Blocking until cancellation
                 sEnv.execute();
-                System.out.println("Stream END");
+                logger.info("Stream END");
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
         
-        
-        // On attends que Sources et Sinks se trouvent
+        // On attend que Sources et Sinks se trouvent
         while (sinkCount.get() != (long) parallelism 
-            || sourceCount.get()  != (long) parallelism 
+            || sourceCount.get() != (long) parallelism 
             || sinkSourceQueue.size() != 0 
             || clusterSenders.size() != parallelism) {
             Thread.sleep(POLL_INTERVAL);
-            System.out.println("Waiting on sources and sinks: " + parallelism + " " + sinkCount + " " + sourceCount + " " + clusterSenders.size() + " " + sinkSourceQueue.size() + " ");
+            logger.info("Waiting on sources and sinks: " + parallelism + " " + sinkCount + " " + sourceCount + " " + clusterSenders.size() + " " + sinkSourceQueue.size() + " ");
         };
         
-        System.out.println("Weaving Done");
+        logger.info("Weaving Done");
         
         veawingDone = true;
     }
@@ -121,10 +123,9 @@ public class RegistryWeaver {
     public static ClusterSender getClusterSender(String random) throws InterruptedException {
         while (false == veawingDone) {
             Thread.sleep(POLL_INTERVAL);
-            System.out.println("Waiting on weaving");
+            logger.info("Waiting on weaving");
         };
         return clusterSenders.get(random.hashCode() % clusterSenders.size());
     }
-
 
 }

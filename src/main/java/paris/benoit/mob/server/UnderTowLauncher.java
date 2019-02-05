@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.HttpHostConnectException;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.comsat.webactors.undertow.AutoWebActorHandler;
 import io.undertow.Handlers;
@@ -20,6 +22,7 @@ import io.undertow.server.session.SessionCookieConfig;
 import io.undertow.server.session.SessionManager;
 
 public class UnderTowLauncher {
+    private static final Logger logger = LoggerFactory.getLogger(UnderTowLauncher.class);
     
     private static Undertow server;
     private static final int INET_PORT = 8090;
@@ -56,7 +59,7 @@ public class UnderTowLauncher {
         
         waitUrlAvailable(url);
 
-        System.out.println("Undertow is up at: " + url);
+        logger.info("Undertow is up at: " + url);
     }
     
     public static void waitUrlAvailable(final String url) throws InterruptedException, IOException {

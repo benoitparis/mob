@@ -9,55 +9,53 @@ import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import paris.benoit.mob.cluster.loopback.ActorSource;
 
 public class JsonTableSource implements StreamTableSource<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
+
+    private TypeInformation<Row> jsonTypeInfo;
+    private String[] fieldNames;
+    private TypeInformation<?>[] fieldTypes;
     
-    // sale cette classe est pas serializable (le cow?)
-    //   puis on fait un random pour au final avoir un gros static
-    //   faudrait se faire une liste de ce qui est par acteur, par thread, par info métier, 
-    //     de par qui va se faire serializer, de timeline sur objet, de convention, etc
-    //       un peu à la TLAps où une solution est une state machine bien simple
-    ActorSource actorFunction;
-    TypeInformation<Row> jsonTypeInfo;
-    JsonRowDeserializationSchema jrds;
+    private ActorSource actorFunction;
+    private JsonRowDeserializationSchema jrds;
     
-    public JsonTableSource(String schema) {
-        actorFunction = new ActorSource(this);
+    public JsonTableSource(String schema) {        
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
+        fieldNames = new String[] { 
+            "loopback_index", 
+            "actor_identity",
+            "payload" 
+        };
+        fieldTypes = new TypeInformation[] {
+            Types.STRING(),
+            Types.STRING(),
+            jsonTypeInfo
+        };
+        logger.info("Created Source with json schema: ");
+        logger.info(jsonTypeInfo.toString());
+
+        actorFunction = new ActorSource(this);
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
     }
 
     @Override
     public String explainSource() {
-        return "Json source";
+        return "Json Source";
     }
 
     @Override
     public TypeInformation<Row> getReturnType() {
-        return Types.ROW(
-            new String[] {
-                "loopback_index",
-                "actor_identity",
-                "payload",
-            }, 
-            new TypeInformation[] {
-                Types.STRING(),
-                Types.STRING(),
-                jsonTypeInfo,
-            }
-        );
+        return Types.ROW(fieldNames, fieldTypes);
     }
 
-    // TODO DRY
     @Override
     public TableSchema getTableSchema() {
-        return TableSchema.builder()
-            .field("loopback_index", Types.STRING())
-            .field("actor_identity", Types.STRING())
-            .field("payload", jsonTypeInfo)
-            .build();
+        return new TableSchema(fieldNames, fieldTypes);
     }
 
     @Override

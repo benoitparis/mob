@@ -1,7 +1,5 @@
 package paris.benoit.mob.cluster.json2sql;
 
-import java.util.Arrays;
-
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -9,14 +7,18 @@ import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sinks.AppendStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.types.Row;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import paris.benoit.mob.cluster.RegistryWeaver;
 import paris.benoit.mob.cluster.loopback.ActorSink;
 
 public class JsonTableSink implements AppendStreamTableSink<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
 
+    private TypeInformation<Row> jsonTypeInfo;
     private String[] fieldNames;
     private TypeInformation<?>[] fieldTypes;
-    private TypeInformation<Row> jsonTypeInfo;
 
     public JsonTableSink(String schema) {
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
@@ -30,9 +32,8 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
             Types.STRING(),
             jsonTypeInfo
         };
-
-        System.out.println(jsonTypeInfo);
-        System.out.println(Arrays.asList(fieldTypes));
+        logger.info("Created Sink with json schema: ");
+        logger.info(jsonTypeInfo.toString());
     }
 
     @Override

@@ -4,8 +4,11 @@ import java.nio.file.Paths;
 
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import paris.benoit.mob.cluster.RegistryWeaver;
+import paris.benoit.mob.front.FrontActor;
 
 public class MobServer {
     

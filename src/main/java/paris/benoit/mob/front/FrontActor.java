@@ -2,6 +2,9 @@ package paris.benoit.mob.front;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.BasicActor;
 import co.paralleluniverse.actors.ExitMessage;
@@ -18,6 +21,7 @@ import paris.benoit.mob.message.ClientMessage;
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
 public class FrontActor extends BasicActor<Object, Void> {
+    private static final Logger logger = LoggerFactory.getLogger(FrontActor.class);
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
@@ -43,38 +47,30 @@ public class FrontActor extends BasicActor<Object, Void> {
                 ActorRef<WebDataMessage> from = msg.getFrom();
                 watch(from); // will call handleLifecycleMessage with ExitMessage when the session ends
                 clientWSPort = from;
-                System.out.println("Registering WS port");
+                logger.debug("Registering WS port");
             }
             // -------- WebSocket message received -------- 
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;
-                System.out.println("Got a WS message: " + msg);
+                logger.debug("Got a WS message: " + msg);
                 
                 ClientMessage cMsg = new ClientMessage(msg.getStringBody());
                 
                 switch (cMsg.intent) {
-                case INFO: System.out.println(cMsg.payload);
+                case INFO: logger.debug(cMsg.payload.toString());
                     break;
-                case QUERY: System.out.println(cMsg.payload); 
+                case QUERY: logger.debug(cMsg.payload.toString()); 
                     break;
-                case CALL: System.out.println(cMsg.payload); // TODO
+                case CALL: logger.debug(cMsg.payload.toString()); // TODO
                     break;
-                case SUBSCRIBE: System.out.println(cMsg.payload); // TODO
+                case SUBSCRIBE: logger.debug(cMsg.payload.toString()); // TODO
                     break;
                 }
                 
-                // clunky, badly named, et en plus on seri/déséri deux fois
-                // faudrait ptet deux niveau de jsonschema?
-                //   l'un technique, qui prend une ref de l'autre
-                //   et on map ici, on fait du tech ici, avant d'envoyer à l'inputTable
+                // !on seri/déséri deux fois
+                //   y revenir plus tard avec deux niveaux de jsonschema et un resolver perso qui inline
                 //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
-                //   avec pitetre un resolver que tu fais toi-même et que tu inline la chose
-                //   au lieu de $ref, le nom $param serait plus approprié?
-                //     et tu peux même typer sur plusieurs flux de tables ici?
-                //       en tout cas pas contraint par les schemas flink; tu en fera un par table
-                // ici on s'envoie a soi-même, alors que c'est business.
-                //   faudra mettre le renvoi à soi-même dans le SQL
-                
+
                 clusterSender.send(getName(), cMsg.payload.toString());
             }
             // Message from LoopBackSink
@@ -85,13 +81,13 @@ public class FrontActor extends BasicActor<Object, Void> {
                 if (null != clientWSPort) {
                     clientWSPort.send(new WebDataMessage(self(), msg));
                 } else {
-                    System.out.println("Received a message from the cluster without having a WS Port to send it back to");
+                    logger.warn("Received a message from the cluster without having a WS Port to send it back to");
                 }
             }
             else if (null == message) {
-                System.out.println("null message");
+                logger.warn("null message");
             } else {
-                System.out.println("Unknown message type :" + message);
+                logger.warn("Unknown message type :" + message);
             }
             
             checkCodeSwap();
@@ -104,10 +100,10 @@ public class FrontActor extends BasicActor<Object, Void> {
             // while listeners might contain an SSE actor wrapped with Channels.map, 
             // the wrapped SendPort maintains the original actors hashCode and equals behavior
             ExitMessage em = (ExitMessage) m;
-            System.out.println("Actor " + em.getActor() + " has died.");
+            logger.debug("Actor " + em.getActor() + " has died.");
             // do things?
             //boolean res = listeners.remove(em.getActor());
-            // System.out.println((res ? "Successfuly" : "Unsuccessfuly") + " removed listener for actor " + em.getActor());
+            // logger.info((res ? "Successfuly" : "Unsuccessfuly") + " removed listener for actor " + em.getActor());
         }
         return super.handleLifecycleMessage(m);
     }
