@@ -127,7 +127,8 @@ public class RegistryWeaver {
             Thread.sleep(POLL_INTERVAL);
             logger.info("Waiting on weaving");
         };
-        return clusterSenders.get(random.hashCode() % clusterSenders.size());
+        
+        return clusterSenders.get(Math.abs(random.hashCode()) % clusterSenders.size());
     }
 
 }

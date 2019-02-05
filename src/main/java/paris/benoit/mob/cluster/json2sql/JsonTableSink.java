@@ -1,6 +1,7 @@
 package paris.benoit.mob.cluster.json2sql;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
+import org.apache.flink.api.java.functions.IdPartitioner;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Types;
@@ -10,7 +11,6 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import paris.benoit.mob.cluster.RegistryWeaver;
 import paris.benoit.mob.cluster.loopback.ActorSink;
 
 public class JsonTableSink implements AppendStreamTableSink<Row> {
@@ -28,7 +28,7 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
             "payload" 
         };
         fieldTypes = new TypeInformation[] {
-            Types.STRING(),
+            Types.INT(),
             Types.STRING(),
             jsonTypeInfo
         };
@@ -58,7 +58,8 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     @Override
     public void emitDataStream(DataStream<Row> ds) {
-        ds.addSink(new ActorSink(jsonTypeInfo));
+        ds  .partitionCustom(new IdPartitioner(), 0)
+            .addSink(new ActorSink(jsonTypeInfo));
     }
 
 }

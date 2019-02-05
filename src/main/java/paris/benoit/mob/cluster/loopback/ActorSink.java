@@ -33,10 +33,10 @@ public class ActorSink extends RichSinkFunction<Row> {
     @Override
     public void invoke(Row row) throws Exception {
         
-        String loopbackIndex = (String) row.getField(0);
-        if (Integer.parseInt(loopbackIndex) != this.loopbackIndex) {
+        Integer loopbackIndex = (Integer) row.getField(0);
+        if (loopbackIndex != this.loopbackIndex) {
             // Logging
-            logger.warn("Assumption broken on lookbackIndex");
+            logger.warn("Assumption broken on lookbackIndex: " + loopbackIndex + " vs " + this.loopbackIndex);
         }
         // par convention? faudrait faire par nom?
         String identity = (String) row.getField(1);

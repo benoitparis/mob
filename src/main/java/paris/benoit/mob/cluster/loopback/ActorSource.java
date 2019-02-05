@@ -37,7 +37,7 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
             //     et pourquoi pas avoir l'identité dans le Addressable?
             Row row = receivePort.receive();
             // par convention
-            row.setField(0, "" + loopbackIndex);
+            row.setField(0, loopbackIndex);
             sc.collect(row);
         }
     }

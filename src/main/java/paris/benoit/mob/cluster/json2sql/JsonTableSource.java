@@ -32,7 +32,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
             "payload" 
         };
         fieldTypes = new TypeInformation[] {
-            Types.STRING(),
+            Types.INT(),
             Types.STRING(),
             jsonTypeInfo
         };
