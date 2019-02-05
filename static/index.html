@@ -46,7 +46,7 @@
 			ws.send(JSON.stringify(serverMsg));
 		}
 	}
-	setInterval(sendPosition, 500);
+	setInterval(sendPosition, 50);
 
 	function wsConnect() {
 		var mypath = "/service"

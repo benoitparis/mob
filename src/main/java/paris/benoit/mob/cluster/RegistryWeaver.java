@@ -66,6 +66,9 @@ public class RegistryWeaver {
         tEnv.registerTableSource("inputTable", tableSource);
         String outSchema = new String(Files.readAllBytes(out));
         tEnv.registerTableSink("outputTable", new JsonTableSink(outSchema));
+        
+        
+        // faudrait ptet charger le sql au fur et à mesure?
         String stringSQL = new String(Files.readAllBytes(inBetween));
         
         //chopper le plan, et le schema du payload:
@@ -77,7 +80,6 @@ public class RegistryWeaver {
 //        System.out.println(queryResult);
 //        // c'était un SQL timestamp
 //        queryResult.logicalPlan().output();
-        
         
         tEnv.sqlUpdate(stringSQL);
         

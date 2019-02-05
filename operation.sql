@@ -14,15 +14,16 @@ FROM (
       actor_identity,
       X, 
       Y,
-      CAST(proc_time AS VARCHAR) time_string
-    FROM inputTable
+      CAST(start_time AS VARCHAR) time_string
+    FROM (
+      SELECT
+        loopback_index,
+        actor_identity,
+        AVG(X) X,
+        AVG(Y) Y,
+        HOP_START(proc_time, INTERVAL '0.05' SECOND, INTERVAL '5' SECOND) start_time
+      FROM inputTable
+      GROUP BY HOP(proc_time, INTERVAL '0.05' SECOND, INTERVAL '5' SECOND), loopback_index, actor_identity
+    )
   )
---    ROW(AVG(X), AVG(Y)) payload
---  FROM inputTable
---  GROUP BY HOP(ingest_time, INTERVAL '1' SECOND, INTERVAL '5' SECOND), loopback_index, actor_identity
 )
-
--- talk nicely:
--- 'payload.' ~ '' ?
--- nesting
--- ROW arity > 2
