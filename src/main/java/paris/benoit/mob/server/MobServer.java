@@ -27,7 +27,8 @@ public class MobServer {
         
         // Setup
         StreamExecutionEnvironment sEnv = StreamExecutionEnvironment.getExecutionEnvironment();
-        sEnv.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
+//        sEnv.setStreamTimeCharacteristic(TimeCharacteristic.EventTime);
+        sEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
         sEnv.setParallelism(STREAM_PARALLELISM);
         
         // Processing

@@ -2,11 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "table_name": {
-      "type": "string"
+    "X": {
+      "type": "number"
     },
-    "key_value": {
-      "type": "string"
+    "Y": {
+      "type": "number"
     }
   }
 }

@@ -1,45 +1,72 @@
 <html>
-<head></head>
-<body>
-HELLO
-<button onclick="wsConnect()">Connect WS</button>
-<button onclick="query()">Query</button>
-<script type="text/javascript">
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.js"></script>
+<script>
+	function setup() {
+		createCanvas(1200, 600);
+	}
 
-function query () {
-	var payload = {	
-		INTENT: 'QUERY', 
-		PAYLOAD: {
-			'table_name': 'comment', 
-			'key_value': '1'
-		} 
-	}; 
-    ws.send(JSON.stringify(payload));
-}
+	var mobX = 600;
+	var mobY = 300;
 
-function wsConnect () {
-	var mypath = "/service"
-	var wsUrl = "ws://" + window.location.host + mypath + "/ws";
-    ws = new WebSocket(wsUrl);
-    ws.onopen = wsOnOpen;
-    ws.onmessage = wsOnMessage;
-    ws.onclose = wsOnClose;
-    
-}
-function wsOnOpen(evt) {
-	console.log("WS OPEN");
-	console.log(evt);
-}
-function wsOnClose(evt) {
-	console.log("WS CLOSE");
-	console.log(evt);
-}
-function wsOnMessage(evt) {
-	console.log("WS ON MSG");
-	console.log(evt);
-	console.log(JSON.parse(evt.data));
-}
+	function draw() {
+		background(255, 247, 240);
+		fill(127, 198, 0);
+		ellipse(mobX, mobY, 80, 80);
+		fill(198, 127, 0);
+		ellipse(mouseX, mouseY, 40, 40);
+	}
 
+	function greetInit(evt) {
+		console.log('connection established');
+		console.log(evt);
+	};
+
+	function updateServerPosition(evt) {
+		console.log(evt);
+		console.log(JSON.parse(evt.data));
+		var msg = JSON.parse(event.data);
+		mobX = msg.X;
+		mobY = msg.Y;
+	};
+
+	var ws;
+	function sendPosition() {
+
+		if (ws && ws.readyState === ws.OPEN) {
+			var msg = {
+				X : mouseX,
+				Y : mouseY
+			};
+			var serverMsg = {
+				INTENT : 'WRITE',
+				PAYLOAD : msg
+			};
+			console.log(serverMsg);
+			ws.send(JSON.stringify(serverMsg));
+		}
+	}
+	setInterval(sendPosition, 500);
+
+	function wsConnect() {
+		var mypath = "/service"
+		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+		ws = new WebSocket(wsUrl);
+		ws.onopen = greetInit;
+		ws.onmessage = updateServerPosition;
+		ws.onclose = wsOnClose;
+
+	}
+	
+	function wsOnClose(evt) {
+		console.log("WS CLOSE");
+		console.log(evt);
+	}
+	
 </script>
+</head>
+<body>
+	HELLO
+	<button onclick="wsConnect()">Connect WS</button>
 </body>
 </html>

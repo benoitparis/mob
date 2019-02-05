@@ -7,10 +7,16 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.sql.SqlInsert;
+import org.apache.calcite.sql.SqlNode;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.StreamTableEnvironment;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
+import org.apache.flink.table.calcite.FlinkPlannerImpl;
+import org.apache.flink.table.plan.logical.LogicalRelNode;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,6 +67,18 @@ public class RegistryWeaver {
         String outSchema = new String(Files.readAllBytes(out));
         tEnv.registerTableSink("outputTable", new JsonTableSink(outSchema));
         String stringSQL = new String(Files.readAllBytes(inBetween));
+        
+        //chopper le plan, et le schema du payload:
+        
+//        FlinkPlannerImpl planner = new FlinkPlannerImpl(tEnv.getFrameworkConfig(), tEnv.getPlanner(), tEnv.getTypeFactory());
+//        SqlInsert insert = (SqlInsert) planner.parse(stringSQL);
+//        SqlNode validatedQuery = planner.validate(insert.getSource());
+//        Table queryResult = new Table(tEnv, new LogicalRelNode(planner.rel(validatedQuery).rel));
+//        System.out.println(queryResult);
+//        // c'était un SQL timestamp
+//        queryResult.logicalPlan().output();
+        
+        
         tEnv.sqlUpdate(stringSQL);
         
         parallelism = sEnv.getParallelism();

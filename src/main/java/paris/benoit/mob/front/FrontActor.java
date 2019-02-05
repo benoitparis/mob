@@ -56,22 +56,20 @@ public class FrontActor extends BasicActor<Object, Void> {
                 
                 ClientMessage cMsg = new ClientMessage(msg.getStringBody());
                 
-                switch (cMsg.intent) {
-                case INFO: logger.debug(cMsg.payload.toString());
-                    break;
-                case QUERY: logger.debug(cMsg.payload.toString()); 
-                    break;
-                case CALL: logger.debug(cMsg.payload.toString()); // TODO
-                    break;
-                case SUBSCRIBE: logger.debug(cMsg.payload.toString()); // TODO
-                    break;
-                }
-                
                 // !on seri/déséri deux fois
                 //   y revenir plus tard avec deux niveaux de jsonschema et un resolver perso qui inline
                 //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
 
-                clusterSender.send(getName(), cMsg.payload.toString());
+                switch (cMsg.intent) {
+                case WRITE: clusterSender.send(getName(), cMsg.payload.toString());
+                    break;
+                case QUERY: logger.debug(cMsg.payload.toString()); 
+                    break;
+                case SUBSCRIBE: logger.debug(cMsg.payload.toString());
+                    break;
+                }
+                
+
             }
             // Message from LoopBackSink
             // String pas ouf niveau typage? faudrait ptet un wrapper? Json ça fait un coup de serde en plus.. ou bien un Row?

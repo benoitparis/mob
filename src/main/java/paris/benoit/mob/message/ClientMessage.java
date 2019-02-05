@@ -13,7 +13,7 @@ public class ClientMessage {
     // on va s'orienter vers QUERY, SUBSCRIBE, WRITE, avec potentiellement les mêmes conventions que graphql sur 
     //   les write / les mutation (qui ne seront que des append immutables ici) qui peuvent yield un résultat qui
     //   ressemblerait à une QUERY
-    public enum INTENT {QUERY, CALL, SUBSCRIBE, INFO};
+    public enum INTENT {WRITE, QUERY, SUBSCRIBE};
     
     public INTENT intent;
     public JSONObject payload;
