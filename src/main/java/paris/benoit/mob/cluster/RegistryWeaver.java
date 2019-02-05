@@ -82,6 +82,8 @@ public class RegistryWeaver {
         
         clusterSenders.add(new ClusterSender(channel, jrds)); 
         sourceCount.incrementAndGet();
+        // simplifier le take? et juste valider le in et out même niveau de parallelism?
+        //   juste le getIndex?
         Integer index = sinkSourceQueue.take();
 
         logger.info("Registered Source #" + index);
