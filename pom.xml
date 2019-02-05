@@ -9,6 +9,9 @@
 	<properties>
 		<slf4j.version>1.6.4</slf4j.version>
 		<logback.version>1.0.1</logback.version>
+		<flink.version>1.7.1</flink.version>
+		<quasar.version>0.7.6</quasar.version>
+		<quasar-undertow.version>0.7.0</quasar-undertow.version>
 	</properties>
 
 	<build>
@@ -29,64 +32,64 @@
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-core</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-java</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-clients_2.11</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-streaming-java_2.11</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-table_2.11</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency> <!-- some weird dep, patch soon to separate things better? -->
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-streaming-scala_2.11</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-json</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
 			<artifactId>flink-runtime-web_2.11</artifactId>
-			<version>1.7.1</version>
+			<version>${flink.version}</version>
 		</dependency>
 
 		<!-- Fibers -->
 		<dependency>
 			<groupId>co.paralleluniverse</groupId>
 			<artifactId>quasar-core</artifactId>
-			<version>0.7.6</version>
+			<version>${quasar.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>co.paralleluniverse</groupId>
 			<artifactId>quasar-actors</artifactId>
-			<version>0.7.6</version>
+			<version>${quasar.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>co.paralleluniverse</groupId>
 			<artifactId>comsat-actors-undertow</artifactId>
-			<version>0.7.0</version>
+			<version>${quasar-undertow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>co.paralleluniverse</groupId>
 			<artifactId>comsat-actors-servlet</artifactId>
-			<version>0.7.0</version>
+			<version>${quasar-undertow.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -94,7 +97,7 @@
 			<version>4.5.2</version>
 		</dependency>
 
-		<!-- Client deserialization. use force shaded? -->
+		<!-- Client deserialization. Remove and use force shaded? -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
