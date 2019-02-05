@@ -72,7 +72,6 @@ public class RegistryWeaver {
         String stringSQL = new String(Files.readAllBytes(inBetween));
         
         //chopper le plan, et le schema du payload:
-        
 //        FlinkPlannerImpl planner = new FlinkPlannerImpl(tEnv.getFrameworkConfig(), tEnv.getPlanner(), tEnv.getTypeFactory());
 //        SqlInsert insert = (SqlInsert) planner.parse(stringSQL);
 //        SqlNode validatedQuery = planner.validate(insert.getSource());
