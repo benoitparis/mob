@@ -32,8 +32,7 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
             Types.STRING(),
             jsonTypeInfo
         };
-        logger.info("Created Sink with json schema: ");
-        logger.info(jsonTypeInfo.toString());
+        logger.info("Created Sink with json schema: " + jsonTypeInfo.toString());
     }
 
     @Override
