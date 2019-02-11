@@ -12,6 +12,7 @@
 		<flink.version>1.7.1</flink.version>
 		<quasar.version>0.7.6</quasar.version>
 		<quasar-undertow.version>0.7.0</quasar-undertow.version>
+		<flink-scala.version>2.11</flink-scala.version>
 	</properties>
 
 	<build>
@@ -41,22 +42,22 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-clients_2.11</artifactId>
+			<artifactId>flink-clients_${flink-scala.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-streaming-java_2.11</artifactId>
+			<artifactId>flink-streaming-java_${flink-scala.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-table_2.11</artifactId>
+			<artifactId>flink-table_${flink-scala.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
 		<dependency> <!-- some weird dep, patch soon to separate things better? -->
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-streaming-scala_2.11</artifactId>
+			<artifactId>flink-streaming-scala_${flink-scala.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
 		<dependency>
@@ -66,7 +67,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.flink</groupId>
-			<artifactId>flink-runtime-web_2.11</artifactId>
+			<artifactId>flink-runtime-web_${flink-scala.version}</artifactId>
 			<version>${flink.version}</version>
 		</dependency>
 
