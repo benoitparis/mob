@@ -7,24 +7,20 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.sql.SqlInsert;
-import org.apache.calcite.sql.SqlNode;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.StreamTableEnvironment;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.calcite.FlinkPlannerImpl;
-import org.apache.flink.table.plan.logical.LogicalRelNode;
+import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.strands.channels.Channel;
 import co.paralleluniverse.strands.channels.Channels;
-import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
+import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import paris.benoit.mob.cluster.json2sql.ClusterSender;
 import paris.benoit.mob.cluster.json2sql.JsonTableSink;
 import paris.benoit.mob.cluster.json2sql.JsonTableSource;
@@ -48,17 +44,19 @@ public class RegistryWeaver {
     private Path in;
     private Path out;
     private Path inBetween;
+    private Path query;
     
-    public RegistryWeaver(StreamExecutionEnvironment sEnv, Path in, Path out, Path inBetween) {
+    public RegistryWeaver(StreamExecutionEnvironment sEnv, Path in, Path out, Path inBetween, Path query) {
         super();
         this.sEnv = sEnv;
         this.in = in;
         this.out = out;
         this.inBetween = inBetween;
+        this.query = query;
     }
     
     private void setUpTables() throws IOException {
-
+        
         StreamTableEnvironment tEnv = TableEnvironment.getTableEnvironment(sEnv);
         String inSchema = new String(Files.readAllBytes(in));
         final JsonTableSource tableSource = new JsonTableSource(inSchema);
@@ -66,21 +64,21 @@ public class RegistryWeaver {
         tEnv.registerTableSource("inputTable", tableSource);
         String outSchema = new String(Files.readAllBytes(out));
         tEnv.registerTableSink("outputTable", new JsonTableSink(outSchema));
-        
-        
+
         // faudrait ptet charger le sql au fur et à mesure?
-        String stringSQL = new String(Files.readAllBytes(inBetween));
+        //   ptet avoir une liste ordonnée en fait, avec traitement
+        // et puis kill le server si fail?
         
-        //chopper le plan, et le schema du payload:
-//        FlinkPlannerImpl planner = new FlinkPlannerImpl(tEnv.getFrameworkConfig(), tEnv.getPlanner(), tEnv.getTypeFactory());
-//        SqlInsert insert = (SqlInsert) planner.parse(stringSQL);
-//        SqlNode validatedQuery = planner.validate(insert.getSource());
-//        Table queryResult = new Table(tEnv, new LogicalRelNode(planner.rel(validatedQuery).rel));
-//        System.out.println(queryResult);
-//        // c'était un SQL timestamp
-//        queryResult.logicalPlan().output();
         
-        tEnv.sqlUpdate(stringSQL);
+        String stateMeanPositionSQL = new String(Files.readAllBytes(inBetween));
+        Table meanPositionhistoryTable = tEnv.sqlQuery(stateMeanPositionSQL);
+        tEnv.registerTable("meanPositionHistoryTable", meanPositionhistoryTable);
+        TemporalTableFunction temporalTable = meanPositionhistoryTable.createTemporalTableFunction("start_time", "one_key");
+        tEnv.registerFunction("meanPositionTemporalTable", temporalTable); 
+        
+        String querySQL = new String(Files.readAllBytes(query));
+        tEnv.sqlUpdate(querySQL);
+
         
         parallelism = sEnv.getParallelism();
     }
@@ -117,8 +115,6 @@ public class RegistryWeaver {
         new Thread(() -> {
             try {
                 logger.info("Stream is being initialized. Execution plan: \n"+ sEnv.getExecutionPlan());
-                sEnv.execute();
-                // Launch
                 // Blocking until cancellation
                 sEnv.execute();
                 logger.info("Stream END");
