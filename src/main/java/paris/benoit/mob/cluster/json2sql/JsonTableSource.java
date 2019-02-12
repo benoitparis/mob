@@ -7,7 +7,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
-import org.apache.flink.table.sources.DefinedProctimeAttribute;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import paris.benoit.mob.cluster.loopback.ActorSource;
 
-public class JsonTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
+public class JsonTableSource implements StreamTableSource<Row> {
     
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
 
@@ -26,23 +25,21 @@ public class JsonTableSource implements StreamTableSource<Row>, DefinedProctimeA
     private ActorSource actorFunction;
     private JsonRowDeserializationSchema jrds;
     
-    public JsonTableSource(String schema) {        
+    public JsonTableSource(String schema) {
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
         fieldNames = new String[] { 
             "loopback_index",
             "actor_identity",
-            "proc_time",
             "payload"
         };
         fieldTypes = new TypeInformation[] {
             Types.INT(),
             Types.STRING(),
-            Types.SQL_TIMESTAMP(),
             jsonTypeInfo
         };
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
-        actorFunction = new ActorSource(this);
+        actorFunction = new ActorSource();
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
     }
 
@@ -68,11 +65,6 @@ public class JsonTableSource implements StreamTableSource<Row>, DefinedProctimeA
     
     public JsonRowDeserializationSchema getJsonRowDeserializationSchema() {
         return jrds;
-    }
-
-    @Override
-    public String getProctimeAttribute() {
-        return "proc_time";
     }
 
 }

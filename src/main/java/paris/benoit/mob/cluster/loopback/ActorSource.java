@@ -5,8 +5,7 @@ import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunctio
 import org.apache.flink.types.Row;
 
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
-import paris.benoit.mob.cluster.RegistryWeaver;
-import paris.benoit.mob.cluster.json2sql.JsonTableSource;
+import paris.benoit.mob.cluster.ClusterRegistry;
 import paris.benoit.mob.cluster.json2sql.NumberedReceivePort;
 
 @SuppressWarnings("serial")
@@ -17,14 +16,14 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     private ThreadReceivePort<Row> receivePort = null;
     private Integer loopbackIndex = null;
     
-    public ActorSource(JsonTableSource parentTableParam) {
+    public ActorSource() {
         super();
     }
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        NumberedReceivePort<Row> nrp = RegistryWeaver.registerSource(this);
+        NumberedReceivePort<Row> nrp = ClusterRegistry.registerSourceFunction(this);
         receivePort = nrp.getReceiveport();
         loopbackIndex = nrp.getIndex();
     }

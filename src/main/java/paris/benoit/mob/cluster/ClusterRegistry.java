@@ -1,34 +1,20 @@
 package paris.benoit.mob.cluster;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.apache.flink.api.common.functions.FlatMapFunction;
-import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.core.fs.FileSystem.WriteMode;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.functions.IngestionTimeExtractor;
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableEnvironment;
-import org.apache.flink.table.api.Types;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.table.sinks.CsvTableSink;
 import org.apache.flink.types.Row;
-import org.apache.flink.util.Collector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,8 +29,8 @@ import paris.benoit.mob.cluster.json2sql.NumberedReceivePort;
 import paris.benoit.mob.cluster.loopback.ActorSink;
 import paris.benoit.mob.cluster.loopback.ActorSource;
 
-public class RegistryWeaver {
-    private static final Logger logger = LoggerFactory.getLogger(RegistryWeaver.class);
+public class ClusterRegistry {
+    private static final Logger logger = LoggerFactory.getLogger(ClusterRegistry.class);
     
     private static final int POLL_INTERVAL = 1000;
     
@@ -57,68 +43,86 @@ public class RegistryWeaver {
     
     private StreamExecutionEnvironment sEnv;
     private StreamTableEnvironment tEnv;
-    private Path in;
-    private Path out;
-    private Path inBetween;
-    private Path query;
+    private String inSchema;
+    private String inName;
+    private String outSchema;
+    private String outName;
+    private String[] states;
+    private String[] queries;
     
-    public RegistryWeaver(
+    public ClusterRegistry(
             StreamExecutionEnvironment sEnv, 
             StreamTableEnvironment tEnv, 
-            Path in, Path out, Path inBetween, Path query
+            String inSchema, String inName,
+            String outSchema, String outName,
+            String[] states, String[] queries
         ) {
         super();
         this.sEnv = sEnv;
         this.tEnv = tEnv;
-        this.in = in;
-        this.out = out;
-        this.inBetween = inBetween;
-        this.query = query;
+        this.inSchema = inSchema;
+        this.inName = inName;
+        this.outSchema = outSchema;
+        this.outName = outName;
+        this.states = states;
+        this.queries = queries;
         
         parallelism = sEnv.getParallelism();
     }
     
-    public void setUpInputOutputTables() throws IOException {
+    public void registerInputOutputTables() throws IOException {
         
-        String inSchema = new String(Files.readAllBytes(in));
         final JsonTableSource tableSource = new JsonTableSource(inSchema);
         jrds = tableSource.getJsonRowDeserializationSchema();
-        //?change name
-        tEnv.registerTableSource("inputTable", tableSource);
-        //?SELECT table
-        //?tEnv.toAppendStream table tableSource.getReturnType
-        //?tEnv.registerTable
-        String outSchema = new String(Files.readAllBytes(out));
-        tEnv.registerTableSink("outputTable", new JsonTableSink(outSchema));
+        tEnv.registerTableSource(inName + "_raw", tableSource);
+        Table hashInputTable = tEnv.sqlQuery(
+            "SELECT\n" + 
+            "  " + StringUtils.join(tableSource.getTableSchema().getFieldNames(), ",\n  ") + "\n" +
+            "FROM " + inName + "_raw" + " \n"
+        );
+        DataStream<Row> appendStream = tEnv
+            .toAppendStream(hashInputTable, tableSource.getReturnType());
+        tEnv.registerTable(inName, tEnv.fromDataStream(appendStream, 
+                StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
+                ", proctime.proctime")
+        );
+        tEnv.registerTableSink(outName, new JsonTableSink(outSchema));
     }
 
-    public void setUpIntermediateTables() throws IOException {
-        
-        // faudrait ptet charger le sql au fur et à mesure?
-        //   ptet avoir une liste ordonnée en fait, avec traitement
-        // et puis kill le server si fail?
-        
-        String stateMeanPositionSQL = new String(Files.readAllBytes(inBetween));
-        Table meanPositionhistoryTable = tEnv.sqlQuery(stateMeanPositionSQL);
-        tEnv.registerTable("meanPositionHistoryTable", meanPositionhistoryTable);
-        TemporalTableFunction temporalTable = meanPositionhistoryTable.createTemporalTableFunction("start_time", "one_key");
-        tEnv.registerFunction("meanPositionTemporalTable", temporalTable);
 
-        String querySQL = new String(Files.readAllBytes(query));
-        tEnv.sqlUpdate(querySQL);
+    public static final Pattern TEMPORAL_TABLE_PATTERN = Pattern.compile(
+        "CREATE TEMPORAL TABLE ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS(.*)",
+        Pattern.DOTALL
+    );
+    public void registerIntermediateTables() throws IOException {
+
+        for (String state: states) {
+            Matcher m = TEMPORAL_TABLE_PATTERN.matcher(state);
+            if (m.matches()) {
+                Table historyTable = tEnv.sqlQuery(m.group(4));
+                TemporalTableFunction temporalTable = historyTable.createTemporalTableFunction(m.group(2), m.group(3));
+                tEnv.registerFunction(m.group(1), temporalTable);
+            } else {
+                logger.debug("Failed to create temporal table with: \n" + state);
+            }
+        }
+
+        for (String query: queries) {
+            tEnv.sqlUpdate(query);
+        }
         
     }
     
     private static ArrayBlockingQueue<Integer> sinkSourceQueue = new ArrayBlockingQueue<Integer>(1000);
     private static CopyOnWriteArrayList<ClusterSender> clusterSenders = new CopyOnWriteArrayList<ClusterSender>();
-    public static Integer registerSink(ActorSink function) throws InterruptedException {
+    public static Integer registerSinkFunction(ActorSink function) throws InterruptedException {
         int index = function.getRuntimeContext().getIndexOfThisSubtask();
         sinkCount.incrementAndGet();
         sinkSourceQueue.put(index);
         logger.info("Registered Sink #" + index);
         return index;
     }
-    public static NumberedReceivePort<Row> registerSource(ActorSource function) throws InterruptedException {
+    public static NumberedReceivePort<Row> registerSourceFunction(ActorSource function) throws InterruptedException {
         
         Channel<Row> channel = Channels.newChannel(1000000, OverflowPolicy.BACKOFF, false, false);
         ThreadReceivePort<Row> receivePort = new ThreadReceivePort<Row>(channel);
@@ -136,8 +140,8 @@ public class RegistryWeaver {
     private static volatile boolean veawingDone = false;
     public void weaveComponents() throws InterruptedException, IOException {
         
-//        setUpInputOutputTables();
-//        setUpIntermediateTables();
+        registerInputOutputTables();
+        registerIntermediateTables();
         
         new Thread(() -> {
             try {

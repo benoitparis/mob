@@ -23,11 +23,11 @@ public class ClusterSender {
         
         try {
             Row payloadRow = jrds.deserialize(payload.getBytes());
-            Row root = new Row(4);
+            //
+            Row root = new Row(3);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);
-            // 2 is time, by convention; to be set by the runtime/table
-            root.setField(3, payloadRow);
+            root.setField(2, payloadRow);
             channel.send(root);
         } catch (IOException e) {
             e.printStackTrace();

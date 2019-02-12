@@ -10,8 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.ActorRegistry;
-import paris.benoit.mob.cluster.RegistryWeaver;
-import paris.benoit.mob.cluster.json2sql.JsonTableSource;
+import paris.benoit.mob.cluster.ClusterRegistry;
 
 @SuppressWarnings("serial")
 public class ActorSink extends RichSinkFunction<Row> {
@@ -27,7 +26,7 @@ public class ActorSink extends RichSinkFunction<Row> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        loopbackIndex = RegistryWeaver.registerSink(this);
+        loopbackIndex = ClusterRegistry.registerSinkFunction(this);
     }
     
     @Override

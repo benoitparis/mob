@@ -14,7 +14,7 @@ import co.paralleluniverse.comsat.webactors.WebDataMessage;
 import co.paralleluniverse.comsat.webactors.WebSocketOpened;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
-import paris.benoit.mob.cluster.RegistryWeaver;
+import paris.benoit.mob.cluster.ClusterRegistry;
 import paris.benoit.mob.cluster.json2sql.ClusterSender;
 import paris.benoit.mob.message.ClientMessage;
 
@@ -29,7 +29,7 @@ public class FrontActor extends BasicActor<Object, Void> {
     
     public FrontActor() throws InterruptedException {
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        clusterSender = RegistryWeaver.getClusterSender(getName());
+        clusterSender = ClusterRegistry.getClusterSender(getName());
     }
 
     @Override
