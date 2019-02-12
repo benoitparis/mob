@@ -57,9 +57,7 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
 
     @Override
     public void emitDataStream(DataStream<Row> ds) {
-        // TODO tester ça, c'est plus robuste
-//        ds  .partitionCustom(new IdPartitioner(), "loopback_index")
-        ds  .partitionCustom(new IdPartitioner(), 0)
+        ds  .partitionCustom(new IdPartitioner(), "loopback_index")
             .addSink(new ActorSink(jsonTypeInfo));
     }
 

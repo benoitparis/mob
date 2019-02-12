@@ -86,6 +86,8 @@ public class ClusterRegistry {
                 StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
                 ", proctime.proctime")
         );
+        
+        
         tEnv.registerTableSink(outName, new JsonTableSink(outSchema));
     }
 
@@ -126,7 +128,8 @@ public class ClusterRegistry {
         
         Channel<Row> channel = Channels.newChannel(1000000, OverflowPolicy.BACKOFF, false, false);
         ThreadReceivePort<Row> receivePort = new ThreadReceivePort<Row>(channel);
-        
+
+        // register dans lea clusterSenders avec un enum WRITE?
         clusterSenders.add(new ClusterSender(channel, jrds)); 
         sourceCount.incrementAndGet();
         // simplifier le take? et juste valider le in et out même niveau de parallelism?

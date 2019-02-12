@@ -26,11 +26,6 @@ public class MobServer {
         
         StreamExecutionEnvironment sEnv = StreamExecutionEnvironment.getExecutionEnvironment();
         sEnv.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime);
-        // on fera Ingestion quand on sera capable de faire des event time
-        // "Ingestion time is the time that events enter Flink; internally, it is treated similarly to event time."
-        // procTime for now
-//        sEnv.setStreamTimeCharacteristic(TimeCharacteristic.IngestionTime);
-        
         sEnv.setParallelism(STREAM_PARALLELISM);
         sEnv.setBufferTimeout(MAX_BUFFER_TIME_MILLIS);
         
