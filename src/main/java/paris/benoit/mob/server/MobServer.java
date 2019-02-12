@@ -57,56 +57,30 @@ public class MobServer {
 
         registry.setUpInputOutputTables();
 
-     // Provide a static data set of the rates history table.
-        List<Tuple2<Integer, Long>> ratesHistoryData = new ArrayList<>();
-        ratesHistoryData.add(Tuple2.of(0, 1L));
-        ratesHistoryData.add(Tuple2.of(1, 2L));
-        ratesHistoryData.add(Tuple2.of(2, 2L));
-        ratesHistoryData.add(Tuple2.of(3, 4L));
-        ratesHistoryData.add(Tuple2.of(4, 2L));
-        ratesHistoryData.add(Tuple2.of(5, 4L));
-        ratesHistoryData.add(Tuple2.of(6, 2L));
-        ratesHistoryData.add(Tuple2.of(7, 4L));
-        ratesHistoryData.add(Tuple2.of(8, 4L));
-        // Create and register an example table using above data set.
-        // In the real setup, you should replace this with your own table.
-        DataStream<Tuple2<Integer, Long>> ratesHistoryStream = sEnv.fromCollection(ratesHistoryData);
-        Table ratesHistory = tEnv.fromDataStream(ratesHistoryStream, "currency, r_rate, rowtime.proctime");
-        tEnv.registerTable("RatesHistory", ratesHistory);
-        TemporalTableFunction rates = ratesHistory.createTemporalTableFunction("rowtime", "currency"); // <==== (1)
-        tEnv.registerFunction("Rates", rates);
-        
-        
-//        CsvTableSource sourcecsv = new TimestampedCsvTableSource(
-//            "testsource.csv", 
-//            new String[] { "amount", "currency", "rowtime" }, 
-//            new TypeInformation[] { Types.DECIMAL(), Types.DECIMAL(), Types.SQL_TIMESTAMP() }
-//        );        
-//        tEnv.registerTableSource("Orders", sourcecsv);
-        
-//        Table query = tEnv.sqlQuery(
-//            "SELECT                                     \r\n" + 
-//            "  o.amount * r.r_rate AS amount            \r\n" + 
-//            "FROM                                       \r\n" + 
-//            "  Orders AS o                              \r\n" + 
-//            "JOIN LATERAL TABLE (Rates(o.rowtime)) AS r \r\n" + 
-//            "  ON r.currency = o.currency               \r\n"
-//        );
-        
 
         Table hashInputTable = tEnv.sqlQuery(
             "SELECT loopback_index, actor_identity, payload.X, payload.Y \n" +
             "FROM inputTable"
         );
-
         DataStream<Row> appendStream = tEnv
             .toAppendStream(hashInputTable, Types.ROW(Types.INT(), Types.STRING(), Types.DECIMAL(), Types.DECIMAL()))
-//            .assignTimestampsAndWatermarks(new IngestionTimeExtractor<>()) // nécessaire?
-//            .keyBy(0)
-            ;
-
+        ;
         tEnv.registerTable("keyedInputTable", tEnv.fromDataStream(appendStream, 
                 "loopback_index, actor_identity, X, Y, proc_time.proctime"));
+        
+        
+        Table ratesHistory = tEnv.sqlQuery(
+            "SELECT                                                                                \r\n" + 
+            "  loopback_index one_key,                                                             \r\n" + 
+            "  HOP_START(proc_time, INTERVAL '0.05' SECOND, INTERVAL '5' SECOND) start_time,       \r\n" + 
+            "  AVG(X) X,                                                                           \r\n" + 
+            "  AVG(Y) Y                                                                            \r\n" + 
+            "FROM keyedInputTable                                                                  \r\n" + 
+            "GROUP BY loopback_index, HOP(proc_time, INTERVAL '0.05' SECOND, INTERVAL '5' SECOND)  \r\n" 
+        );
+
+        TemporalTableFunction rates = ratesHistory.createTemporalTableFunction("start_time", "one_key"); // <==== (1)
+        tEnv.registerFunction("Rates", rates);
         
         Table query = tEnv.sqlQuery(
             "SELECT                                                             \r\n" +
@@ -117,13 +91,13 @@ public class MobServer {
             "  SELECT                                                           \r\n" +
             "    o.loopback_index                  AS loopback_index,           \r\n" +
             "    o.actor_identity                  AS actor_identity,           \r\n" +
-            "    o.X * r.r_rate                    AS X,                        \r\n" +
-            "    o.Y                               AS Y,                        \r\n" +
+            "    r.X                               AS X,                        \r\n" +
+            "    r.Y                               AS Y,                        \r\n" +
             "    CAST(o.proc_time AS VARCHAR)      AS time_string               \r\n" +
             "  FROM                                                             \r\n" +
             "    keyedInputTable AS o                                           \r\n" +
             "  JOIN LATERAL TABLE (Rates(o.proc_time)) AS r                     \r\n" +
-            "    ON r.currency = o.loopback_index                               \r\n" +
+            "    ON r.one_key = o.loopback_index                                \r\n" +
             ")                                                                  \r\n"
         );
         
