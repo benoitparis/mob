@@ -29,10 +29,10 @@ public class JsonTableSource implements StreamTableSource<Row>, DefinedProctimeA
     public JsonTableSource(String schema) {        
         jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
         fieldNames = new String[] { 
-            "loopback_index", 
+            "loopback_index",
             "actor_identity",
             "proc_time",
-            "payload" 
+            "payload"
         };
         fieldTypes = new TypeInformation[] {
             Types.INT(),
