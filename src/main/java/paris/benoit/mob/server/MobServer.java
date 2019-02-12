@@ -46,6 +46,8 @@ public class MobServer {
         
         StreamTableEnvironment tEnv = TableEnvironment.getTableEnvironment(sEnv);
 
+        // source name, source list? source schema
+        // state list, 
         RegistryWeaver registry = new RegistryWeaver(
                 sEnv,
                 tEnv,
@@ -82,7 +84,10 @@ public class MobServer {
         TemporalTableFunction rates = ratesHistory.createTemporalTableFunction("start_time", "one_key"); // <==== (1)
         tEnv.registerFunction("Rates", rates);
         
-        Table query = tEnv.sqlQuery(
+        Table queryOut = 
+        tEnv.sqlQuery(
+//        tEnv.sqlUpdate(
+//            "INSERT INTO outputTable                                            \r\n" +
             "SELECT                                                             \r\n" +
             "  loopback_index,                                                  \r\n" +
             "  actor_identity,                                                  \r\n" +
@@ -101,16 +106,32 @@ public class MobServer {
             ")                                                                  \r\n"
         );
         
-        // TODO générer des dumps auto vers csv/kafka? que tu puisse bolt au runtime pour debug où tu veux sur le pipeline
         tEnv.registerTableSink(
             "outsinkCsv", 
             new String [] { "loopback_index", "actor_identity", "payload" }, 
             new TypeInformation[] { Types.INT(), Types.STRING(), Types.ROW(Types.DECIMAL(), Types.DECIMAL(), Types.STRING()) }, 
             new CsvTableSink("./outregtable.csv", ";", 1, WriteMode.OVERWRITE)
         );
+        
+        tEnv.registerTable("queryOut", queryOut);
 
-        query.insertInto("outputTable");
-        query.insertInto("outsinkCsv");
+
+        Table writeOut = 
+        tEnv.sqlQuery("SELECT * FROM queryOut");
+        
+
+        DataStream<Row> appendStreamOut = tEnv
+            .toAppendStream(writeOut, Types.ROW(Types.INT(), Types.STRING(), Types.ROW(Types.DECIMAL(), Types.DECIMAL(), Types.STRING())))
+        ;
+        tEnv.registerTable("queryOut2", tEnv.fromDataStream(appendStreamOut, 
+                "loopback_index, actor_identity, payload"));
+        
+
+        Table writeOut2 = 
+        tEnv.sqlQuery("SELECT * FROM queryOut2");
+        
+        writeOut2.insertInto("outputTable");
+        writeOut2.insertInto("outsinkCsv");
 
 
 //        sEnv.execute();
@@ -150,11 +171,7 @@ public class MobServer {
                 Paths.get("query.sql")
         );
         registry.weaveComponents();
-        
 
-        
-        // Il faudra packager ça:
-//            .partitionCustom(new IdPartitioner(), 0)
     }
 
 }

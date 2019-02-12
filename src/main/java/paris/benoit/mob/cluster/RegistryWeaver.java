@@ -83,7 +83,11 @@ public class RegistryWeaver {
         String inSchema = new String(Files.readAllBytes(in));
         final JsonTableSource tableSource = new JsonTableSource(inSchema);
         jrds = tableSource.getJsonRowDeserializationSchema();
+        //?change name
         tEnv.registerTableSource("inputTable", tableSource);
+        //?SELECT table
+        //?tEnv.toAppendStream table tableSource.getReturnType
+        //?tEnv.registerTable
         String outSchema = new String(Files.readAllBytes(out));
         tEnv.registerTableSink("outputTable", new JsonTableSink(outSchema));
     }
@@ -102,55 +106,6 @@ public class RegistryWeaver {
 
         String querySQL = new String(Files.readAllBytes(query));
         tEnv.sqlUpdate(querySQL);
-        
-//        List<Long> interrogateDAta = new ArrayList<>();
-//        interrogateDAta.add(1L);
-//        interrogateDAta.add(1L);
-//        interrogateDAta.add(1L);
-//        interrogateDAta.add(2L);
-//        interrogateDAta.add(1L);
-//        interrogateDAta.add(1L);
-//        SingleOutputStreamOperator<Long> interrogateStream = sEnv
-//            .fromCollection(interrogateDAta)
-//            .assignTimestampsAndWatermarks(new IngestionTimeExtractor<Long>());
-//
-//        Table interrogateTable = tEnv.fromDataStream(interrogateStream, "interrogate_in, it_time.proctime");
-//        tEnv.registerTable("interrogateTable", interrogateTable);
-//        
-//        // Provide a static data set of the rates history table.
-//        List<Tuple3<Long, BigDecimal, BigDecimal>> ratesHistoryData = new ArrayList<>();
-//        ratesHistoryData.add(Tuple3.of(1L, BigDecimal.valueOf(105L), BigDecimal.valueOf(105L)));
-//        ratesHistoryData.add(Tuple3.of(1L, BigDecimal.valueOf(105L), BigDecimal.valueOf(105L)));
-//        ratesHistoryData.add(Tuple3.of(1L, BigDecimal.valueOf(105L), BigDecimal.valueOf(105L)));
-//        ratesHistoryData.add(Tuple3.of(2L, BigDecimal.valueOf(105L), BigDecimal.valueOf(105L)));
-//        ratesHistoryData.add(Tuple3.of(1L, BigDecimal.valueOf(105L), BigDecimal.valueOf(105L)));
-////         Create and register an example table using above data set.
-////         In the real setup, you should replace this with your own table.
-//        DataStream<Tuple3<Long, BigDecimal, BigDecimal>> ratesHistoryStream = sEnv.fromCollection(ratesHistoryData);
-//        
-//        Table ratesHistory = tEnv.fromDataStream(ratesHistoryStream, "one_key, X, Y, start_time.proctime");
-//        tEnv.registerTable("RatesHistory", ratesHistory);
-//
-//        // Create and register a temporal table function.
-//        // Define "r_proctime" as the time attribute and "r_currency" as the primary key.
-//        TemporalTableFunction rates = ratesHistory.createTemporalTableFunction("start_time", "one_key");
-//        tEnv.registerFunction("meanPositionTemporalTable", rates);
-        
-        
-//        tEnv.registerTableSink(
-//            "outsink", 
-//            new String [] { "X", "Y" }, 
-//            new TypeInformation[] { Types.DECIMAL(), Types.DECIMAL() }, 
-//            new CsvTableSink("./outregtable.csv", ";", 1, WriteMode.OVERWRITE)
-//        );
-//        
-//        tEnv.sqlUpdate(
-//            " INSERT INTO outsink                                          \n" +
-//            " SELECT X, Y                                                  \n" +
-//            " FROM interrogateTable it                                     \n" +
-//            " JOIN LATERAL TABLE(meanPositionTemporalTable(it.it_time)) st \n" +
-//            "   ON it.interrogate_in = st.one_key                          \n" 
-//        );    
         
     }
     
