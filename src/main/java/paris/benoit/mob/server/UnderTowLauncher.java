@@ -23,53 +23,51 @@ import io.undertow.server.session.SessionManager;
 
 public class UnderTowLauncher {
     private static final Logger logger = LoggerFactory.getLogger(UnderTowLauncher.class);
+
+    private Undertow server;
+    private final int inetPort;
+    protected final String baseUrl;
     
-    private static Undertow server;
-    private static final int INET_PORT = 8090;
-    
-    public static void launchUntertow() throws Exception {
-                
+    public UnderTowLauncher(int port) {
+        super();
+        this.inetPort = port;
+        this.baseUrl = "http://localhost:" + inetPort;
+    }
+
+    public void launchUntertow(String appName) throws Exception {
+
         final SessionManager sessionManager = new InMemorySessionManager("SESSION_MANAGER", 1, true);
         final SessionCookieConfig sessionConfig = new SessionCookieConfig();
         sessionConfig.setMaxAge(60);
-        final SessionAttachmentHandler sessionAttachmentHandler =
-            new SessionAttachmentHandler(sessionManager, sessionConfig);
-        
-        final ResourceHandler fileHandler = 
-                Handlers.resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/static"), 100))
-                    .setWelcomeFiles("index.html");
-        
-        final RequestDumpingHandler actorHandler = new RequestDumpingHandler(
-                sessionAttachmentHandler.setNext(new AutoWebActorHandler())
-        );
-        
-        final PathHandler routingHandler = Handlers.path()
-            .addPrefixPath("/service", actorHandler)
-            .addPrefixPath("/", fileHandler)
-        ;
-        
-        server = Undertow.builder()
-            .addHttpListener(INET_PORT, "localhost")
-            .setHandler(routingHandler)
-            .build();
-        
-        server.start();
-        
-        final String url = "http://localhost:" + INET_PORT;
-        
-        waitUrlAvailable(url);
+        final SessionAttachmentHandler sessionAttachmentHandler = new SessionAttachmentHandler(sessionManager, sessionConfig);
 
-        logger.info("Undertow is up at: " + url);
+        final ResourceHandler fileHandler = Handlers
+                .resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + appName + "/public"), 100))
+                .setWelcomeFiles("index.html");
+
+        final RequestDumpingHandler actorHandler = new RequestDumpingHandler(sessionAttachmentHandler.setNext(new AutoWebActorHandler()));
+
+        final PathHandler routingHandler = Handlers.path().addPrefixPath("/service", actorHandler).addPrefixPath("/", fileHandler);
+
+        server = Undertow.builder().addHttpListener(inetPort, "localhost").setHandler(routingHandler).build();
+
+        server.start();
+        logger.info("Undertow is up at: " + baseUrl);
+    }
+
+    public void waitUnderTowAvailable() throws InterruptedException, IOException {
+        for (;;) {
+            Thread.sleep(10);
+            try {
+                if (HttpClients.createDefault().execute(new HttpGet(baseUrl)).getStatusLine().getStatusCode() > -100)
+                    break;
+            } catch (HttpHostConnectException ex) {
+            }
+        }
     }
     
-    public static void waitUrlAvailable(final String url) throws InterruptedException, IOException {
-       for (;;) {
-           Thread.sleep(10);
-           try {
-               if (HttpClients.createDefault().execute(new HttpGet(url)).getStatusLine().getStatusCode() > -100)
-                   break;
-           } catch (HttpHostConnectException ex) {}
-       }
-   }
-    
+    public String getUrl() {
+        return baseUrl;
+    }
+
 }

@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.json2sql;
+package paris.benoit.mob.cluster;
 
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 

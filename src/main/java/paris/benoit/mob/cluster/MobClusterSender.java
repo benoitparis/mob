@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.json2sql;
+package paris.benoit.mob.cluster;
 
 import java.io.IOException;
 
@@ -8,12 +8,12 @@ import org.apache.flink.types.Row;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.Channel;
 
-public class ClusterSender {
+public class MobClusterSender {
     
     private Channel<Row> channel;
     private JsonRowDeserializationSchema jrds;
     
-    public ClusterSender(Channel<Row> channel, JsonRowDeserializationSchema jrds) {
+    public MobClusterSender(Channel<Row> channel, JsonRowDeserializationSchema jrds) {
         super();
         this.channel = channel;
         this.jrds = jrds;
