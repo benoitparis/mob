@@ -53,16 +53,29 @@ public class UnderTowLauncher {
 
         server.start();
         logger.info("Undertow is up at: " + baseUrl);
+        
+        pokeActorService();
+        
+    }
+
+    private volatile boolean isUp = false;
+    private void pokeActorService() {
+        new Thread(() -> {
+            try {
+                if (HttpClients.createDefault().execute(new HttpGet(baseUrl + "/service")).getStatusLine().getStatusCode() > -100) {
+                    isUp = true;
+                } else {
+                    logger.error("Unable to call Actor service");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     public void waitUnderTowAvailable() throws InterruptedException, IOException {
-        for (;;) {
+        while (!isUp) {
             Thread.sleep(10);
-            try {
-                if (HttpClients.createDefault().execute(new HttpGet(baseUrl)).getStatusLine().getStatusCode() > -100)
-                    break;
-            } catch (HttpHostConnectException ex) {
-            }
         }
     }
     
