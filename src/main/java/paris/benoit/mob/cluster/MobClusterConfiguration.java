@@ -78,8 +78,8 @@ public class MobClusterConfiguration {
     }
     
     public class ConfigurationItem {
-        protected String content;
-        protected String name;
+        public String content;
+        public String name;
         public ConfigurationItem(String content, String name) {
             super();
             this.content = content;

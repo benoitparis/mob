@@ -7,16 +7,21 @@ import org.apache.flink.types.Row;
 
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.Channel;
+import co.paralleluniverse.strands.channels.Channels;
+import co.paralleluniverse.strands.channels.ThreadReceivePort;
+import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
 
 public class MobClusterSender {
     
-    private Channel<Row> channel;
     private JsonRowDeserializationSchema jrds;
+    private Channel<Row> channel;
+    ThreadReceivePort<Row> receiveport;
     
-    public MobClusterSender(Channel<Row> channel, JsonRowDeserializationSchema jrds) {
+    public MobClusterSender(JsonRowDeserializationSchema jrds) {
         super();
-        this.channel = channel;
         this.jrds = jrds;
+        this.channel = Channels.newChannel(1000000, OverflowPolicy.BACKOFF, false, false);
+        this.receiveport = new ThreadReceivePort<Row>(channel);
     }
     
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
@@ -32,5 +37,9 @@ public class MobClusterSender {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public ThreadReceivePort<Row> getReceiveport() {
+        return receiveport;
     }
 }

@@ -3,18 +3,22 @@ package paris.benoit.mob.cluster.loopback;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.types.Row;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import paris.benoit.mob.cluster.MobClusterRegistry;
-import paris.benoit.mob.cluster.NumberedReceivePort;
+import paris.benoit.mob.cluster.MobClusterSender;
 
 @SuppressWarnings("serial")
 public class ActorSource extends RichParallelSourceFunction<Row> {
     
+    private static final Logger logger = LoggerFactory.getLogger(ActorSource.class);
+    
     private volatile boolean isRunning = true;
 
     private ThreadReceivePort<Row> receivePort = null;
-    private Integer loopbackIndex = null;
+    private Integer loopbackIndex = -1;
     
     public ActorSource() {
         super();
@@ -23,9 +27,10 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        NumberedReceivePort<Row> nrp = MobClusterRegistry.registerSourceFunction(this);
-        receivePort = nrp.getReceiveport();
-        loopbackIndex = nrp.getIndex();
+        MobClusterSender sender = MobClusterRegistry.registerSourceFunction(this);
+        receivePort = sender.getReceiveport();
+        loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
+        logger.info("Opening source #" + loopbackIndex);
     }
     
     public void run(SourceContext<Row> sc) throws Exception {

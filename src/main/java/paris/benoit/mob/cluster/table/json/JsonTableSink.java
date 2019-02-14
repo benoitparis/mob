@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.json2sql;
+package paris.benoit.mob.cluster.table.json;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.IdPartitioner;

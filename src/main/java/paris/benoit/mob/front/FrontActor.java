@@ -14,8 +14,8 @@ import co.paralleluniverse.comsat.webactors.WebDataMessage;
 import co.paralleluniverse.comsat.webactors.WebSocketOpened;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
-import paris.benoit.mob.cluster.MobClusterSender;
 import paris.benoit.mob.cluster.MobClusterRegistry;
+import paris.benoit.mob.cluster.MobClusterSender;
 import paris.benoit.mob.message.ClientMessage;
 
 @SuppressWarnings("serial")
