@@ -12,7 +12,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import paris.benoit.mob.cluster.loopback.ActorSource;
+import paris.benoit.mob.cluster.table.loopback.ActorSource;
 
 public class JsonTableSource implements StreamTableSource<Row> {
     
@@ -39,8 +39,8 @@ public class JsonTableSource implements StreamTableSource<Row> {
         };
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
-        actorFunction = new ActorSource();
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
+        actorFunction = new ActorSource(jrds);
     }
 
     @Override

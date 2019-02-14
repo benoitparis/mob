@@ -1,6 +1,7 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.table.loopback;
 
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
@@ -19,15 +20,18 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
 
     private ThreadReceivePort<Row> receivePort = null;
     private Integer loopbackIndex = -1;
+    private JsonRowDeserializationSchema jrds;
     
-    public ActorSource() {
+    public ActorSource(JsonRowDeserializationSchema jrds) {
         super();
+        this.jrds = jrds;
     }
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        MobClusterSender sender = MobClusterRegistry.registerSourceFunction(this);
+        MobClusterSender sender = new MobClusterSender(jrds);
+        MobClusterRegistry.registerClusterSender(new MobClusterSender(jrds));
         receivePort = sender.getReceiveport();
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
         logger.info("Opening source #" + loopbackIndex);
@@ -49,5 +53,5 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     public void cancel() {
         isRunning = false;
     }
-    
+
 }

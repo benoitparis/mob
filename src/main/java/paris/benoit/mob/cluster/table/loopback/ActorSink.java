@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.table.loopback;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;

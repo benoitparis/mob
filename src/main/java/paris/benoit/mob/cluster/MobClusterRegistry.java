@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import paris.benoit.mob.cluster.MobClusterConfiguration.ConfigurationItem;
-import paris.benoit.mob.cluster.loopback.ActorSource;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
@@ -40,7 +39,7 @@ public class MobClusterRegistry {
         startFlink();
         
         configuration.underTowLauncher.waitUnderTowAvailable();
-        waitSourcesAndSinksRegistered();
+        waitSendersRegistration();
         
         logger.info("Mob Cluster is up");
         logger.info("Front at: " + configuration.underTowLauncher.getUrl());
@@ -103,34 +102,33 @@ public class MobClusterRegistry {
     // TODO static à enlever quand on pourra injecter dans l'actor
     //   @FiberSpringBootApplication
     //   Spring too big? Pas pour now
+    // TODO déplacer dans un ActorSources.register quand on aura du multi-input?
+    //   avec du ActorSources.getClusterSender as well (on garde clsutersender en tant que tel)
+    //     et on enlève le nom registry de cette classe
+    //     et avec du ActorSources.waitSourcesRegistered (qui obersera d'abord combien de types de sources il doit recevoir)
     private static CopyOnWriteArrayList<MobClusterSender> clusterSenders = new CopyOnWriteArrayList<MobClusterSender>();
-    public static MobClusterSender registerSourceFunction(ActorSource function) throws InterruptedException {
-
-        // comment associer jrds lié à la table source?
-        final MobClusterSender sender = new MobClusterSender(jrds);
+    public static void registerClusterSender(MobClusterSender sender) throws InterruptedException {
         clusterSenders.add(sender);
-        return sender;
-        
     }
 
-    private static volatile boolean veawingDone = false;
+    private static volatile boolean registrationDone = false;
     private static final int POLL_INTERVAL = 1000;
-    private void waitSourcesAndSinksRegistered() throws InterruptedException {
+    private void waitSendersRegistration() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
-        // On attend que Sources soient là
+        // On attend que tous les senders soient là
         while (clusterSenders.size() != parallelism) {
+            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenders.size());
             Thread.sleep(POLL_INTERVAL);
-            logger.info("Waiting on sources and sinks: " + parallelism + " " + clusterSenders.size());
         };
         
-        veawingDone = true;
-        logger.info("Weaving Done");
+        registrationDone = true;
+        logger.info("Registration Done");
     }
 
     public static MobClusterSender getClusterSender(String random) throws InterruptedException {
-        while (false == veawingDone) {
+        while (false == registrationDone) {
+            logger.info("Waiting on registration");
             Thread.sleep(POLL_INTERVAL);
-            logger.info("Waiting on weaving");
         };
         
         return clusterSenders.get(Math.abs(random.hashCode()) % clusterSenders.size());
