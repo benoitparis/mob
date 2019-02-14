@@ -31,7 +31,7 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         MobClusterSender sender = new MobClusterSender(jrds);
-        MobClusterRegistry.registerClusterSender(new MobClusterSender(jrds));
+        MobClusterRegistry.registerClusterSender(sender);
         receivePort = sender.getReceiveport();
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
         logger.info("Opening source #" + loopbackIndex);

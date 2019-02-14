@@ -20,19 +20,17 @@ public class MobClusterSender {
     public MobClusterSender(JsonRowDeserializationSchema jrds) {
         super();
         this.jrds = jrds;
-        this.channel = Channels.newChannel(1000000, OverflowPolicy.BACKOFF, false, false);
+        this.channel = Channels.newChannel(100_000, OverflowPolicy.BACKOFF, false, false);
         this.receiveport = new ThreadReceivePort<Row>(channel);
     }
     
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
         
         try {
-            Row payloadRow = jrds.deserialize(payload.getBytes());
-            //
             Row root = new Row(3);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);
-            root.setField(2, payloadRow);
+            root.setField(2, jrds.deserialize(payload.getBytes()));
             channel.send(root);
         } catch (IOException e) {
             e.printStackTrace();
