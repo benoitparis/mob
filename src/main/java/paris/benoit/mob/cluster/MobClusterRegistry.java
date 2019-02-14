@@ -6,7 +6,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
-import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
@@ -17,7 +16,6 @@ import paris.benoit.mob.cluster.MobClusterConfiguration.ConfigurationItem;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
-import paris.benoit.mob.cluster.table.json.JsonTableSource;
 
 public class MobClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterRegistry.class);
@@ -60,13 +58,10 @@ public class MobClusterRegistry {
         tEnv = TableEnvironment.getTableEnvironment(sEnv);
     }
 
-    // Mono Input pour le moment
-    public static JsonRowDeserializationSchema jrds;
     public void registerInputOutputTables() throws IOException {
         
         for (ConfigurationItem inSchema: configuration.inSchemas) {
-            JsonTableSource tableSource = AppendStreamTableUtils.createAndRegisterTableSource(tEnv, inSchema);
-            jrds = tableSource.getJsonRowDeserializationSchema();
+            AppendStreamTableUtils.createAndRegisterTableSource(tEnv, inSchema);
         }
 
         for (ConfigurationItem outSchema: configuration.outSchemas) {
