@@ -27,7 +27,7 @@ public class MobServer {
             FLINK_WEB_UI_PORT
         );
         MobClusterRegistry registry = new MobClusterRegistry(configuration);
-        registry.weaveComponentsAndStart();
+        registry.start();
         
     }
 

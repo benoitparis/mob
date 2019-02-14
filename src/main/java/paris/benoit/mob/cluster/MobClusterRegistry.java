@@ -30,7 +30,7 @@ public class MobClusterRegistry {
         this.configuration = clusterConfiguration;
     }
     
-    public void weaveComponentsAndStart() throws Exception {
+    public void start() throws Exception {
 
         configuration.underTowLauncher.launchUntertow(configuration.name);
         setupFlink();
@@ -106,6 +106,7 @@ public class MobClusterRegistry {
     //   avec du ActorSources.getClusterSender as well (on garde clsutersender en tant que tel)
     //     et on enlève le nom registry de cette classe
     //     et avec du ActorSources.waitSourcesRegistered (qui obersera d'abord combien de types de sources il doit recevoir)
+    //    ActorSources, ou bien Sources, ou bien (Json?)TableSources
     private static CopyOnWriteArrayList<MobClusterSender> clusterSenders = new CopyOnWriteArrayList<MobClusterSender>();
     public static void registerClusterSender(MobClusterSender sender) throws InterruptedException {
         clusterSenders.add(sender);
