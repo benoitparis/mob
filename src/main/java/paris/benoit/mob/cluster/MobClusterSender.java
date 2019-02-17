@@ -11,6 +11,9 @@ import co.paralleluniverse.strands.channels.Channels;
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
 
+// TODO fusionner avec ActorSource, channel, receivePort, jrds largment partagé, et la construction de row à deux endroits
+//   et en plus l'acteur pourra faure un Sources.getChannels, ce qui sémantiquement est plus propre, et clyclomatiquement ne lie plus .cluster à actors
+//   quand multi-sources
 public class MobClusterSender {
     
     private JsonRowDeserializationSchema jrds;
@@ -27,6 +30,7 @@ public class MobClusterSender {
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
         
         try {
+
             Row root = new Row(3);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);

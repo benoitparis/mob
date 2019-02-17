@@ -17,7 +17,7 @@ public class AppendStreamTableUtils {
         Table hashInputTable = tEnv.sqlQuery(
             "SELECT\n" + 
             "  " + StringUtils.join(tableSource.getTableSchema().getFieldNames(), ",\n  ") + "\n" +
-            "FROM " + inSchema.name + "_raw" + " \n"
+            "FROM " + inSchema.name + "_raw" + "\n"
         );
         DataStream<Row> appendStream = tEnv
             .toAppendStream(hashInputTable, tableSource.getReturnType());

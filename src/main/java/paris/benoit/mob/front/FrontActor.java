@@ -28,7 +28,12 @@ public class FrontActor extends BasicActor<Object, Void> {
     private MobClusterSender clusterSender;
     
     public FrontActor() throws InterruptedException {
+        // guids? 
+        // index-atomicIncrements? index pour debug niveau client? atomicIncrements dans les sources, au getChannels? 
+        //   des NumberedChannels? oui, et on fait le send+setfield+deseri là?
+        // du coup on donnerait pas que channel?
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+        // faudrait plutôt une map(actionName -> channel)
         clusterSender = MobClusterRegistry.getClusterSender(getName());
     }
 
@@ -61,6 +66,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
 
                 switch (cMsg.intent) {
+                //?clusterSenders.get(cMsg.intent).send(getName(), cMsg.payload.toString());
                 case WRITE: clusterSender.send(getName(), cMsg.payload.toString());
                     break;
                 case QUERY: logger.debug(cMsg.payload.toString()); 

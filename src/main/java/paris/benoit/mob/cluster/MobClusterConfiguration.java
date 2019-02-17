@@ -85,6 +85,10 @@ public class MobClusterConfiguration {
             this.content = content;
             this.name = name;
         }
+        @Override
+        public String toString() {
+            return "ConfigurationItem [content=" + content + ", name=" + name + "]";
+        }
     }
 
 }

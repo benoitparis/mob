@@ -77,6 +77,9 @@ public class MobClusterRegistry {
         }
 
         for (ConfigurationItem query: configuration.queries) {
+            // TODO payload: Row
+            // PayloadedTableUtils.wrapPrettyErrorAndUpdate
+            // ou bien un mode où infer le out schema? yep, contrat d'interface good 
             tEnv.sqlUpdate(query.content);
         }
         
@@ -97,7 +100,8 @@ public class MobClusterRegistry {
     // TODO static à enlever quand on pourra injecter dans l'actor
     //   @FiberSpringBootApplication
     //   Spring too big? Pas pour now
-    // TODO déplacer dans un ActorSources.register quand on aura du multi-input?
+    // TODO déplacer dans un ActorSources.register quand on aura du multi-input? 
+    //          (et ça sera register d'un channel,nom)
     //   avec du ActorSources.getClusterSender as well (on garde clsutersender en tant que tel)
     //     et on enlève le nom registry de cette classe
     //     et avec du ActorSources.waitSourcesRegistered (qui obersera d'abord combien de types de sources il doit recevoir)

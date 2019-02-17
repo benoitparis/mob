@@ -7,6 +7,10 @@ SELECT
 FROM write_position                                                                
 GROUP BY loopback_index, HOP(proctime, INTERVAL '0.05' SECOND, INTERVAL '1.0' SECOND)
 
+/* hw-decaying: ici on va tester le windowing pour faire du cedaying average sur un window, par index de loopback */
+
+
+
 -- avec le MAX:
 -- Exception in thread "main" org.apache.flink.table.api.ValidationException: SQL validation failed. From line 7, column 3 to line 7, column 187: 
 --   Aggregate expressions cannot be nested

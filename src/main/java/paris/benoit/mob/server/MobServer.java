@@ -8,7 +8,9 @@ import paris.benoit.mob.cluster.MobClusterRegistry;
 public class MobServer {
     
     public static void main(String[] args) throws Exception {
-        setupCluster("hw-decaying");
+        // mmh, avec du 
+        setupCluster("hw-global-average");
+//        setupCluster("hw-decaying");
     }
 
     public final static int STREAM_PARALLELISM = 8;
