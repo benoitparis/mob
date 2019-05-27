@@ -1,7 +1,13 @@
 package paris.benoit.mob.cluster;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
@@ -12,7 +18,6 @@ import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import paris.benoit.mob.cluster.MobClusterConfiguration.ConfigurationItem;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
@@ -60,27 +65,27 @@ public class MobClusterRegistry {
 
     public void registerInputOutputTables() throws IOException {
         
-        for (ConfigurationItem inSchema: configuration.inSchemas) {
+        for (MobTableConfiguration inSchema: configuration.inSchemas) {
             AppendStreamTableUtils.createAndRegisterTableSource(tEnv, inSchema);
         }
 
-        for (ConfigurationItem outSchema: configuration.outSchemas) {
-            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema.content));
+        for (MobTableConfiguration outSchema: configuration.outSchemas) {
+            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema.ddl));
         }
         
     }
 
     public void registerIntermediateTables() throws IOException {
 
-        for (ConfigurationItem state: configuration.states) {
+        for (MobTableConfiguration state: configuration.states) {
             TemporalTableUtils.createAndRegister(tEnv, state);
         }
 
-        for (ConfigurationItem query: configuration.queries) {
+        for (MobTableConfiguration query: configuration.queries) {
             // TODO payload: Row
             // PayloadedTableUtils.wrapPrettyErrorAndUpdate
             // ou bien un mode où infer le out schema? yep, contrat d'interface good 
-            tEnv.sqlUpdate(query.content);
+            tEnv.sqlUpdate(query.ddl);
         }
         
     }
@@ -106,9 +111,18 @@ public class MobClusterRegistry {
     //     et on enlève le nom registry de cette classe
     //     et avec du ActorSources.waitSourcesRegistered (qui obersera d'abord combien de types de sources il doit recevoir)
     //    ActorSources, ou bien Sources, ou bien (Json?)TableSources
-    private static CopyOnWriteArrayList<MobClusterSender> clusterSenders = new CopyOnWriteArrayList<MobClusterSender>();
-    public static void registerClusterSender(MobClusterSender sender) throws InterruptedException {
-        clusterSenders.add(sender);
+    public static class NameSenderPair {
+        public String name;
+        public MobClusterSender sender;
+        public NameSenderPair(String name, MobClusterSender sender) {
+            this.name = name;
+            this.sender = sender;
+        }
+    }
+    private static CopyOnWriteArrayList<NameSenderPair> clusterSenderPairs = new CopyOnWriteArrayList<NameSenderPair>();
+    private static List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
+    public static void registerClusterSender(String tableName, MobClusterSender sender) throws InterruptedException {
+        clusterSenderPairs.add(new NameSenderPair(tableName, sender));
     }
 
     private static volatile boolean registrationDone = false;
@@ -116,16 +130,33 @@ public class MobClusterRegistry {
     private void waitSendersRegistration() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
-        while (clusterSenders.size() != parallelism) {
-            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenders.size());
+        while (clusterSenderPairs.size() != parallelism * configuration.inSchemas.size()) {
+            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderPairs.size());
             Thread.sleep(POLL_INTERVAL);
         };
+        
+        Map<String, List<NameSenderPair>> byName = clusterSenderPairs.stream().collect(
+            Collectors.groupingBy(
+                it -> it.name,
+                Collectors.toList()
+            )
+        );
+        
+        for (int i = 0; i < parallelism; i++) {
+            HashMap<String, MobClusterSender> localMap = new HashMap<String, MobClusterSender>();
+            for(MobTableConfiguration ci: configuration.inSchemas) {
+                localMap.put(ci.name, byName.get(ci.name).get(i).sender);
+            }
+            clusterSenders.add(localMap);
+        }
+        
+
         
         registrationDone = true;
         logger.info("Registration Done");
     }
 
-    public static MobClusterSender getClusterSender(String random) throws InterruptedException {
+    public static Map<String, MobClusterSender> getClusterSender(String random) throws InterruptedException {
         while (false == registrationDone) {
             logger.info("Waiting on registration");
             Thread.sleep(POLL_INTERVAL);

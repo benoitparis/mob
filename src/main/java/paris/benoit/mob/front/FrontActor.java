@@ -1,5 +1,6 @@
 package paris.benoit.mob.front;
 
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class FrontActor extends BasicActor<Object, Void> {
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
-    private MobClusterSender clusterSender;
+    private Map<String, MobClusterSender> clusterSender;
     
     public FrontActor() throws InterruptedException {
         // guids? 
@@ -66,8 +67,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
 
                 switch (cMsg.intent) {
-                //?clusterSenders.get(cMsg.intent).send(getName(), cMsg.payload.toString());
-                case WRITE: clusterSender.send(getName(), cMsg.payload.toString());
+                case WRITE: clusterSender.get(cMsg.destination).send(getName(), cMsg.payload.toString());
                     break;
                 case QUERY: logger.debug(cMsg.payload.toString()); 
                     break;

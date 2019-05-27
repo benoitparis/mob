@@ -25,10 +25,10 @@ public class MobClusterConfiguration {
     protected int maxBufferTimeMillis;
     protected int flinkWebUiPort;
     
-    protected List<ConfigurationItem> inSchemas;
-    protected List<ConfigurationItem> outSchemas;
-    protected List<ConfigurationItem> states;
-    protected List<ConfigurationItem> queries;
+    protected List<MobTableConfiguration> inSchemas;
+    protected List<MobTableConfiguration> outSchemas;
+    protected List<MobTableConfiguration> states;
+    protected List<MobTableConfiguration> queries;
 
     private String basePath;
 
@@ -52,7 +52,7 @@ public class MobClusterConfiguration {
         
     }
 
-    private List<ConfigurationItem> buildConfigurationItem(final String folder) throws IOException {
+    private List<MobTableConfiguration> buildConfigurationItem(final String folder) throws IOException {
         
         return StreamSupport.stream(
                 Files
@@ -65,7 +65,7 @@ public class MobClusterConfiguration {
             .map(it -> {
                 try {
                     return 
-                        new ConfigurationItem(
+                        new MobTableConfiguration(
                             new String(Files.readAllBytes(it)), 
                             it.getFileName().toString().split("\\.")[0]
                         );
@@ -75,20 +75,6 @@ public class MobClusterConfiguration {
                 }
             })
             .collect(Collectors.toList());
-    }
-    
-    public class ConfigurationItem {
-        public String content;
-        public String name;
-        public ConfigurationItem(String content, String name) {
-            super();
-            this.content = content;
-            this.name = name;
-        }
-        @Override
-        public String toString() {
-            return "ConfigurationItem [content=" + content + ", name=" + name + "]";
-        }
     }
 
 }

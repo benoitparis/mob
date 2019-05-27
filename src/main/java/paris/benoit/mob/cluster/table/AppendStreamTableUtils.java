@@ -6,22 +6,22 @@ import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 
-import paris.benoit.mob.cluster.MobClusterConfiguration.ConfigurationItem;
+import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.json.JsonTableSource;
 
 public class AppendStreamTableUtils {
 
-    public static JsonTableSource createAndRegisterTableSource(StreamTableEnvironment tEnv, ConfigurationItem inSchema) {
-        final JsonTableSource tableSource = new JsonTableSource(inSchema.content);
-        tEnv.registerTableSource(inSchema.name + "_raw", tableSource);
+    public static JsonTableSource createAndRegisterTableSource(StreamTableEnvironment tEnv, MobTableConfiguration configuration) {
+        final JsonTableSource tableSource = new JsonTableSource(configuration);
+        tEnv.registerTableSource(configuration.name + "_raw", tableSource);
         Table hashInputTable = tEnv.sqlQuery(
             "SELECT\n" + 
             "  " + StringUtils.join(tableSource.getTableSchema().getFieldNames(), ",\n  ") + "\n" +
-            "FROM " + inSchema.name + "_raw" + "\n"
+            "FROM " + configuration.name + "_raw" + "\n"
         );
         DataStream<Row> appendStream = tEnv
             .toAppendStream(hashInputTable, tableSource.getReturnType());
-        tEnv.registerTable(inSchema.name, tEnv.fromDataStream(appendStream, 
+        tEnv.registerTable(configuration.name, tEnv.fromDataStream(appendStream, 
             StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
             ", proctime.proctime")
         );

@@ -16,13 +16,15 @@ public class ClientMessage {
     // et le routage vers les divers types?
     // faudrait une nomenclature
     public enum INTENT {WRITE, QUERY, SUBSCRIBE};
-    
+
     public INTENT intent;
+    public String destination;
     public JSONObject payload;
     
     public ClientMessage(String fromClient) {
         JSONObject json = new JSONObject(fromClient);
         intent = INTENT.valueOf(json.getString("INTENT"));
+        destination = json.getString("destination");
         payload = json.getJSONObject("PAYLOAD");
     }
 

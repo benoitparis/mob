@@ -12,6 +12,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSource;
 
 public class JsonTableSource implements StreamTableSource<Row> {
@@ -25,8 +26,8 @@ public class JsonTableSource implements StreamTableSource<Row> {
     private ActorSource actorFunction;
     private JsonRowDeserializationSchema jrds;
     
-    public JsonTableSource(String schema) {
-        jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
+    public JsonTableSource(MobTableConfiguration configuration) {
+        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.ddl);
         fieldNames = new String[] { 
             "loopback_index",
             "actor_identity",
@@ -40,7 +41,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
-        actorFunction = new ActorSource(jrds);
+        actorFunction = new ActorSource(configuration, jrds);
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
+import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.MobClusterSender;
 
@@ -21,17 +22,19 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     private ThreadReceivePort<Row> receivePort = null;
     private Integer loopbackIndex = -1;
     private JsonRowDeserializationSchema jrds;
+    private MobTableConfiguration configuration;
     
-    public ActorSource(JsonRowDeserializationSchema jrds) {
+    public ActorSource(MobTableConfiguration configuration, JsonRowDeserializationSchema jrds) {
         super();
         this.jrds = jrds;
+        this.configuration = configuration;
     }
 
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         MobClusterSender sender = new MobClusterSender(jrds);
-        MobClusterRegistry.registerClusterSender(sender);
+        MobClusterRegistry.registerClusterSender(configuration.name, sender);
         receivePort = sender.getReceiveport();
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
         logger.info("Opening source #" + loopbackIndex);
