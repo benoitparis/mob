@@ -41,7 +41,7 @@
 			var serverMsg = {
 				INTENT : 'WRITE',
 				destination : 'write_position',
-				PAYLOAD : msg
+				payload : msg
 			};
 			console.log(serverMsg);
 			ws.send(JSON.stringify(serverMsg));

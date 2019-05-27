@@ -32,6 +32,16 @@
 	};
 
 	var ws;
+  function wsConnect() {
+		var mypath = "/service"
+		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+		ws = new WebSocket(wsUrl);
+		ws.onopen = greetInit;
+		ws.onmessage = updateServerPosition;
+		ws.onclose = wsOnClose;
+	}
+  
+  
 	function sendPosition() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			var msg = {
@@ -41,23 +51,28 @@
 			var serverMsg = {
 				INTENT : 'WRITE',
 				destination : 'write_position',
-				PAYLOAD : msg
+				payload : msg
 			};
 			console.log(serverMsg);
 			ws.send(JSON.stringify(serverMsg));
 		}
 	}
 	setInterval(sendPosition, 40);
-
-	function wsConnect() {
-		var mypath = "/service"
-		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
-		ws = new WebSocket(wsUrl);
-		ws.onopen = greetInit;
-		ws.onmessage = updateServerPosition;
-		ws.onclose = wsOnClose;
-
+  
+	function queryGlobalPosition() {
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			var serverMsg = {
+				INTENT : 'WRITE',
+				destination : 'query_global_position',
+				payload : {}
+			};
+			console.log(serverMsg);
+			ws.send(JSON.stringify(serverMsg));
+		}
 	}
+	setInterval(queryGlobalPosition, 500);
+
+
 	
 	function wsOnClose(evt) {
 		console.log("WS CLOSE");
