@@ -1,4 +1,3 @@
-
 INSERT INTO send_client                                   
 SELECT                                                    
   loopback_index,                                         
@@ -11,10 +10,10 @@ FROM (
     r.X                                   AS X,               
     r.Y                                   AS Y,               
     CAST(o.proctime AS VARCHAR)           AS time_string1,     
-    CAST(r.avg_hop_proc_time AS VARCHAR)  AS time_string2,     
-    CAST(r.avg_proc_time AS VARCHAR)      AS time_string3,     
-    CAST('dsadsdsadsadsadasa' AS VARCHAR) AS time_string4,
-    CAST(r.start_time AS VARCHAR)         AS time_string5
+    CAST(o.proctime AS VARCHAR)           AS time_string2,     
+    CAST(o.proctime AS VARCHAR)           AS time_string3,     
+    CAST('dsadsdsa' AS VARCHAR)           AS time_string4,
+    CAST(o.proctime AS VARCHAR)           AS time_string5
   FROM                                                    
     write_position AS o                                  
   JOIN LATERAL TABLE (global_position(o.proctime)) AS r            

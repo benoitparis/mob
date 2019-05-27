@@ -8,7 +8,6 @@ import paris.benoit.mob.cluster.MobClusterRegistry;
 public class MobServer {
     
     public static void main(String[] args) throws Exception {
-        // mmh, avec du 
         setupCluster("hw-global-average");
 //        setupCluster("hw-decaying");
     }
@@ -23,7 +22,7 @@ public class MobServer {
         MobClusterConfiguration configuration = new MobClusterConfiguration(
             appName,
             new UnderTowLauncher(FRONT_PORT),
-            TimeCharacteristic.ProcessingTime, 
+            TimeCharacteristic.IngestionTime, 
             STREAM_PARALLELISM, 
             MAX_BUFFER_TIME_MILLIS,
             FLINK_WEB_UI_PORT
