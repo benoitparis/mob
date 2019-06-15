@@ -13,7 +13,9 @@ public class MobServer {
     }
 
     public final static int STREAM_PARALLELISM = 8;
-    public final static int MAX_BUFFER_TIME_MILLIS = 5;
+    // Apparamment à 1ms on est seulement 25% en dessous du max
+    // https://flink.apache.org/2019/06/05/flink-network-stack.html
+    public final static int MAX_BUFFER_TIME_MILLIS = 1;
     public final static int FRONT_PORT = 8090;
     public final static int FLINK_WEB_UI_PORT = 8082;
     
