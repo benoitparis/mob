@@ -41,7 +41,7 @@
     rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
 	}
 
-  // Network
+  // Network setup
 	var ws;
   
 	function greetInit(evt) {
@@ -50,6 +50,7 @@
 	};
 
 	function updateServerPosition(evt) {
+    // TODO from which table?
 		console.log(evt);
 		console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
@@ -57,23 +58,21 @@
 		rightY = msg.rightY;
 		draw();
 	};
-
-	function sendPosition() {
+  
+  function sendToServer(table, msg) {
+    console.log('Trying to send ' + msg + ' to ' + table);
+    // TODO queuing? because si ws était pas prête, on drop
 		if (ws && ws.readyState === WebSocket.OPEN) {
-			var msg = {
-				y : mouseY
-			};
 			var serverMsg = {
 				INTENT : 'WRITE',
-				destination : 'write_y',
+				destination : table,
 				payload : msg
 			};
-			console.log(serverMsg);
 			ws.send(JSON.stringify(serverMsg));
+      console.log('Msg sent');
 		}
-	}
-	setInterval(sendPosition, 40);
-	
+  }
+  
 	function wsOnClose(evt) {
 		console.log("WS CLOSE");
 		console.log(evt);
@@ -87,6 +86,23 @@
 		ws.onmessage = updateServerPosition;
 		ws.onclose = wsOnClose;
 	}
+  
+  // Network business
+  function chooseSide(e) {
+    var msg = {
+				side : e
+		};
+    sendToServer('choose_side', msg);
+  }
+  
+	function sendPosition() {
+    var msg = {
+      y : mouseY
+    };
+    sendToServer('write_y', msg);
+	}
+  // Ou bien plus subtil avec du onMouseMove?
+	setInterval(sendPosition, 40);
 
 	
 </script>
@@ -95,9 +111,9 @@
 	<button onclick="wsConnect()">Connect WS</button>
   <div>
     <div id="side-chooser">
-      <input type="radio" id="side-left" name="side" value="left">
+      <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');">
       <label for="side-left">Left</label>
-      <input type="radio" id="side-right" name="side" value="right">
+      <input type="radio" id="side-right" name="side" value="right" onclick="chooseSide('right');">
       <label for="side-right">Right</label>
     </div>
     
