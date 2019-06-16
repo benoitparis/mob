@@ -1,0 +1,113 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.js"></script>
+<script>
+  // UI
+	function setup() {
+		createCanvas(1200, 600);
+	}
+  
+  var height = 600;
+  var width = 1200;
+  var racketHeight = 100;
+  var racketWidth = 20;
+  var racketBorderDistance = 100;
+  var ballDiameter = 50;
+  var ballRadius = ballDiameter/2;
+  var leftDistance  = racketBorderDistance         - racketWidth/2;
+  var rightDistance = width - racketBorderDistance - racketWidth/2;
+  
+  var leftY = 300;
+  var rightY = 300;
+  var userSide;
+  var ballX = 300;
+  var ballY = 300;
+  
+
+	function draw() {
+		background(255, 247, 240);
+		fill(0, 0, 0);
+    rect(leftDistance , leftY  - racketHeight/2, racketWidth, racketHeight);
+    rect(rightDistance, rightY - racketHeight/2, racketWidth, racketHeight);
+		fill(0, 0, 255);
+    if (userSide) {
+      if (userSide === 'left') {
+        rect(leftDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
+      } else {
+        rect(rightDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
+      }
+    }
+		fill(0, 0, 0);
+    rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
+	}
+
+  // Network
+	var ws;
+  
+	function greetInit(evt) {
+		console.log('connection established');
+		console.log(evt);
+	};
+
+	function updateServerPosition(evt) {
+		console.log(evt);
+		console.log(JSON.parse(evt.data));
+		var msg = JSON.parse(evt.data);
+		leftY = msg.leftY;
+		rightY = msg.rightY;
+		draw();
+	};
+
+	function sendPosition() {
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			var msg = {
+				y : mouseY
+			};
+			var serverMsg = {
+				INTENT : 'WRITE',
+				destination : 'write_y',
+				payload : msg
+			};
+			console.log(serverMsg);
+			ws.send(JSON.stringify(serverMsg));
+		}
+	}
+	setInterval(sendPosition, 40);
+	
+	function wsOnClose(evt) {
+		console.log("WS CLOSE");
+		console.log(evt);
+	}
+  
+	function wsConnect() {
+		var mypath = "/service"
+		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+		ws = new WebSocket(wsUrl);
+		ws.onopen = greetInit;
+		ws.onmessage = updateServerPosition;
+		ws.onclose = wsOnClose;
+	}
+
+	
+</script>
+</head>
+<body>
+	<button onclick="wsConnect()">Connect WS</button>
+  <div>
+    <div id="side-chooser">
+      <input type="radio" id="side-left" name="side" value="left">
+      <label for="side-left">Left</label>
+      <input type="radio" id="side-right" name="side" value="right">
+      <label for="side-right">Right</label>
+    </div>
+    
+    <div id="side-chosen">
+      <input type="radio" id="side-left-chosen" name="side-chosen" value="left" disabled>
+      <label for="side-left">Left</label>
+      <input type="radio" id="side-left-chosen" name="side-chosen" value="right" disabled>
+      <label for="side-right">Right</label>
+    </div>
+    
+  </div>
+</body>
+</html>

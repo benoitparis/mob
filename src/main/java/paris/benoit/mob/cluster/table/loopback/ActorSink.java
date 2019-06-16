@@ -42,6 +42,9 @@ public class ActorSink extends RichSinkFunction<Row> {
         String identity = (String) row.getField(1);
         // arreter de faire par convention, le vrai schema est pas loin
         Row payload = (Row) row.getField(2);
+        
+        // ICI: faire un petit coup de metadata pour donner le name de this? 
+        
         String payloadString = new String(jrs.serialize(payload));
         final ActorRef<String> actor = (ActorRef<String>) ActorRegistry.tryGetActor(identity);
         if (null != actor) {
