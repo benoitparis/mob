@@ -22,7 +22,6 @@ public class TemporalTableUtils {
             TemporalTableFunction temporalTable = historyTable.createTemporalTableFunction(m.group(2), m.group(3));
             tEnv.registerFunction(m.group(1), temporalTable);
         } else {
-            // TODO work on exception types?
             throw new RuntimeException("Failed to create temporal table. They must conform to: " + TEMPORAL_TABLE_PATTERN_REGEX + "\nSQL was: \n" + state);
         }
         

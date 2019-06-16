@@ -37,15 +37,14 @@ public class ActorSink extends RichSinkFunction<Row> {
     @Override
     public void invoke(Row row) throws Exception {
         
+        // By convention
         Integer loopbackIndex = (Integer) row.getField(0);
+        String identity = (String) row.getField(1);
+        Row payload = (Row) row.getField(2);
+
         if (loopbackIndex != this.loopbackIndex) {
-            // Logging
             logger.error("Assumption broken on lookbackIndex: " + loopbackIndex + " vs " + this.loopbackIndex);
         }
-        // par convention? faudrait faire par nom?
-        String identity = (String) row.getField(1);
-        // arreter de faire par convention, le vrai schema est pas loin
-        Row payload = (Row) row.getField(2);
         
         String payloadString = new String(jrs.serialize(payload));
         

@@ -35,7 +35,6 @@ public class FrontActor extends BasicActor<Object, Void> {
         //   des NumberedChannels? oui, et on fait le send+setfield+deseri là?
         // du coup on donnerait pas que channel?
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        // faudrait plutôt une map(actionName -> channel)
         clusterSender = MobClusterRegistry.getClusterSender(getName());
     }
 
@@ -48,7 +47,6 @@ public class FrontActor extends BasicActor<Object, Void> {
         
         for (;;) {
             Object message = receive();
-            // -------- WebSocket opened --------
             if (message instanceof WebSocketOpened) {
                 WebSocketOpened msg = (WebSocketOpened) message;
                 ActorRef<WebDataMessage> from = msg.getFrom();
@@ -56,7 +54,6 @@ public class FrontActor extends BasicActor<Object, Void> {
                 clientWSPort = from;
                 logger.debug("Registering WS port");
             }
-            // -------- WebSocket message received -------- 
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;
                 logger.debug("Got a WS message: " + msg);
@@ -83,22 +80,8 @@ public class FrontActor extends BasicActor<Object, Void> {
                 case SUBSCRIBE: logger.debug(cMsg.payload.toString());
                     break;
                 }
-                
-
-            }
-            // Message from LoopBackSink
-            // String pas ouf niveau typage? faudrait ptet un wrapper? Json ça fait un coup de serde en plus.. ou bien un Row?
-            //   on fait la serde où?? ptet ici non?
-            else if (message instanceof String) {
-                String msg = (String) message;
-                if (null != clientWSPort) {
-                    clientWSPort.send(new WebDataMessage(self(), msg));
-                } else {
-                    logger.warn("Received a message from the cluster without having a WS Port to send it back to");
-                }
             }
             else if (message instanceof ToClientMessage) {
-                logger.info("No string!!");
                 ToClientMessage msg = (ToClientMessage) message;
                 if (null != clientWSPort) {
                     clientWSPort.send(new WebDataMessage(self(), msg.toString()));
@@ -123,9 +106,6 @@ public class FrontActor extends BasicActor<Object, Void> {
             // the wrapped SendPort maintains the original actors hashCode and equals behavior
             ExitMessage em = (ExitMessage) m;
             logger.debug("Actor " + em.getActor() + " has died.");
-            // do things?
-            //boolean res = listeners.remove(em.getActor());
-            // logger.info((res ? "Successfuly" : "Unsuccessfuly") + " removed listener for actor " + em.getActor());
         }
         return super.handleLifecycleMessage(m);
     }

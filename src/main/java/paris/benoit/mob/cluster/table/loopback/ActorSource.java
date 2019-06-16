@@ -43,11 +43,8 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     public void run(SourceContext<Row> sc) throws Exception {
         
         while (isRunning && !receivePort.isClosed()) {
-            // ici on peut pas passer en generics, sauf à passer un truc qui implement
-            //   une interface du style Addressable avec un void setIndex(Integer)
-            //     et pourquoi pas avoir l'identité dans le Addressable?
             Row row = receivePort.receive();
-            // par convention
+            // By convention
             row.setField(0, loopbackIndex);
             sc.collect(row);
         }
