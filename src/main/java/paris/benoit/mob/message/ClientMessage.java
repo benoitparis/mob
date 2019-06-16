@@ -23,7 +23,7 @@ public class ClientMessage {
     
     public ClientMessage(String fromClient) {
         JSONObject json = new JSONObject(fromClient);
-        intent = INTENT.valueOf(json.getString("INTENT"));
+        intent = INTENT.valueOf(json.getString("intent"));
         destination = json.getString("destination");
         payload = json.getJSONObject("payload");
     }

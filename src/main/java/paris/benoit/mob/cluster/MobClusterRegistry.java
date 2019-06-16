@@ -2,11 +2,9 @@ package paris.benoit.mob.cluster;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
@@ -14,7 +12,6 @@ import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.sinks.*;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
@@ -83,22 +80,6 @@ public class MobClusterRegistry {
             TemporalTableUtils.createAndRegister(tEnv, state);
         }
         
-        
-        System.out.println("---------------------------------------");
-        System.out.println(Arrays.asList(tEnv.listTables()));
-        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getCollations());
-        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getDistribution());
-        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getRowCount());
-        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getReferentialConstraints());
-        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getCollations());
-        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getDistribution());
-        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getRowCount());
-        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getReferentialConstraints());
-        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getCollations());
-        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getDistribution());
-        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getRowCount());
-        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getReferentialConstraints());
-
         for (MobTableConfiguration query: configuration.queries) {
             // TODO payload: Row
             // PayloadedTableUtils.wrapPrettyErrorAndUpdate
@@ -160,6 +141,8 @@ public class MobClusterRegistry {
             )
         );
         
+        logger.info("Cluster senders names: " + byName.keySet());
+        
         for (int i = 0; i < parallelism; i++) {
             HashMap<String, MobClusterSender> localMap = new HashMap<String, MobClusterSender>();
             for(MobTableConfiguration ci: configuration.inSchemas) {
@@ -167,9 +150,7 @@ public class MobClusterRegistry {
             }
             clusterSenders.add(localMap);
         }
-        
-
-        
+                
         registrationDone = true;
         logger.info("Registration Done");
     }

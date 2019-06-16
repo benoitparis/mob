@@ -1,0 +1,13 @@
+Bug Sources Dupliquées
+
+On avait le table_raw, et le table en tant que appendstream
+
+et si on lit du raw, et pas de sa dépendance, ça le dupliquerait?
+
+Résolution: lire de la table
+
+Comment prevent:
+Éviter les tablse deadend? Ie qui finissent pas dans des sinks?
+
+
+17:51:33.153 [main] INFO  p.b.m.c.MobClusterRegistry - Waiting to receive all senders: 8 != 16

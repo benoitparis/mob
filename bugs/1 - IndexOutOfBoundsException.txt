@@ -1,0 +1,286 @@
+fiche bug: IndexOutOfBoundsException index (1) must be less than size (1)
+
+
+
+
+
+ROW(side) AS payload
+et ça a du mal pour le type inferrence si tu met un alias
+
+Signes:
+Exception in thread "main" java.lang.IndexOutOfBoundsException: index (1) must be less than size (1)
+
+Dans https://github.com/apache/calcite/blob/master/core/src/main/java/org/apache/calcite/sql/type/InferTypes.java
+On a le ? returnType.getFieldList().get(i).getType()
+ça va tenter de get sur l'alias, et on avait rien en face dans le 
+returnType
+(because faut que ça branche sur la fin maintenant? ou bien ça capte pas que le AS il carry le même type)
+dans SqlValidatorImpl.inferUnknownTypes, on met un breakpoint à 1803, 13ème count
+
+le inferredType qui y arrive a une taille de 1
+alors que le AS qui nous arrive dans callBinding.operands en a 2 (c'est un AS) (qui vient du node)
+
+
+
+Comment reproduire:
+commit 953fc7a332288721a6c2e277495c6dcb9fe171f1
+Repro bug Index
+
+Résolution:
+C'était pour un ROW pour mettre dans un payload
+-> enlever l'aliasing sur payload
+
+
+call/node=  ROW(`EXPR$0`.`side`) AS `gnagna`
+operands=[ROW(`EXPR$0`.`side`), gnagna]
+
+inferredType=RecordType(VARCHAR(65536) EXPR$0)
+
+
+
+---- Trace suit
+
+
+15:46:05.990 [main] INFO  p.b.m.c.MobClusterConfiguration - Configuration with basePath:C:\ws\flink-mob-lib/apps/hw-pong/
+15:46:06.195 [main] DEBUG o.j.logging - Logging Provider: org.jboss.logging.Slf4jLoggerProvider
+15:46:06.306 [main] INFO  o.xnio - XNIO version 3.3.4.Final
+15:46:06.443 [main] INFO  o.x.nio - XNIO NIO Implementation Version 3.3.4.Final
+15:46:06.744 [XNIO-1 I/O-1] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-1', selector sun.nio.ch.WindowsSelectorImpl@6f255a8f
+15:46:06.744 [XNIO-1 I/O-2] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-2', selector sun.nio.ch.WindowsSelectorImpl@261f3
+15:46:06.744 [XNIO-1 I/O-4] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-4', selector sun.nio.ch.WindowsSelectorImpl@343dd92c
+15:46:06.745 [XNIO-1 I/O-5] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-5', selector sun.nio.ch.WindowsSelectorImpl@1d70439f
+15:46:06.745 [XNIO-1 I/O-8] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-8', selector sun.nio.ch.WindowsSelectorImpl@5fcfc7ed
+15:46:06.747 [XNIO-1 Accept] DEBUG o.x.nio - Started channel thread 'XNIO-1 Accept', selector sun.nio.ch.WindowsSelectorImpl@c393c13
+15:46:06.749 [XNIO-1 I/O-6] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-6', selector sun.nio.ch.WindowsSelectorImpl@fd76dc0
+15:46:06.750 [XNIO-1 I/O-7] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-7', selector sun.nio.ch.WindowsSelectorImpl@437b4385
+15:46:06.751 [XNIO-1 I/O-3] DEBUG o.x.nio - Started channel thread 'XNIO-1 I/O-3', selector sun.nio.ch.WindowsSelectorImpl@66b54730
+15:46:06.825 [main] INFO  p.b.m.s.UnderTowLauncher - Undertow is up at: http://localhost:8090
+15:46:09.634 [main] INFO  p.b.m.c.t.j.JsonTableSource - Created Source with json schema: Row(side: String)
+[quasar] WARNING: Method not found in class - assuming suspendable: [Ljava/lang/Object;#clone()Ljava/lang/Object; (at org/apache/calcite/rel/metadata/ReflectiveRelMetadataProvider#lambda$null$0)
+15:46:12.383 [main] DEBUG o.a.c.sql2rel - Plan after converting SqlNode to RelNode
+LogicalProject(loopback_index=[$0], actor_identity=[$1], payload=[$2])
+  LogicalTableScan(table=[[choose_side_raw]])
+
+15:46:12.611 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#3:LogicalProject.NONE(input=HepRelVertex#2,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:12.611 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#0:LogicalTableScan.NONE(table=[choose_side_raw])
+15:46:12.616 [main] DEBUG o.a.c.p.RelOptPlanner - call#0: Apply rule [TableScanRule] to [rel#0:LogicalTableScan.NONE(table=[choose_side_raw])]
+15:46:12.619 [main] DEBUG o.a.c.p.RelOptPlanner - call#0: Rule TableScanRule arguments [rel#0:LogicalTableScan.NONE(table=[choose_side_raw])] produced EnumerableTableScan#8
+15:46:12.621 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#6:LogicalProject.NONE(input=HepRelVertex#5,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:12.621 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#8:EnumerableTableScan.ENUMERABLE(table=[choose_side_raw])
+15:46:12.621 [main] DEBUG o.a.c.p.RelOptPlanner - call#1: Apply rule [EnumerableToLogicalTableScan] to [rel#8:EnumerableTableScan.ENUMERABLE(table=[choose_side_raw])]
+15:46:12.622 [main] DEBUG o.a.c.p.RelOptPlanner - call#1: Rule EnumerableToLogicalTableScan arguments [rel#8:EnumerableTableScan.ENUMERABLE(table=[choose_side_raw])] produced LogicalTableScan#13
+15:46:12.622 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#11:LogicalProject.NONE(input=HepRelVertex#10,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:12.622 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#13:LogicalTableScan.NONE(table=[choose_side_raw])
+15:46:12.658 [main] DEBUG o.a.c.p.RelOptPlanner - call#2: Apply rule [ReduceExpressionsRule(Project)] to [rel#17:LogicalProject.NONE(input=HepRelVertex#16,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:12.690 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#17:LogicalProject.NONE(input=HepRelVertex#16,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:12.690 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#13:LogicalTableScan.NONE(table=[choose_side_raw])
+15:46:12.834 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 1/1; PHASE = PRE_PROCESS_MDR; COST = {inf}
+15:46:12.834 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 2/1; PHASE = PRE_PROCESS; COST = {inf}
+15:46:12.834 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 3/1; PHASE = OPTIMIZE; COST = {inf}
+15:46:12.836 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [ProjectToCalcRule] rels [rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:12.836 [main] DEBUG o.a.c.p.RelOptPlanner - call#26: Apply rule [ProjectToCalcRule] to [rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:12.850 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#24 via ProjectToCalcRule
+15:46:12.853 [main] DEBUG o.a.c.p.RelOptPlanner - call#26 generated 1 successors: [rel#24:LogicalCalc.NONE(input=rel#19:Subset#0.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.853 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 4/2; PHASE = OPTIMIZE; COST = {inf}
+15:46:12.853 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [FlinkLogicalCalcConverter] rels [rel#24:LogicalCalc.NONE(input=rel#19:Subset#0.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.853 [main] DEBUG o.a.c.p.RelOptPlanner - call#51: Apply rule [FlinkLogicalCalcConverter] to [rel#24:LogicalCalc.NONE(input=rel#19:Subset#0.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.857 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#26 via FlinkLogicalCalcConverter
+15:46:12.902 [main] DEBUG o.a.c.p.RelOptPlanner - call#51 generated 1 successors: [rel#26:FlinkLogicalCalc.LOGICAL(input=rel#25:Subset#0.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.902 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 5/3; PHASE = OPTIMIZE; COST = {inf}
+15:46:12.902 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [ProjectRemoveRule] rels [rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:12.902 [main] DEBUG o.a.c.p.RelOptPlanner - call#22: Apply rule [ProjectRemoveRule] to [rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:12.904 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#19 via ProjectRemoveRule
+15:46:12.904 [main] DEBUG o.a.c.p.RelOptPlanner - call#22 generated 1 successors: [rel#19:Subset#0.NONE]
+15:46:12.904 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 6/4; PHASE = OPTIMIZE; COST = {inf}
+15:46:12.904 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [FlinkLogicalTableSourceScanConverter] rels [rel#13:LogicalTableScan.NONE(table=[choose_side_raw])]
+15:46:12.904 [main] DEBUG o.a.c.p.RelOptPlanner - call#7: Apply rule [FlinkLogicalTableSourceScanConverter] to [rel#13:LogicalTableScan.NONE(table=[choose_side_raw])]
+15:46:12.906 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#27 via FlinkLogicalTableSourceScanConverter
+15:46:12.944 [main] DEBUG o.a.c.p.RelOptPlanner - call#7 generated 1 successors: [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:12.945 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 7/5; PHASE = OPTIMIZE; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:12.946 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [PushProjectIntoTableSourceScanRule] rels [rel#26:FlinkLogicalCalc.LOGICAL(input=rel#25:Subset#0.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2), Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:12.946 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [CalcMergeRule] rels [rel#26:FlinkLogicalCalc.LOGICAL(input=rel#25:Subset#0.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2), rel#26:FlinkLogicalCalc.LOGICAL(input=rel#25:Subset#0.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.951 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [ProjectMergeRule:force_mode] rels [rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2), rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:12.951 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [ProjectCalcMergeRule] rels [rel#20:LogicalProject.NONE(input=rel#19:Subset#0.NONE,loopback_index=$0,actor_identity=$1,payload=$2), rel#24:LogicalCalc.NONE(input=rel#19:Subset#0.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.951 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [CalcMergeRule] rels [rel#24:LogicalCalc.NONE(input=rel#19:Subset#0.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2), rel#24:LogicalCalc.NONE(input=rel#19:Subset#0.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:12.952 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 8/1; PHASE = CLEANUP; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:12.989 [main] DEBUG o.a.c.p.RelOptPlanner - Cheapest plan:
+FlinkLogicalTableSourceScan(table=[[choose_side_raw]], fields=[loopback_index, actor_identity, payload], source=[Json Source]): rowcount = 100.0, cumulative cost = {100.0 rows, 100.0 cpu, 2800.0 io}, id = 27
+
+15:46:12.992 [main] DEBUG o.a.c.p.RelOptPlanner - Provenance:
+Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+  call#7 rule [FlinkLogicalTableSourceScanConverter]
+    rel#13:LogicalTableScan.NONE(table=[choose_side_raw])
+      no parent
+
+15:46:12.999 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 1/1; PHASE = PRE_PROCESS_MDR; COST = {inf}
+15:46:13.000 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 2/1; PHASE = PRE_PROCESS; COST = {inf}
+15:46:13.000 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 3/1; PHASE = OPTIMIZE; COST = {inf}
+15:46:13.000 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [StreamTableSourceScanRule] rels [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.000 [main] DEBUG o.a.c.p.RelOptPlanner - call#138: Apply rule [StreamTableSourceScanRule] to [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.011 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#31 via StreamTableSourceScanRule
+15:46:13.047 [main] DEBUG o.a.c.p.RelOptPlanner - call#138 generated 1 successors: [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.048 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 4/2; PHASE = OPTIMIZE; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:13.048 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 5/1; PHASE = CLEANUP; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:13.088 [main] DEBUG o.a.c.p.RelOptPlanner - Cheapest plan:
+StreamTableSourceScan(table=[[choose_side_raw]], fields=[loopback_index, actor_identity, payload], source=[Json Source]): rowcount = 100.0, cumulative cost = {100.0 rows, 100.0 cpu, 2800.0 io}, id = 31
+
+15:46:13.088 [main] DEBUG o.a.c.p.RelOptPlanner - Provenance:
+Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+  call#138 rule [StreamTableSourceScanRule]
+    Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+      no parent
+
+15:46:13.089 [main] DEBUG o.a.c.p.RelOptPlanner - call#139: Apply rule [AssignDefaultRetractionRule] to [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.161 [main] DEBUG o.a.c.p.RelOptPlanner - call#139: Rule AssignDefaultRetractionRule arguments [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)] produced Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+15:46:13.162 [main] DEBUG o.a.c.p.RelOptPlanner - call#140: Apply rule [AssignDefaultRetractionRule] to [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.162 [main] DEBUG o.a.c.p.RelOptPlanner - call#141: Apply rule [SetUpdatesAsRetractionRule] to [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.165 [main] DEBUG o.a.c.p.RelOptPlanner - call#142: Apply rule [SetAccModeRule] to [Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:13.166 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using Scan(table:[choose_side_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+15:46:13.443 [main] INFO  o.a.f.a.j.t.TypeExtractor - class org.apache.flink.types.Row does not contain a getter for field fields
+15:46:13.443 [main] INFO  o.a.f.a.j.t.TypeExtractor - class org.apache.flink.types.Row does not contain a setter for field fields
+15:46:13.443 [main] INFO  o.a.f.a.j.t.TypeExtractor - Class class org.apache.flink.types.Row cannot be used as a POJO type because not all fields are valid POJO fields, and must be processed as GenericType. Please read the Flink documentation on "Data Types & Serialization" for details of the effect on performance.
+15:46:14.197 [main] INFO  p.b.m.c.t.j.JsonTableSource - Created Source with json schema: Row(y: BigDecimal)
+15:46:14.205 [main] DEBUG o.a.c.sql2rel - Plan after converting SqlNode to RelNode
+LogicalProject(loopback_index=[$0], actor_identity=[$1], payload=[$2])
+  LogicalTableScan(table=[[write_y_raw]])
+
+15:46:14.206 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#39:LogicalProject.NONE(input=HepRelVertex#38,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:14.206 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#36:LogicalTableScan.NONE(table=[write_y_raw])
+15:46:14.206 [main] DEBUG o.a.c.p.RelOptPlanner - call#143: Apply rule [TableScanRule] to [rel#36:LogicalTableScan.NONE(table=[write_y_raw])]
+15:46:14.206 [main] DEBUG o.a.c.p.RelOptPlanner - call#143: Rule TableScanRule arguments [rel#36:LogicalTableScan.NONE(table=[write_y_raw])] produced EnumerableTableScan#44
+15:46:14.207 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#42:LogicalProject.NONE(input=HepRelVertex#41,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:14.207 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#44:EnumerableTableScan.ENUMERABLE(table=[write_y_raw])
+15:46:14.207 [main] DEBUG o.a.c.p.RelOptPlanner - call#144: Apply rule [EnumerableToLogicalTableScan] to [rel#44:EnumerableTableScan.ENUMERABLE(table=[write_y_raw])]
+15:46:14.207 [main] DEBUG o.a.c.p.RelOptPlanner - call#144: Rule EnumerableToLogicalTableScan arguments [rel#44:EnumerableTableScan.ENUMERABLE(table=[write_y_raw])] produced LogicalTableScan#49
+15:46:14.207 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#47:LogicalProject.NONE(input=HepRelVertex#46,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:14.207 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#49:LogicalTableScan.NONE(table=[write_y_raw])
+15:46:14.208 [main] DEBUG o.a.c.p.RelOptPlanner - call#145: Apply rule [ReduceExpressionsRule(Project)] to [rel#53:LogicalProject.NONE(input=HepRelVertex#52,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:14.228 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#53:LogicalProject.NONE(input=HepRelVertex#52,loopback_index=$0,actor_identity=$1,payload=$2)
+15:46:14.228 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using rel#49:LogicalTableScan.NONE(table=[write_y_raw])
+15:46:14.364 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 1/1; PHASE = PRE_PROCESS_MDR; COST = {inf}
+15:46:14.364 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 2/1; PHASE = PRE_PROCESS; COST = {inf}
+15:46:14.365 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 3/1; PHASE = OPTIMIZE; COST = {inf}
+15:46:14.366 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [ProjectToCalcRule] rels [rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:14.366 [main] DEBUG o.a.c.p.RelOptPlanner - call#179: Apply rule [ProjectToCalcRule] to [rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:14.367 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#60 via ProjectToCalcRule
+15:46:14.367 [main] DEBUG o.a.c.p.RelOptPlanner - call#179 generated 1 successors: [rel#60:LogicalCalc.NONE(input=rel#55:Subset#3.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.367 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 4/2; PHASE = OPTIMIZE; COST = {inf}
+15:46:14.368 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [FlinkLogicalCalcConverter] rels [rel#60:LogicalCalc.NONE(input=rel#55:Subset#3.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.368 [main] DEBUG o.a.c.p.RelOptPlanner - call#200: Apply rule [FlinkLogicalCalcConverter] to [rel#60:LogicalCalc.NONE(input=rel#55:Subset#3.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.368 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#62 via FlinkLogicalCalcConverter
+15:46:14.369 [main] DEBUG o.a.c.p.RelOptPlanner - call#200 generated 1 successors: [rel#62:FlinkLogicalCalc.LOGICAL(input=rel#61:Subset#3.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.369 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 5/3; PHASE = OPTIMIZE; COST = {inf}
+15:46:14.369 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [ProjectRemoveRule] rels [rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:14.369 [main] DEBUG o.a.c.p.RelOptPlanner - call#168: Apply rule [ProjectRemoveRule] to [rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:14.370 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#55 via ProjectRemoveRule
+15:46:14.371 [main] DEBUG o.a.c.p.RelOptPlanner - call#168 generated 1 successors: [rel#55:Subset#3.NONE]
+15:46:14.371 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 6/4; PHASE = OPTIMIZE; COST = {inf}
+15:46:14.371 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [FlinkLogicalTableSourceScanConverter] rels [rel#49:LogicalTableScan.NONE(table=[write_y_raw])]
+15:46:14.371 [main] DEBUG o.a.c.p.RelOptPlanner - call#152: Apply rule [FlinkLogicalTableSourceScanConverter] to [rel#49:LogicalTableScan.NONE(table=[write_y_raw])]
+15:46:14.371 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#63 via FlinkLogicalTableSourceScanConverter
+15:46:14.372 [main] DEBUG o.a.c.p.RelOptPlanner - call#152 generated 1 successors: [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.373 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 7/5; PHASE = OPTIMIZE; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:14.373 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [PushProjectIntoTableSourceScanRule] rels [rel#62:FlinkLogicalCalc.LOGICAL(input=rel#61:Subset#3.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2), Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.373 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [CalcMergeRule] rels [rel#62:FlinkLogicalCalc.LOGICAL(input=rel#61:Subset#3.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2), rel#62:FlinkLogicalCalc.LOGICAL(input=rel#61:Subset#3.LOGICAL,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.373 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [ProjectMergeRule:force_mode] rels [rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2), rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2)]
+15:46:14.373 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [ProjectCalcMergeRule] rels [rel#56:LogicalProject.NONE(input=rel#55:Subset#3.NONE,loopback_index=$0,actor_identity=$1,payload=$2), rel#60:LogicalCalc.NONE(input=rel#55:Subset#3.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.373 [main] DEBUG o.a.c.p.RelOptPlanner - Skip match: rule [CalcMergeRule] rels [rel#60:LogicalCalc.NONE(input=rel#55:Subset#3.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2), rel#60:LogicalCalc.NONE(input=rel#55:Subset#3.NONE,expr#0..2={inputs},loopback_index=$t0,actor_identity=$t1,payload=$t2)]
+15:46:14.374 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 8/1; PHASE = CLEANUP; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:14.376 [main] DEBUG o.a.c.p.RelOptPlanner - Cheapest plan:
+FlinkLogicalTableSourceScan(table=[[write_y_raw]], fields=[loopback_index, actor_identity, payload], source=[Json Source]): rowcount = 100.0, cumulative cost = {100.0 rows, 100.0 cpu, 2800.0 io}, id = 63
+
+15:46:14.376 [main] DEBUG o.a.c.p.RelOptPlanner - Provenance:
+Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+  call#152 rule [FlinkLogicalTableSourceScanConverter]
+    rel#49:LogicalTableScan.NONE(table=[write_y_raw])
+      no parent
+
+15:46:14.381 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 1/1; PHASE = PRE_PROCESS_MDR; COST = {inf}
+15:46:14.382 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 2/1; PHASE = PRE_PROCESS; COST = {inf}
+15:46:14.383 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 3/1; PHASE = OPTIMIZE; COST = {inf}
+15:46:14.383 [main] DEBUG o.a.c.p.RelOptPlanner - Pop match: rule [StreamTableSourceScanRule] rels [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.383 [main] DEBUG o.a.c.p.RelOptPlanner - call#281: Apply rule [StreamTableSourceScanRule] to [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.383 [main] DEBUG o.a.c.p.RelOptPlanner - Transform to: rel#67 via StreamTableSourceScanRule
+15:46:14.384 [main] DEBUG o.a.c.p.RelOptPlanner - call#281 generated 1 successors: [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.384 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 4/2; PHASE = OPTIMIZE; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:14.385 [main] DEBUG o.a.c.p.RelOptPlanner - PLANNER = org.apache.calcite.plan.volcano.VolcanoPlanner@30c8c6ab; TICK = 5/1; PHASE = CLEANUP; COST = {100.0 rows, 100.0 cpu, 2800.0 io}
+15:46:14.385 [main] DEBUG o.a.c.p.RelOptPlanner - Cheapest plan:
+StreamTableSourceScan(table=[[write_y_raw]], fields=[loopback_index, actor_identity, payload], source=[Json Source]): rowcount = 100.0, cumulative cost = {100.0 rows, 100.0 cpu, 2800.0 io}, id = 67
+
+15:46:14.386 [main] DEBUG o.a.c.p.RelOptPlanner - Provenance:
+Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+  call#281 rule [StreamTableSourceScanRule]
+    Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+      no parent
+
+15:46:14.387 [main] DEBUG o.a.c.p.RelOptPlanner - call#282: Apply rule [AssignDefaultRetractionRule] to [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.387 [main] DEBUG o.a.c.p.RelOptPlanner - call#282: Rule AssignDefaultRetractionRule arguments [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)] produced Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+15:46:14.388 [main] DEBUG o.a.c.p.RelOptPlanner - call#283: Apply rule [AssignDefaultRetractionRule] to [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.388 [main] DEBUG o.a.c.p.RelOptPlanner - call#284: Apply rule [SetUpdatesAsRetractionRule] to [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.389 [main] DEBUG o.a.c.p.RelOptPlanner - call#285: Apply rule [SetAccModeRule] to [Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)]
+15:46:14.389 [main] DEBUG o.a.c.p.RelOptPlanner - For final plan, using Scan(table:[write_y_raw], fields:(loopback_index, actor_identity, payload), source:Json Source)
+15:46:14.402 [main] INFO  o.a.f.a.j.t.TypeExtractor - class org.apache.flink.types.Row does not contain a getter for field fields
+15:46:14.403 [main] INFO  o.a.f.a.j.t.TypeExtractor - class org.apache.flink.types.Row does not contain a setter for field fields
+15:46:14.403 [main] INFO  o.a.f.a.j.t.TypeExtractor - Class class org.apache.flink.types.Row cannot be used as a POJO type because not all fields are valid POJO fields, and must be processed as GenericType. Please read the Flink documentation on "Data Types & Serialization" for details of the effect on performance.
+15:46:14.428 [main] INFO  p.b.m.c.t.j.JsonTableSink - Created Sink with json schema: Row(side: String)
+15:46:14.430 [main] INFO  p.b.m.c.t.j.JsonTableSink - Created Sink with json schema: Row(leftY: BigDecimal, rightY: BigDecimal)
+15:46:14.431 [main] INFO  p.b.m.c.t.j.JsonTableSink - Created Sink with json schema: Row(countLeft: BigDecimal, countRight: BigDecimal, countGlobal: BigDecimal)
+15:46:14.447 [main] DEBUG o.a.c.sql2rel - Plan after converting SqlNode to RelNode
+LogicalProject(actor_identity=[$1], chosen_at=[$3], side=[$2.side])
+  LogicalTableScan(table=[[choose_side]])
+
+15:46:14.474 [main] INFO  o.a.f.a.j.t.TypeExtractor - class org.apache.flink.types.Row does not contain a getter for field fields
+15:46:14.474 [main] INFO  o.a.f.a.j.t.TypeExtractor - class org.apache.flink.types.Row does not contain a setter for field fields
+15:46:14.474 [main] INFO  o.a.f.a.j.t.TypeExtractor - Class class org.apache.flink.types.Row cannot be used as a POJO type because not all fields are valid POJO fields, and must be processed as GenericType. Please read the Flink documentation on "Data Types & Serialization" for details of the effect on performance.
+Exception in thread "main" java.lang.IndexOutOfBoundsException: index (1) must be less than size (1)
+	at org.apache.flink.calcite.shaded.com.google.common.base.Preconditions.checkElementIndex(Preconditions.java:310)
+	at org.apache.flink.calcite.shaded.com.google.common.base.Preconditions.checkElementIndex(Preconditions.java:293)
+	at org.apache.flink.calcite.shaded.com.google.common.collect.SingletonImmutableList.get(SingletonImmutableList.java:41)
+	at org.apache.calcite.sql.type.InferTypes.lambda$static$1(InferTypes.java:73)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.inferUnknownTypes(SqlValidatorImpl.java:1803)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.expandSelectItem(SqlValidatorImpl.java:461)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.expandStar(SqlValidatorImpl.java:353)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelectList(SqlToRelConverter.java:3797)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelectImpl(SqlToRelConverter.java:664)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelect(SqlToRelConverter.java:621)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQueryRecursive(SqlToRelConverter.java:3051)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQuery(SqlToRelConverter.java:557)
+	at org.apache.flink.table.calcite.FlinkPlannerImpl.rel(FlinkPlannerImpl.scala:125)
+	at org.apache.flink.table.api.TableEnvironment.sqlUpdate(TableEnvironment.scala:811)
+	at org.apache.flink.table.api.TableEnvironment.sqlUpdate(TableEnvironment.scala:777)
+	at paris.benoit.mob.cluster.MobClusterRegistry.registerIntermediateTables(MobClusterRegistry.java:89)
+	at paris.benoit.mob.cluster.MobClusterRegistry.start(MobClusterRegistry.java:42)
+	at paris.benoit.mob.server.MobServer.setupCluster(MobServer.java:34)
+	at paris.benoit.mob.server.MobServer.main(MobServer.java:13)
+15:46:19.093 [XNIO-1 I/O-7] INFO  i.u.r.dump - 
+----------------------------REQUEST---------------------------
+               URI=/service
+ characterEncoding=null
+     contentLength=-1
+       contentType=null
+            header=Connection=Keep-Alive
+            header=Accept-Encoding=gzip,deflate
+            header=User-Agent=Apache-HttpClient/4.5.2 (Java/1.8.0_101)
+            header=Host=localhost:8090
+            locale=[]
+            method=GET
+          protocol=HTTP/1.1
+       queryString=
+        remoteAddr=/127.0.0.1:63952
+        remoteHost=127.0.0.1
+            scheme=http
+              host=localhost:8090
+        serverPort=8090
+--------------------------RESPONSE--------------------------
+     contentLength=0
+       contentType=null
+            cookie=JSESSIONID=ul8NnRJAwvLc1nAHCp85BTuamtlbZfgd2kCSaxpA; domain=null; path=/
+            header=Connection=keep-alive
+            header=Set-Cookie=JSESSIONID=ul8NnRJAwvLc1nAHCp85BTuamtlbZfgd2kCSaxpA; path=/; Max-Age=60; Expires=Sun, 16-Jun-2019 13:47:19 GMT
+            header=Content-Length=0
+            header=Date=Sun, 16 Jun 2019 13:46:19 GMT
+            status=404
+==============================================================
+
+  
+

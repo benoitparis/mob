@@ -3,5 +3,5 @@ INSERT INTO ack_side
 SELECT
   loopback_index,
   actor_identity,
-  ROW(side) AS payload
-FROM choose_side_raw
+  ROW(side)
+FROM choose_side

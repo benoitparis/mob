@@ -67,7 +67,15 @@ public class FrontActor extends BasicActor<Object, Void> {
                 //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
 
                 switch (cMsg.intent) {
-                case WRITE: clusterSender.get(cMsg.destination).send(getName(), cMsg.payload.toString());
+                case WRITE: 
+                    {
+                        MobClusterSender specificSender = clusterSender.get(cMsg.destination);
+                        if (null == specificSender) {
+                            logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.destination);
+                        } else {
+                            specificSender.send(getName(), cMsg.payload.toString());
+                        }
+                    } ;
                     break;
                 case QUERY: logger.debug(cMsg.payload.toString()); 
                     break;

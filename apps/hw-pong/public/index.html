@@ -3,8 +3,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.js"></script>
 <script>
   // UI
+  
+  var mouseY;
 	function setup() {
 		createCanvas(1200, 600);
+    mouseY = mouseY;
 	}
   
   var height = 600;
@@ -49,7 +52,7 @@
 		console.log(evt);
 	};
 
-	function updateServerPosition(evt) {
+	function processServerMessage(evt) {
     // TODO from which table?
 		console.log(evt);
 		console.log(JSON.parse(evt.data));
@@ -64,7 +67,7 @@
     // TODO queuing? because si ws était pas prête, on drop
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
-				INTENT : 'WRITE',
+				intent : 'WRITE',
 				destination : table,
 				payload : msg
 			};
@@ -83,7 +86,7 @@
 		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
 		ws = new WebSocket(wsUrl);
 		ws.onopen = greetInit;
-		ws.onmessage = updateServerPosition;
+		ws.onmessage = processServerMessage;
 		ws.onclose = wsOnClose;
 	}
   
@@ -102,7 +105,7 @@
     sendToServer('write_y', msg);
 	}
   // Ou bien plus subtil avec du onMouseMove?
-	setInterval(sendPosition, 40);
+	setInterval(sendPosition, 4000);
 
 	
 </script>
