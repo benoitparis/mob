@@ -2,6 +2,7 @@ package paris.benoit.mob.cluster;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,6 +82,22 @@ public class MobClusterRegistry {
         for (MobTableConfiguration state: configuration.states) {
             TemporalTableUtils.createAndRegister(tEnv, state);
         }
+        
+        
+        System.out.println("---------------------------------------");
+        System.out.println(Arrays.asList(tEnv.listTables()));
+        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getCollations());
+        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getDistribution());
+        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getRowCount());
+        System.out.println(tEnv.getTable("choose_side_raw").get().getStatistic().getReferentialConstraints());
+        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getCollations());
+        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getDistribution());
+        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getRowCount());
+        System.out.println(tEnv.getTable("choose_side").get().getStatistic().getReferentialConstraints());
+        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getCollations());
+        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getDistribution());
+        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getRowCount());
+        System.out.println(tEnv.getTable("ack_side").get().getStatistic().getReferentialConstraints());
 
         for (MobTableConfiguration query: configuration.queries) {
             // TODO payload: Row
