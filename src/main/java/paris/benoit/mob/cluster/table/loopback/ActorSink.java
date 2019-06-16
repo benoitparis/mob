@@ -1,6 +1,5 @@
 package paris.benoit.mob.cluster.table.loopback;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
@@ -10,16 +9,21 @@ import org.slf4j.LoggerFactory;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.ActorRegistry;
+import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.message.ToClientMessage;
 
 @SuppressWarnings("serial")
 public class ActorSink extends RichSinkFunction<Row> {
     private static final Logger logger = LoggerFactory.getLogger(ActorSink.class);
     
-    private JsonRowSerializationSchema jrs = null;
     private Integer loopbackIndex = -1;
+    private JsonRowSerializationSchema jrs = null;
+    private MobTableConfiguration configuration;
     
-    public ActorSink(TypeInformation<Row> jsonTypeInfo) {
-        this.jrs = new JsonRowSerializationSchema(jsonTypeInfo);
+    public ActorSink(MobTableConfiguration configuration, JsonRowSerializationSchema jrs) {
+        super();
+        this.jrs = jrs;
+        this.configuration = configuration;
     }
 
     @Override
@@ -43,13 +47,14 @@ public class ActorSink extends RichSinkFunction<Row> {
         // arreter de faire par convention, le vrai schema est pas loin
         Row payload = (Row) row.getField(2);
         
-        // ICI: faire un petit coup de metadata pour donner le name de this? 
-        
         String payloadString = new String(jrs.serialize(payload));
-        final ActorRef<String> actor = (ActorRef<String>) ActorRegistry.tryGetActor(identity);
+        
+        ToClientMessage message = new ToClientMessage(configuration.name, payloadString);
+        
+        final ActorRef<ToClientMessage> actor = (ActorRef<ToClientMessage>) ActorRegistry.tryGetActor(identity);
         if (null != actor) {
             // call to send: not blocking or dropping the message, as his mailbox is unbounded
-            actor.send(payloadString);
+            actor.send(message);
         } else {
             logger.error("Actor named " + identity + " was not found on sink #" + loopbackIndex);
         }

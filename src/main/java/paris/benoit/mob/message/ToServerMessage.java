@@ -7,7 +7,7 @@ import org.json.JSONObject;
  * @author ben
  *
  */
-public class ClientMessage {
+public class ToServerMessage {
     
     // INFO on met quoi? des ACKs de choses? 
     // on va s'orienter vers QUERY, SUBSCRIBE, WRITE, avec potentiellement les mêmes conventions que graphql sur 
@@ -18,13 +18,13 @@ public class ClientMessage {
     public enum INTENT {WRITE, QUERY, SUBSCRIBE};
 
     public INTENT intent;
-    public String destination;
+    public String table;
     public JSONObject payload;
     
-    public ClientMessage(String fromClient) {
+    public ToServerMessage(String fromClient) {
         JSONObject json = new JSONObject(fromClient);
         intent = INTENT.valueOf(json.getString("intent"));
-        destination = json.getString("destination");
+        table = json.getString("table");
         payload = json.getJSONObject("payload");
     }
 

@@ -17,7 +17,8 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.MobClusterSender;
-import paris.benoit.mob.message.ClientMessage;
+import paris.benoit.mob.message.ToClientMessage;
+import paris.benoit.mob.message.ToServerMessage;
 
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
@@ -60,7 +61,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 WebDataMessage msg = (WebDataMessage) message;
                 logger.debug("Got a WS message: " + msg);
                 
-                ClientMessage cMsg = new ClientMessage(msg.getStringBody());
+                ToServerMessage cMsg = new ToServerMessage(msg.getStringBody());
                 
                 // !on seri/déséri deux fois
                 //   y revenir plus tard avec deux niveaux de jsonschema et un resolver perso qui inline
@@ -69,9 +70,9 @@ public class FrontActor extends BasicActor<Object, Void> {
                 switch (cMsg.intent) {
                 case WRITE: 
                     {
-                        MobClusterSender specificSender = clusterSender.get(cMsg.destination);
+                        MobClusterSender specificSender = clusterSender.get(cMsg.table);
                         if (null == specificSender) {
-                            logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.destination);
+                            logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
                             specificSender.send(getName(), cMsg.payload.toString());
                         }
@@ -92,6 +93,15 @@ public class FrontActor extends BasicActor<Object, Void> {
                 String msg = (String) message;
                 if (null != clientWSPort) {
                     clientWSPort.send(new WebDataMessage(self(), msg));
+                } else {
+                    logger.warn("Received a message from the cluster without having a WS Port to send it back to");
+                }
+            }
+            else if (message instanceof ToClientMessage) {
+                logger.info("No string!!");
+                ToClientMessage msg = (ToClientMessage) message;
+                if (null != clientWSPort) {
+                    clientWSPort.send(new WebDataMessage(self(), msg.toString()));
                 } else {
                     logger.warn("Received a message from the cluster without having a WS Port to send it back to");
                 }

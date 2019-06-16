@@ -16,7 +16,6 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSource;
 
 public class JsonTableSource implements StreamTableSource<Row> {
-    
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
 
     private TypeInformation<Row> jsonTypeInfo;
@@ -25,6 +24,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
     
     private ActorSource actorFunction;
     private JsonRowDeserializationSchema jrds;
+    private MobTableConfiguration configuration;
     
     public JsonTableSource(MobTableConfiguration configuration) {
         jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.ddl);
@@ -42,6 +42,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
 
         jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
         actorFunction = new ActorSource(configuration, jrds);
+        this.configuration = configuration;
     }
 
     @Override
@@ -61,7 +62,8 @@ public class JsonTableSource implements StreamTableSource<Row> {
 
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
-        return sEnv .addSource(actorFunction, getReturnType());
+        return sEnv .addSource(actorFunction, getReturnType())
+                    .name(configuration.name);
     }
     
     public JsonRowDeserializationSchema getJsonRowDeserializationSchema() {

@@ -69,7 +69,7 @@ public class MobClusterRegistry {
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {
-            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema.ddl));
+            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema));
         }
         
     }

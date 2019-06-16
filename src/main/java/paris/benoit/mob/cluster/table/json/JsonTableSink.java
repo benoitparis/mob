@@ -3,6 +3,7 @@ package paris.benoit.mob.cluster.table.json;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.IdPartitioner;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
+import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sinks.AppendStreamTableSink;
@@ -11,6 +12,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSink;
 
 public class JsonTableSink implements AppendStreamTableSink<Row> {
@@ -20,8 +22,12 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
     private String[] fieldNames;
     private TypeInformation<?>[] fieldTypes;
 
-    public JsonTableSink(String schema) {
-        jsonTypeInfo = JsonRowSchemaConverter.convert(schema);
+    private ActorSink actorFunction;
+    private JsonRowSerializationSchema jrs;
+    private MobTableConfiguration configuration;
+
+    public JsonTableSink(MobTableConfiguration configuration) {
+        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.ddl);
         fieldNames = new String[] { 
             "loopback_index", 
             "actor_identity",
@@ -33,6 +39,10 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
             jsonTypeInfo
         };
         logger.info("Created Sink with json schema: " + jsonTypeInfo.toString());
+        
+        jrs = new JsonRowSerializationSchema(jsonTypeInfo);
+        actorFunction = new ActorSink(configuration, jrs);
+        this.configuration = configuration;
     }
 
     @Override
@@ -58,7 +68,8 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
     @Override
     public void emitDataStream(DataStream<Row> ds) {
         ds  .partitionCustom(new IdPartitioner(), "loopback_index")
-            .addSink(new ActorSink(jsonTypeInfo));
+            .addSink(actorFunction)
+            .name(configuration.name);
     }
 
 }

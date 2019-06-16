@@ -49,8 +49,8 @@
 				Y : mouseY
 			};
 			var serverMsg = {
-				INTENT : 'WRITE',
-				destination : 'write_position',
+				intent : 'WRITE',
+				table : 'write_position',
 				payload : msg
 			};
 			console.log(serverMsg);
@@ -62,8 +62,8 @@
 	function queryGlobalPosition() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
-				INTENT : 'WRITE',
-				destination : 'query_global_position',
+				intent : 'WRITE',
+				table : 'query_global_position',
 				payload : {}
 			};
 			console.log(serverMsg);

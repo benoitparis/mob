@@ -2,8 +2,8 @@
 <head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.2/p5.js"></script>
 <script>
+
   // UI
-  
   var mouseY;
 	function setup() {
 		createCanvas(1200, 600);
@@ -22,7 +22,7 @@
   
   var leftY = 300;
   var rightY = 300;
-  var userSide;
+  var side;
   var ballX = 300;
   var ballY = 300;
   
@@ -33,10 +33,10 @@
     rect(leftDistance , leftY  - racketHeight/2, racketWidth, racketHeight);
     rect(rightDistance, rightY - racketHeight/2, racketWidth, racketHeight);
 		fill(0, 0, 255);
-    if (userSide) {
-      if (userSide === 'left') {
+    if (side) {
+      if (side === 'left') {
         rect(leftDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
-      } else {
+      } else if (side === 'right') {
         rect(rightDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
       }
     }
@@ -57,22 +57,28 @@
 		console.log(evt);
 		console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
-		leftY = msg.leftY;
-		rightY = msg.rightY;
+    if (msg.table === 'ack_side') {
+      document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
+      side = msg.payload.side;
+    } else {
+      console.log('received msg of unknown table:');
+      console.log(msg);
+    }
+    
+		//leftY = msg.leftY;
+		//rightY = msg.rightY;
 		draw();
 	};
   
   function sendToServer(table, msg) {
-    console.log('Trying to send ' + msg + ' to ' + table);
     // TODO queuing? because si ws était pas prête, on drop
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-				destination : table,
+				table : table,
 				payload : msg
 			};
 			ws.send(JSON.stringify(serverMsg));
-      console.log('Msg sent');
 		}
   }
   
@@ -95,6 +101,8 @@
     var msg = {
 				side : e
 		};
+    console.log('Trying to send to choose_side: ');
+    console.log(msg);
     sendToServer('choose_side', msg);
   }
   
@@ -105,26 +113,28 @@
     sendToServer('write_y', msg);
 	}
   // Ou bien plus subtil avec du onMouseMove?
-	setInterval(sendPosition, 4000);
+	setInterval(sendPosition, 40);
 
 	
 </script>
 </head>
 <body>
-	<button onclick="wsConnect()">Connect WS</button>
+	<button onclick="wsConnect()">1. Connect WS</button>
   <div>
     <div id="side-chooser">
-      <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');">
+      <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');" style="border:1px black;">
       <label for="side-left">Left</label>
       <input type="radio" id="side-right" name="side" value="right" onclick="chooseSide('right');">
       <label for="side-right">Right</label>
+      (2. Choose side)
     </div>
     
     <div id="side-chosen">
-      <input type="radio" id="side-left-chosen" name="side-chosen" value="left" disabled>
+      <input type="radio" id="side-left-chosen"  name="side-chosen" value="left" disabled>
       <label for="side-left">Left</label>
-      <input type="radio" id="side-left-chosen" name="side-chosen" value="right" disabled>
+      <input type="radio" id="side-right-chosen" name="side-chosen" value="right" disabled>
       <label for="side-right">Right</label>
+      (3. Server ack)
     </div>
     
   </div>
