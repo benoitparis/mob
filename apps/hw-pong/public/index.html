@@ -60,6 +60,9 @@
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
       side = msg.payload.side;
+    } else if (msg.table === 'racket_positions') {
+      leftY  = msg.payload.leftY;
+      rightY = msg.payload.rightY;
     } else {
       console.log('received msg of unknown table:');
       console.log(msg);

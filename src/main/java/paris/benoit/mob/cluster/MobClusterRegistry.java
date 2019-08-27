@@ -2,6 +2,7 @@ package paris.benoit.mob.cluster;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +47,9 @@ public class MobClusterRegistry {
         logger.info("Mob Cluster is up");
         logger.info("Front at: " + configuration.underTowLauncher.getUrl());
         logger.info("Web UI at: http://localhost:" + configuration.flinkWebUiPort);
+        logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
         logger.info("Plan is: \n" + sEnv.getExecutionPlan());
+        
     }
     
     private void setupFlink() {
