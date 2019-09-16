@@ -26,8 +26,8 @@
 		console.log(evt);
 		console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
-		mobX = msg.X;
-		mobY = msg.Y;
+		mobX = msg.payload.X;
+		mobY = msg.payload.Y;
 		draw();
 	};
 

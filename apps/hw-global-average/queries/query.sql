@@ -15,7 +15,7 @@ FROM (
     CAST('dsadsdsa' AS VARCHAR)           AS time_string4,
     CAST(o.proctime AS VARCHAR)           AS time_string5
   FROM                                                    
-    query_global_position AS o                                  
+    write_position AS o                                  
   JOIN LATERAL TABLE (global_position(o.proctime)) AS r            
     ON r.one_key = o.loopback_index                       
 )                                                         
