@@ -2,5 +2,5 @@ CREATE TEMPORAL TABLE user_side TIME ATTRIBUTE chosen_at PRIMARY KEY actor_ident
 SELECT
   actor_identity,
   proctime chosen_at,
-  side
+  payload.side
 FROM choose_side

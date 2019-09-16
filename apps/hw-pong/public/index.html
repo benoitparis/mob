@@ -118,6 +118,19 @@
   // Ou bien plus subtil avec du onMouseMove?
 	setInterval(sendPosition, 40);
 
+
+	function getGlobalPosition() { // temp subscription
+    var msgL = {
+      side : 'left'
+    };
+    var msgR = {
+      side : 'right'
+    };
+    sendToServer('query_global_position', msgL);
+    sendToServer('query_global_position', msgR);
+	}
+  // Ou bien plus subtil avec du onMouseMove?
+	getGlobalPosition(sendPosition, 41);
 	
 </script>
 </head>
