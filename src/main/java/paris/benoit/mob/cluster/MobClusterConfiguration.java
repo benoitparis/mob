@@ -60,14 +60,13 @@ public class MobClusterConfiguration {
                     .spliterator()
                 , false
              )
-            // FIXME alphabetical != ordering scheme 
             .sorted((a,b) -> a.getFileName().toString().compareTo(b.getFileName().toString()))
             .map(it -> {
                 try {
                     return 
                         new MobTableConfiguration(
                             new String(Files.readAllBytes(it)), 
-                            it.getFileName().toString().split("\\.")[0]
+                            it.getFileName().toString().split("\\.")[0].replaceAll("^\\d*_", "")
                         );
                 } catch (IOException e) {
                     // eww
