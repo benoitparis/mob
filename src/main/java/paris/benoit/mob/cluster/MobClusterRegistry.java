@@ -110,6 +110,9 @@ public class MobClusterRegistry {
                 logger.info("Stream END");
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                logger.error("Flink failed to start. Exiting program.");
+                System.exit(-1);
             }
         }).start();
     }
@@ -125,16 +128,18 @@ public class MobClusterRegistry {
     //    ActorSources, ou bien Sources, ou bien (Json?)TableSources
     public static class NameSenderPair {
         public String name;
+        public Integer loopbackIndex;
         public MobClusterSender sender;
-        public NameSenderPair(String name, MobClusterSender sender) {
+        public NameSenderPair(String name, Integer loopbackIndex, MobClusterSender sender) {
             this.name = name;
+            this.loopbackIndex = loopbackIndex;
             this.sender = sender;
         }
     }
-    private static CopyOnWriteArrayList<NameSenderPair> clusterSenderPairs = new CopyOnWriteArrayList<NameSenderPair>();
+    private static CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<NameSenderPair>();
     private static List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
-    public static void registerClusterSender(String tableName, MobClusterSender sender) throws InterruptedException {
-        clusterSenderPairs.add(new NameSenderPair(tableName, sender));
+    public static void registerClusterSender(String tableName, MobClusterSender sender, Integer loopbackIndex) throws InterruptedException {
+        clusterSenderRaw.add(new NameSenderPair(tableName, loopbackIndex, sender));
     }
 
     private static volatile boolean registrationDone = false;
@@ -142,12 +147,14 @@ public class MobClusterRegistry {
     private void waitSendersRegistration() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
-        while (clusterSenderPairs.size() != parallelism * configuration.inSchemas.size()) {
-            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderPairs.size());
+        while (clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) {
+            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderRaw.size());
             Thread.sleep(POLL_INTERVAL);
         };
         
-        Map<String, List<NameSenderPair>> byName = clusterSenderPairs.stream().collect(
+        Map<String, List<NameSenderPair>> byName = clusterSenderRaw.stream()
+            .sorted((a, b) -> a.loopbackIndex > b.loopbackIndex ? -1 : 1)
+            .collect(
             Collectors.groupingBy(
                 it -> it.name,
                 Collectors.toList()
