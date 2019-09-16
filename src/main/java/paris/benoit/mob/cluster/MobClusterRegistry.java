@@ -80,14 +80,24 @@ public class MobClusterRegistry {
     public void registerIntermediateTables() throws IOException {
 
         for (MobTableConfiguration state: configuration.states) {
-            TemporalTableUtils.createAndRegister(tEnv, state);
+            try {
+                TemporalTableUtils.createAndRegister(tEnv, state);
+            }
+            catch (Throwable t) {
+                throw new RuntimeException("" + state, t);
+            }
         }
         
         for (MobTableConfiguration query: configuration.queries) {
-            // TODO payload: Row
-            // PayloadedTableUtils.wrapPrettyErrorAndUpdate
-            // ou bien un mode où infer le out schema? yep, contrat d'interface good 
-            tEnv.sqlUpdate(query.ddl);
+            try {
+                // TODO payload: Row
+                // PayloadedTableUtils.wrapPrettyErrorAndUpdate
+                // ou bien un mode où infer le out schema? yep, contrat d'interface good 
+                tEnv.sqlUpdate(query.ddl);
+            }
+            catch (Throwable t) {
+                throw new RuntimeException("" + query, t);
+            }
         }
         
     }
