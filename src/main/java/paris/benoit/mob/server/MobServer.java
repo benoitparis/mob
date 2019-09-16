@@ -9,7 +9,6 @@ public class MobServer {
     
     public static void main(String[] args) throws Exception {
         setupCluster("hw-global-average");
-//        setupCluster("hw-decaying");
 //        setupCluster("hw-pong");
     }
 
