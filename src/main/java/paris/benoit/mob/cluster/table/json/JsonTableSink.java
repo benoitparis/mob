@@ -2,14 +2,12 @@ package paris.benoit.mob.cluster.table.json;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.IdPartitioner;
-import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.table.api.Types;
-import org.apache.flink.table.sinks.AppendStreamTableSink;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.types.Row;
@@ -44,7 +42,7 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
         };
         logger.info("Created Sink with json schema: " + jsonTypeInfo.toString());
         
-        jrs = new JsonRowSerializationSchema(jsonTypeInfo);
+        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
         actorFunction = new ActorSink(configuration, jrs);
         this.configuration = configuration;
     }
@@ -64,20 +62,6 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
         return fieldTypes;
     }
 
-//    @Override
-//    public TypeInformation<Row> getOutputType() {
-//        return Types.ROW(fieldNames, fieldTypes);
-//    }
-    
-//    @Override
-//    public TypeInformation<Tuple2<Boolean, Row>> getOutputType() {
-//        
-//        new TypeHint<Tuple2<Long, String>>(){}
-//        
-//        TypeInformation.TUPLE        
-//        return Types.ROW(fieldNames, fieldTypes);
-//    }
-    
     @Override
     public TypeInformation<Row> getRecordType() {
         return Types.ROW(fieldNames, fieldTypes);
@@ -91,10 +75,9 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         return ds  
-//              .partitionCustom(new IdPartitioner(), "loopback_index")
-                .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
-                .addSink(actorFunction)
-                .name(configuration.name);
+            .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
+            .addSink(actorFunction)
+            .name(configuration.name);
     }
 
 

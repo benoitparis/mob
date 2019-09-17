@@ -1,14 +1,11 @@
 package paris.benoit.mob.server;
 
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 
 public class MobServer {
-    private static final Logger logger = LoggerFactory.getLogger(MobServer.class);
     
     public static void main(String[] args) throws Exception {
         setupCluster("hw-global-average");

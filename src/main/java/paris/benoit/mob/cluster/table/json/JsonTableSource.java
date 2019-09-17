@@ -40,7 +40,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
         };
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
-        jrds = new JsonRowDeserializationSchema(jsonTypeInfo);
+        jrds = new JsonRowDeserializationSchema.Builder(jsonTypeInfo).build();
         actorFunction = new ActorSource(configuration, jrds);
         this.configuration = configuration;
     }
