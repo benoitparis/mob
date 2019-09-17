@@ -57,7 +57,7 @@
 			ws.send(JSON.stringify(serverMsg));
 		}
 	}
-	setInterval(sendPosition, 37);
+	setInterval(sendPosition, 80);
   
 	function queryGlobalPosition() {
 		if (ws && ws.readyState === WebSocket.OPEN) {
@@ -70,7 +70,7 @@
 			ws.send(JSON.stringify(serverMsg));
 		}
 	}
-	setInterval(queryGlobalPosition, 41);
+	setInterval(queryGlobalPosition, 83);
 
 
 	

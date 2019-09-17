@@ -13,7 +13,7 @@ import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.table.api.TableEnvironment;
+import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,15 @@ public class MobClusterRegistry {
         sEnv.setStreamTimeCharacteristic(configuration.processingtime);
         sEnv.setParallelism(configuration.streamParallelism);
         sEnv.setBufferTimeout(configuration.maxBufferTimeMillis);
-        tEnv = TableEnvironment.getTableEnvironment(sEnv);
+        
+        EnvironmentSettings bsSettings = 
+            EnvironmentSettings.newInstance()
+//                .useOldPlanner()
+                .useBlinkPlanner()
+                .inStreamingMode()
+            .build();
+        tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
+        
     }
 
     public void registerInputOutputTables() throws IOException {
@@ -98,6 +106,7 @@ public class MobClusterRegistry {
             catch (Throwable t) {
                 throw new RuntimeException("" + query, t);
             }
+            
         }
         
     }
@@ -110,13 +119,10 @@ public class MobClusterRegistry {
                 logger.info("Stream END");
             } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                logger.error("Flink failed to start. Exiting program.");
-                System.exit(-1);
             }
         }).start();
     }
-    
+
     // TODO static à enlever quand on pourra injecter dans l'actor
     //   @FiberSpringBootApplication
     //   Spring too big? Pas pour now

@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.TemporalTableFunction;
+import org.apache.flink.table.sources.LookupableTableSource;
 
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
@@ -19,6 +20,7 @@ public class TemporalTableUtils {
         
         if (m.matches()) {
             Table historyTable = tEnv.sqlQuery(m.group(4));
+//            LookupableTableSource
             TemporalTableFunction temporalTable = historyTable.createTemporalTableFunction(m.group(2), m.group(3));
             tEnv.registerFunction(m.group(1), temporalTable);
         } else {

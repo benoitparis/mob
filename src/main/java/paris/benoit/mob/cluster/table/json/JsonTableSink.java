@@ -2,11 +2,15 @@ package paris.benoit.mob.cluster.table.json;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.IdPartitioner;
+import org.apache.flink.api.java.functions.KeySelector;
+import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sinks.AppendStreamTableSink;
+import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
@@ -15,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSink;
 
-public class JsonTableSink implements AppendStreamTableSink<Row> {
+public class JsonTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
 
     private TypeInformation<Row> jsonTypeInfo;
@@ -46,8 +50,8 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
     }
 
     @Override
-    public TableSink<Row> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
-        throw new UnsupportedOperationException("This class is configured through its constructor");
+    public TableSink<Tuple2<Boolean, Row>> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
+        throw new UnsupportedOperationException("Moblib: This class is configured through its constructor");
     }
 
     @Override
@@ -60,16 +64,38 @@ public class JsonTableSink implements AppendStreamTableSink<Row> {
         return fieldTypes;
     }
 
+//    @Override
+//    public TypeInformation<Row> getOutputType() {
+//        return Types.ROW(fieldNames, fieldTypes);
+//    }
+    
+//    @Override
+//    public TypeInformation<Tuple2<Boolean, Row>> getOutputType() {
+//        
+//        new TypeHint<Tuple2<Long, String>>(){}
+//        
+//        TypeInformation.TUPLE        
+//        return Types.ROW(fieldNames, fieldTypes);
+//    }
+    
     @Override
-    public TypeInformation<Row> getOutputType() {
+    public TypeInformation<Row> getRecordType() {
         return Types.ROW(fieldNames, fieldTypes);
     }
 
     @Override
-    public void emitDataStream(DataStream<Row> ds) {
-        ds  .partitionCustom(new IdPartitioner(), "loopback_index")
-            .addSink(actorFunction)
-            .name(configuration.name);
+    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
+        consumeDataStream(ds);
     }
+    
+    @Override
+    public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
+        return ds  
+//              .partitionCustom(new IdPartitioner(), "loopback_index")
+                .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
+                .addSink(actorFunction)
+                .name(configuration.name);
+    }
+
 
 }
