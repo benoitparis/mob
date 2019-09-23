@@ -1,8 +1,20 @@
-CREATE TEMPORAL TABLE global_position TIME ATTRIBUTE start_time PRIMARY KEY one_key AS
+CREATE TEMPORAL TABLE global_position TIME ATTRIBUTE max_proctime PRIMARY KEY loopback_index AS
 SELECT                                                                              
-  loopback_index one_key,
-  HOP_START(proctime, INTERVAL '0.05' SECOND, INTERVAL '5.0' SECOND) start_time, 
+  loopback_index,
+  MAX(max_proctime) max_proctime,
   AVG(X) X,
   AVG(Y) Y
-FROM write_position                                                                
-GROUP BY loopback_index, HOP(proctime, INTERVAL '0.05' SECOND, INTERVAL '5.0' SECOND)
+FROM (
+  SELECT
+    loopback_index,
+    actor_identity,
+    MAX(proctime) max_proctime,
+    LAST_VALUE(X) X,
+    LAST_VALUE(Y) Y
+  FROM write_position
+  GROUP BY loopback_index, actor_identity
+) tbl
+GROUP BY loopback_index
+
+
+

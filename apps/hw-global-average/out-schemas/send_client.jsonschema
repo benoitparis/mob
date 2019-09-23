@@ -7,21 +7,6 @@
     },
     "Y": {
       "type": "number"
-    },
-    "time_string_1": {
-      "type": "string"
-    },
-    "time_string_2": {
-      "type": "string"
-    },
-    "time_string_3": {
-      "type": "string"
-    },
-    "time_string_4": {
-      "type": "string"
-    },
-    "time_string_5": {
-      "type": "string"
     }
   }
 }
