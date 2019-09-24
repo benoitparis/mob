@@ -18,6 +18,7 @@ public class MobServer {
     public final static int MAX_BUFFER_TIME_MILLIS = 1;
     public final static int FRONT_PORT = 8090;
     public final static int FLINK_WEB_UI_PORT = 8082;
+    public final static long LATENCY_TRACKING_INTERVAL = 100;
     
     public static void setupCluster(String appName) throws Exception {
 
@@ -27,7 +28,8 @@ public class MobServer {
             TimeCharacteristic.IngestionTime, 
             STREAM_PARALLELISM, 
             MAX_BUFFER_TIME_MILLIS,
-            FLINK_WEB_UI_PORT
+            FLINK_WEB_UI_PORT,
+            LATENCY_TRACKING_INTERVAL
         );
         MobClusterRegistry registry = new MobClusterRegistry(configuration);
         

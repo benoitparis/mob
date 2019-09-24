@@ -24,6 +24,7 @@ public class MobClusterConfiguration {
     protected int streamParallelism;
     protected int maxBufferTimeMillis;
     protected int flinkWebUiPort;
+    protected long latencyTrackingInterval;
     
     protected List<MobTableConfiguration> inSchemas;
     protected List<MobTableConfiguration> outSchemas;
@@ -32,13 +33,15 @@ public class MobClusterConfiguration {
 
     private String basePath;
 
-    public MobClusterConfiguration(String appName, UnderTowLauncher underTowLauncher, TimeCharacteristic processingtime, int streamParallelism, int maxBufferTimeMillis, int flinkWebUiPort) throws IOException {
+
+    public MobClusterConfiguration(String appName, UnderTowLauncher underTowLauncher, TimeCharacteristic processingtime, int streamParallelism, int maxBufferTimeMillis, int flinkWebUiPort, long latencyTrackingInterval) throws IOException {
         super();
         this.name = appName;
         this.processingtime = processingtime;
         this.streamParallelism = streamParallelism;
         this.maxBufferTimeMillis = maxBufferTimeMillis;
         this.flinkWebUiPort = flinkWebUiPort;
+        this.latencyTrackingInterval = latencyTrackingInterval;
         
         this.underTowLauncher = underTowLauncher;
         
