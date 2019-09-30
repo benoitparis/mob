@@ -3,9 +3,9 @@ SELECT
   qgp.loopback_index,                                         
   qgp.actor_identity,
   ROW(
-    leftY,
-    rightY
+    CAST(leftY AS DECIMAL(38, 18)),
+    CAST(rightY AS DECIMAL(38, 18))
   )
-FROM query_global_position qgp
-JOIN LATERAL TABLE (global_position(qgp.proctime)) AS gp 
-  ON qgp.payload.side = gp.side
+FROM query_global_position_flat AS qgp
+   , LATERAL TABLE (global_position(qgp.proctime)) AS gp 
+WHERE qgp.side = gp.side

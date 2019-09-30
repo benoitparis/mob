@@ -15,6 +15,7 @@ import org.apache.flink.configuration.MetricOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ public class MobClusterRegistry {
         configuration.underTowLauncher.launchUntertow(configuration.name);
         setupFlink();
         registerInputOutputTables();
-        registerIntermediateTables();
+        registerDataFlow();
         startFlink();
         
         configuration.underTowLauncher.waitUnderTowAvailable();
@@ -68,8 +69,8 @@ public class MobClusterRegistry {
         
         EnvironmentSettings bsSettings = 
             EnvironmentSettings.newInstance()
-//                .useOldPlanner()
-                .useBlinkPlanner()
+                .useOldPlanner()
+//                .useBlinkPlanner()
                 .inStreamingMode()
             .build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
@@ -88,7 +89,16 @@ public class MobClusterRegistry {
         
     }
 
-    public void registerIntermediateTables() throws IOException {
+    public void registerDataFlow() throws IOException {
+        
+        for (MobTableConfiguration table: configuration.table) {
+            try {
+                tEnv.registerTable(table.name, tEnv.sqlQuery(table.ddl));
+            }
+            catch (Throwable t) {
+                throw new RuntimeException("" + table, t);
+            }
+        }
 
         for (MobTableConfiguration state: configuration.states) {
             try {
