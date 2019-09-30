@@ -8,4 +8,4 @@ SELECT
   )
 FROM query_global_position_flat AS qgp
    , LATERAL TABLE (global_position(qgp.proctime)) AS gp 
-WHERE qgp.side = gp.side
+WHERE qgp.constant_dummy = gp.constant_dummy
