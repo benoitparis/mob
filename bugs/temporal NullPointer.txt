@@ -1,0 +1,4 @@
+Quand on crée une temporal table, il faut respecter la syntaxe à la lettre, sinon ça veut pas.
+
+là on avait une table register, et apparemment ça passe pas.
+

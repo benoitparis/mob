@@ -1,0 +1,17 @@
+Caused by: org.apache.flink.table.api.ValidationException: 
+  Only single column join key is supported. Found [] in [InnerJoin(where: (AND(__TEMPORAL_JOIN_CONDITION(proctime, side), =(payload.side, side))),
+  
+  
+-> une histoire d'écriture de la left key ici (query side)
+  lire les row, ça veut pas
+  
+-> solution: 
+  utiliser le old planner (bug report fait sur le blink)
+  flatten la chose dans une table avant
+    (ce qui me fait dire que les tables déclarées, mais en mode forward sont une barrière d'opt, et matérialisées et queryable en dynamique)
+    -> surveiller le plan, que ça hash correctement, que pas trop de transport? (sinon utiliser des primary keys locales?)
+
+et ça aime pas les constantes non plus
+  bug plus tot, en 20190212
+  si ça se trouve, mettre une constante dans la table ça passe
+  

@@ -1,0 +1,4 @@
+ANSI style -> old style
+pour le Temporal Table Functions
+cf autre projet
+cf JIRA https://issues.apache.org/jira/browse/FLINK-14173?filter=-2
