@@ -18,7 +18,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private static final Logger logger = LoggerFactory.getLogger(ActorSink.class);
     
     private Integer loopbackIndex = -1;
-    private JsonRowSerializationSchema jrs = null;
+    private JsonRowSerializationSchema jrs;
     private MobTableConfiguration configuration;
     
     public ActorSink(MobTableConfiguration configuration, JsonRowSerializationSchema jrs) {
@@ -47,7 +47,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
             String identity = (String) row.getField(1);
             Row payload = (Row) row.getField(2);
 
-            if (loopbackIndex != this.loopbackIndex) {
+            if (!loopbackIndex.equals(loopbackIndex)) {
                 logger.error("Assumption broken on lookbackIndex: " + loopbackIndex + " vs " + this.loopbackIndex);
             }
             
