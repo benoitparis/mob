@@ -1,0 +1,3 @@
+quand on fait du lateral de lateral, ça marche pas vraiment:
+
+on peut transformer le proctime en fixé avec du max et du tumble_end, mais on peut pas réutiliser le temps créé en proctime par la suite en fait

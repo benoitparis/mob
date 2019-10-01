@@ -36,7 +36,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     }
     
     @Override
-    public void invoke(Tuple2<Boolean, Row> value) throws Exception {
+    public void invoke(Tuple2<Boolean, Row> value, Context context) throws Exception {
         
         if (value.f0) { // Add
             
