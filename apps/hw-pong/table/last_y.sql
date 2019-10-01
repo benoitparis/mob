@@ -1,5 +1,4 @@
 SELECT
-  loopback_index,
   actor_identity,
   proctime,
   y
