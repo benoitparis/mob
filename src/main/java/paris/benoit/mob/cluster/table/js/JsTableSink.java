@@ -49,6 +49,10 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
         this.configuration = configuration;
     }
 
+    public String getName() {
+        return configuration.name;
+    }
+
     @Override
     public TableSink<Tuple2<Boolean, Row>> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
         throw new UnsupportedOperationException("Moblib: This class is configured through its constructor");

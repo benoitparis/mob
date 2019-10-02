@@ -21,7 +21,10 @@ import org.slf4j.LoggerFactory;
 
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
+import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
+
+import javax.script.ScriptException;
 
 public class MobClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterRegistry.class);
@@ -38,12 +41,13 @@ public class MobClusterRegistry {
 
         configuration.underTowLauncher.launchUntertow(configuration.name);
         setupFlink();
+        registerJsEngines();
         registerInputOutputTables();
         registerDataFlow();
         startFlink();
         
         configuration.underTowLauncher.waitUnderTowAvailable();
-        waitSendersRegistration();
+        waitRegistrationsReady();
         
         logger.info("Mob Cluster is up");
         logger.info("Front at: " + configuration.underTowLauncher.getUrl());
@@ -74,6 +78,18 @@ public class MobClusterRegistry {
             .build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
         
+    }
+
+
+
+    public void registerJsEngines() throws IOException, ScriptException {
+
+        for (MobTableConfiguration conf: configuration.js) {
+            JsTableEngine tableEngine = new JsTableEngine(conf);
+            tEnv.registerTableSink(tableEngine.getSink().getName(), tableEngine.getSink());
+            tEnv.registerTableSource(tableEngine.getSource().getName(), tableEngine.getSource());
+        }
+
     }
 
     public void registerInputOutputTables() throws IOException {
@@ -162,14 +178,18 @@ public class MobClusterRegistry {
 
     private static volatile boolean registrationDone = false;
     private static final int POLL_INTERVAL = 1000;
-    private void waitSendersRegistration() throws InterruptedException {
+    private void waitRegistrationsReady() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
-        while (clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) {
+        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size())) {
             logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderRaw.size());
             Thread.sleep(POLL_INTERVAL);
         };
-        
+        doClusterSendersMatching(parallelism);
+    }
+
+    private void doClusterSendersMatching(int parallelism) throws InterruptedException {
+
         Map<String, List<NameSenderPair>> byName = clusterSenderRaw.stream()
             .sorted((a, b) -> a.loopbackIndex > b.loopbackIndex ? -1 : 1)
             .collect(

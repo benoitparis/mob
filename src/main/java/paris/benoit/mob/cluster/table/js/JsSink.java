@@ -6,9 +6,12 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
+import java.util.function.Consumer;
+
 public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
     private MobTableConfiguration configuration;
+    private Consumer<Object> consumer;
 
     public JsSink(MobTableConfiguration configuration) {
         this.configuration = configuration;
@@ -17,11 +20,15 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        JsTable.registerSink(configuration.name,this);
+        consumer = JsTableEngine.registerSink(configuration.name);
     }
 
     @Override
     public void invoke(Tuple2<Boolean, Row> value, Context context) throws Exception {
+
+        if (value.f0) {
+            consumer.accept(value.f1);
+        }
 
     }
 }

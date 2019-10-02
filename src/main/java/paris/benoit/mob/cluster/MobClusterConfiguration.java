@@ -31,6 +31,7 @@ public class MobClusterConfiguration {
     protected List<MobTableConfiguration> states;
     protected List<MobTableConfiguration> queries;
     protected List<MobTableConfiguration> table;
+    protected List<MobTableConfiguration> js;
 
     private String basePath;
 
@@ -54,6 +55,7 @@ public class MobClusterConfiguration {
         this.states = buildConfigurationItem("states");
         this.queries = buildConfigurationItem("queries");
         this.table = buildConfigurationItem("table");
+        this.js = buildConfigurationItem("js");
         
     }
 

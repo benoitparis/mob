@@ -5,6 +5,7 @@ import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sources.StreamTableSource;
@@ -22,7 +23,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
     private String[] fieldNames;
     private TypeInformation<?>[] fieldTypes;
     
-    private ActorSource actorFunction;
+    private RichParallelSourceFunction actorFunction;
     private JsonRowDeserializationSchema jrds;
     private MobTableConfiguration configuration;
     

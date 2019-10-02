@@ -7,6 +7,7 @@ public class MobTableConfiguration implements Serializable {
 
     public String content;
     public String name;
+    // TODO changer ordre
     public MobTableConfiguration(String content, String name) {
         super();
         this.content = content;
