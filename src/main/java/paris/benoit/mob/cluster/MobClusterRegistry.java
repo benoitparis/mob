@@ -15,7 +15,6 @@ import org.apache.flink.configuration.MetricOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +92,7 @@ public class MobClusterRegistry {
         
         for (MobTableConfiguration table: configuration.table) {
             try {
-                tEnv.registerTable(table.name, tEnv.sqlQuery(table.ddl));
+                tEnv.registerTable(table.name, tEnv.sqlQuery(table.content));
             }
             catch (Throwable t) {
                 throw new RuntimeException("" + table, t);
@@ -114,7 +113,7 @@ public class MobClusterRegistry {
                 // TODO payload: Row
                 // PayloadedTableUtils.wrapPrettyErrorAndUpdate
                 // ou bien un mode où infer le out schema? yep, contrat d'interface good 
-                tEnv.sqlUpdate(query.ddl);
+                tEnv.sqlUpdate(query.content);
             }
             catch (Throwable t) {
                 throw new RuntimeException("" + query, t);

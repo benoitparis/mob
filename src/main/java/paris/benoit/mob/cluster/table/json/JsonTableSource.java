@@ -27,7 +27,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
     private MobTableConfiguration configuration;
     
     public JsonTableSource(MobTableConfiguration configuration) {
-        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.ddl);
+        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
         fieldNames = new String[] { 
             "loopback_index",
             "actor_identity",

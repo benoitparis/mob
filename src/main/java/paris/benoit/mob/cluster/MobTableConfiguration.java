@@ -5,15 +5,15 @@ import java.io.Serializable;
 public class MobTableConfiguration implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public String ddl;
+    public String content;
     public String name;
-    public MobTableConfiguration(String ddl, String name) {
+    public MobTableConfiguration(String content, String name) {
         super();
-        this.ddl = ddl;
+        this.content = content;
         this.name = name;
     }
     @Override
     public String toString() {
-        return "ConfigurationItem [ddl=" + ddl + ", name=" + name + "]";
+        return "ConfigurationItem [content=" + content + ", name=" + name + "]";
     }
 }

@@ -15,7 +15,7 @@ public class TemporalTableUtils {
     public static final Pattern TEMPORAL_TABLE_PATTERN = Pattern.compile(TEMPORAL_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
     public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
-        Matcher m = TEMPORAL_TABLE_PATTERN.matcher(state.ddl);
+        Matcher m = TEMPORAL_TABLE_PATTERN.matcher(state.content);
         
         if (m.matches()) {
             Table historyTable = tEnv.sqlQuery(m.group(4));

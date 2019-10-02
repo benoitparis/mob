@@ -7,6 +7,7 @@ import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
+import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
@@ -24,12 +25,12 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     private String[] fieldNames;
     private TypeInformation<?>[] fieldTypes;
 
-    private ActorSink actorFunction;
+    private RichSinkFunction actorFunction;
     private JsonRowSerializationSchema jrs;
     private MobTableConfiguration configuration;
 
     public JsonTableSink(MobTableConfiguration configuration) {
-        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.ddl);
+        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
         fieldNames = new String[] { 
             "loopback_index", 
             "actor_identity",
