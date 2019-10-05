@@ -1,4 +1,5 @@
 package paris.benoit.mob.cluster.table.js;
+import org.apache.flink.table.api.java.StreamTableEnvironment;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 import javax.script.Invocable;
@@ -28,26 +29,7 @@ public class JsTableEngine {
             "INVOKE '([^\\s]+)'[\\s]*";
     public static final Pattern JS_TABLE_PATTERN = Pattern.compile(JS_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-
-    private String sourceCode;
-    private String inSchema;
-    private String outSchema;
-    private String invokeFunction;
-
-    ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
-    Invocable inv = (Invocable) graaljsEngine;
-
-    private JsTableSink sink;
-    private JsTableSource source;
-
-    public JsTableSink getSink() {
-        return sink;
-    }
-    public JsTableSource getSource() {
-        return source;
-    }
-
-    public JsTableEngine(MobTableConfiguration conf) throws IOException, ScriptException {
+    public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration conf) throws IOException, ScriptException {
         Matcher m = JS_TABLE_PATTERN.matcher(conf.content);
 
         if (m.matches()) {
@@ -55,21 +37,27 @@ public class JsTableEngine {
                 throw new RuntimeException("Created table must match with file name");
             }
             // TODO gérer avec conf globale dans MobCLusterConfiguration
-            sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(2))));
-            inSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(3))));
-            outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(4))));
-            invokeFunction = m.group(5);
+            String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(2))));
+            String inSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(3))));
+            String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(4))));
+            String invokeFunction = m.group(5);
 
+            ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
             graaljsEngine.eval(sourceCode);
+            Invocable inv = (Invocable) graaljsEngine;
             registerEngine(conf.name, invokeFunction, inv);
 
-            sink = new JsTableSink(new MobTableConfiguration(conf.name + "_in", inSchema, null));
-            source = new JsTableSource(new MobTableConfiguration(conf.name + "_out", outSchema, null));
+            JsTableSink sink = new JsTableSink(new MobTableConfiguration(conf.name + "_in", inSchema, null));
+            JsTableSource source = new JsTableSource(new MobTableConfiguration(conf.name + "_out", outSchema, null));
+
+            tEnv.registerTableSink(sink.getName(), sink);
+            tEnv.registerTableSource(source.getName(), source);
 
         } else {
             throw new RuntimeException("Failed to create js table. They must conform to: " + JS_TABLE_PATTERN_REGEX + "\nSQL was: \n" + conf);
         }
     }
+
 
     static Map<String, BlockingQueue<Object>> queues = new HashMap<String, BlockingQueue<Object>>();
     static Map<String, Consumer<Object>> lambdas = new HashMap<String, Consumer<Object>>();

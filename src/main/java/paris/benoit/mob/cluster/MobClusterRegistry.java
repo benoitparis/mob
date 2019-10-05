@@ -41,7 +41,6 @@ public class MobClusterRegistry {
 
         configuration.underTowLauncher.launchUntertow(configuration.name);
         setupFlink();
-        registerJsEngines();
         registerInputOutputTables();
         registerDataFlow();
         startFlink();
@@ -81,17 +80,6 @@ public class MobClusterRegistry {
     }
 
 
-
-    public void registerJsEngines() throws IOException, ScriptException {
-
-        for (MobTableConfiguration conf: configuration.js) {
-            JsTableEngine tableEngine = new JsTableEngine(conf);
-            tEnv.registerTableSink(tableEngine.getSink().getName(), tableEngine.getSink());
-            tEnv.registerTableSource(tableEngine.getSource().getName(), tableEngine.getSource());
-        }
-
-    }
-
     public void registerInputOutputTables() throws IOException {
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
@@ -115,6 +103,9 @@ public class MobClusterRegistry {
                         break;
                     case STATE:
                         TemporalTableUtils.createAndRegister(tEnv, sqlConf);
+                        break;
+                    case JS_ENGINE:
+                        JsTableEngine.createAndRegister(tEnv, sqlConf);
                         break;
                     case UPDATE:
                         // TODO payload: Row

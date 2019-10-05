@@ -30,7 +30,6 @@ public class MobClusterConfiguration {
     protected List<MobTableConfiguration> inSchemas;
     protected List<MobTableConfiguration> outSchemas;
     protected List<MobTableConfiguration> sql;
-    protected List<MobTableConfiguration> js;
 
     private String basePath;
 
@@ -52,7 +51,6 @@ public class MobClusterConfiguration {
         this.inSchemas = buildConfigurationItem("in-schemas");
         this.outSchemas = buildConfigurationItem("out-schemas");
         this.sql = buildConfigurationItem("sql");
-        this.js = buildConfigurationItem("js");
         
     }
 
