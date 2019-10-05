@@ -63,8 +63,8 @@ public class JsTableEngine {
             graaljsEngine.eval(sourceCode);
             registerEngine(conf.name, invokeFunction, inv);
 
-            sink = new JsTableSink(new MobTableConfiguration(inSchema, conf.name + "_in"));
-            source = new JsTableSource(new MobTableConfiguration(outSchema, conf.name + "_out"));
+            sink = new JsTableSink(new MobTableConfiguration(conf.name + "_in", inSchema, null));
+            source = new JsTableSource(new MobTableConfiguration(conf.name + "_out", outSchema, null));
 
         } else {
             throw new RuntimeException("Failed to create js table. They must conform to: " + JS_TABLE_PATTERN_REGEX + "\nSQL was: \n" + conf);

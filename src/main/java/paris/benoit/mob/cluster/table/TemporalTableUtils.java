@@ -11,14 +11,20 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 
 public class TemporalTableUtils {
     
-    public static final String TEMPORAL_TABLE_PATTERN_REGEX = "CREATE TEMPORAL TABLE ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS(.*)";
+    public static final String TEMPORAL_TABLE_PATTERN_REGEX = "CREATE TEMPORAL TABLE ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS\\s+(TABLE_SCAN ([^ ]+))?(.*)";
     public static final Pattern TEMPORAL_TABLE_PATTERN = Pattern.compile(TEMPORAL_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
     public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = TEMPORAL_TABLE_PATTERN.matcher(state.content);
         
         if (m.matches()) {
-            Table historyTable = tEnv.sqlQuery(m.group(4));
+            String sqlCode = m.group(4);
+            Table historyTable;
+            if (null != m.group(4) && m.group(4).trim().startsWith("TABLE_SCAN")) {
+                historyTable = tEnv.scan(m.group(5).trim());
+            } else {
+                historyTable = tEnv.sqlQuery(m.group(6));
+            }
             TemporalTableFunction temporalTable = historyTable.createTemporalTableFunction(m.group(2), m.group(3));
             tEnv.registerFunction(m.group(1), temporalTable);
         } else {
@@ -29,5 +35,5 @@ public class TemporalTableUtils {
             throw new RuntimeException("Created table must match with file name");
         }
     }
-    
+
 }

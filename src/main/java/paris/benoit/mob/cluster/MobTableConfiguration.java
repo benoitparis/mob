@@ -3,18 +3,31 @@ package paris.benoit.mob.cluster;
 import java.io.Serializable;
 
 public class MobTableConfiguration implements Serializable {
+    public enum CONF_TYPE {
+        TABLE, STATE, UPDATE,
+        // TODO: use?
+        JS_ENGINE, IN_JSONSCHEMA, OUT_JSONSCHEMA
+    }
+
     private static final long serialVersionUID = 1L;
 
-    public String content;
     public String name;
-    // TODO changer ordre
-    public MobTableConfiguration(String content, String name) {
+    public String content;
+    public CONF_TYPE confType;
+
+    public MobTableConfiguration(String name, String content, CONF_TYPE confType) {
         super();
         this.content = content;
         this.name = name;
+        this.confType = confType;
     }
+
     @Override
     public String toString() {
-        return "ConfigurationItem [content=" + content + ", name=" + name + "]";
+        return "MobTableConfiguration{" +
+                "name='" + name + '\'' +
+                ", content='" + content + '\'' +
+                ", confType=" + confType +
+                '}';
     }
 }

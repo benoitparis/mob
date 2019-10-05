@@ -105,38 +105,33 @@ public class MobClusterRegistry {
     }
 
     public void registerDataFlow() throws IOException {
-        
-        for (MobTableConfiguration table: configuration.table) {
+
+
+        for (MobTableConfiguration sqlConf: configuration.sql) {
             try {
-                tEnv.registerTable(table.name, tEnv.sqlQuery(table.content));
+                switch (sqlConf.confType) {
+                    case TABLE:
+                        tEnv.registerTable(sqlConf.name, tEnv.sqlQuery(sqlConf.content));
+                        break;
+                    case STATE:
+                        TemporalTableUtils.createAndRegister(tEnv, sqlConf);
+                        break;
+                    case UPDATE:
+                        // TODO payload: Row
+                        // PayloadedTableUtils.wrapPrettyErrorAndUpdate
+                        // ou bien un mode où infer le out schema? yep, contrat d'interface good
+                        tEnv.sqlUpdate(sqlConf.content);
+                        break;
+                        default:
+                            throw new RuntimeException("No SQL type was specified");
+                }
+
             }
             catch (Throwable t) {
-                throw new RuntimeException("" + table, t);
+                throw new RuntimeException("" + sqlConf, t);
             }
         }
 
-        for (MobTableConfiguration state: configuration.states) {
-            try {
-                TemporalTableUtils.createAndRegister(tEnv, state);
-            }
-            catch (Throwable t) {
-                throw new RuntimeException("" + state, t);
-            }
-        }
-        
-        for (MobTableConfiguration query: configuration.queries) {
-            try {
-                // TODO payload: Row
-                // PayloadedTableUtils.wrapPrettyErrorAndUpdate
-                // ou bien un mode où infer le out schema? yep, contrat d'interface good 
-                tEnv.sqlUpdate(query.content);
-            }
-            catch (Throwable t) {
-                throw new RuntimeException("" + query, t);
-            }
-            
-        }
-        
     }
     
     private void startFlink() {
@@ -181,8 +176,8 @@ public class MobClusterRegistry {
     private void waitRegistrationsReady() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
-        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size())) {
-            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderRaw.size());
+        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) && !JsTableEngine.isReady()) {
+            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderRaw.size() + " and JsTableEngines");
             Thread.sleep(POLL_INTERVAL);
         };
         doClusterSendersMatching(parallelism);

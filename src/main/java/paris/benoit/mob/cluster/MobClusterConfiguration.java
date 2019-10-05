@@ -3,6 +3,7 @@ package paris.benoit.mob.cluster;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -28,9 +29,7 @@ public class MobClusterConfiguration {
     
     protected List<MobTableConfiguration> inSchemas;
     protected List<MobTableConfiguration> outSchemas;
-    protected List<MobTableConfiguration> states;
-    protected List<MobTableConfiguration> queries;
-    protected List<MobTableConfiguration> table;
+    protected List<MobTableConfiguration> sql;
     protected List<MobTableConfiguration> js;
 
     private String basePath;
@@ -52,9 +51,7 @@ public class MobClusterConfiguration {
         
         this.inSchemas = buildConfigurationItem("in-schemas");
         this.outSchemas = buildConfigurationItem("out-schemas");
-        this.states = buildConfigurationItem("states");
-        this.queries = buildConfigurationItem("queries");
-        this.table = buildConfigurationItem("table");
+        this.sql = buildConfigurationItem("sql");
         this.js = buildConfigurationItem("js");
         
     }
@@ -67,13 +64,15 @@ public class MobClusterConfiguration {
                     .spliterator()
                 , false
              )
-            .sorted((a,b) -> a.getFileName().toString().compareTo(b.getFileName().toString()))
+            .sorted(Comparator.comparing(a -> a.getFileName().toString()))
             .map(it -> {
                 try {
-                    return 
+                    String[] fileParts = it.getFileName().toString().split("\\.");
+                    return
                         new MobTableConfiguration(
-                            new String(Files.readAllBytes(it)), 
-                            it.getFileName().toString().split("\\.")[0].replaceAll("^\\d*_", "")
+                            fileParts[0].replaceAll("^\\d*_", ""),
+                            new String(Files.readAllBytes(it)),
+                            getConfType(fileParts[1])
                         );
                 } catch (IOException e) {
                     // eww
@@ -81,6 +80,14 @@ public class MobClusterConfiguration {
                 }
             })
             .collect(Collectors.toList());
+    }
+
+    private MobTableConfiguration.CONF_TYPE getConfType(String filePart) {
+        try {
+            return MobTableConfiguration.CONF_TYPE.valueOf(filePart.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
 }
