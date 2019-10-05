@@ -1,5 +1,7 @@
 package paris.benoit.mob.cluster.table.js;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 import javax.script.Invocable;
@@ -13,12 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class JsTableEngine {
+    private static final Logger logger = LoggerFactory.getLogger(JsTableEngine.class);
 
     public static final String JS_TABLE_PATTERN_REGEX = "" +
             "CREATE TABLE ([^\\s]+)[\\s]+" +
@@ -47,8 +49,8 @@ public class JsTableEngine {
             Invocable inv = (Invocable) graaljsEngine;
             registerEngine(conf.name, invokeFunction, inv);
 
-            JsTableSink sink = new JsTableSink(new MobTableConfiguration(conf.name + "_in", inSchema, null));
-            JsTableSource source = new JsTableSource(new MobTableConfiguration(conf.name + "_out", outSchema, null));
+            JsTableSink sink = new JsTableSink(conf, new MobTableConfiguration(conf.name + "_in", inSchema, null));
+            JsTableSource source = new JsTableSource(conf, new MobTableConfiguration(conf.name + "_out", outSchema, null));
 
             tEnv.registerTableSink(sink.getName(), sink);
             tEnv.registerTableSource(source.getName(), source);
@@ -58,40 +60,56 @@ public class JsTableEngine {
         }
     }
 
+    static Map<String, BlockingQueue<BlockingQueue<Object>>> queues = new HashMap<>();
+    static Map<String, BlockingQueue<Consumer<Object>>> lambdas = new HashMap<>();
 
-    static Map<String, BlockingQueue<Object>> queues = new HashMap<String, BlockingQueue<Object>>();
-    static Map<String, Consumer<Object>> lambdas = new HashMap<String, Consumer<Object>>();
-
-    static int registrationTarget = 0;
-    static volatile int counter;
+    static volatile int registrationTarget = 0;
+    static volatile int counter = 0;
 
     static void registerEngine(String name, String invokeFunction, Invocable inv) {
+
+        BlockingQueue<BlockingQueue<Object>> exchangeQueue = new ArrayBlockingQueue(1);
+        BlockingQueue<Consumer<Object>> exchangeLambda = new ArrayBlockingQueue(1);
+        queues.put(name, exchangeQueue);
+        lambdas.put(name, exchangeLambda);
 
         BlockingQueue<Object> queue = new ArrayBlockingQueue(100);
         Consumer<Object> lambda = it -> {
             try {
-                queue.add(inv.invokeFunction("inJs", it));
+                queue.add(inv.invokeFunction(invokeFunction, it));
             } catch (ScriptException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
                 e.printStackTrace();
             }
         };
+        exchangeQueue.add(queue);
+        exchangeLambda.add(lambda);
+
         registrationTarget = registrationTarget + 2;
 
     }
 
-    static Consumer<Object> registerSink(String name) {
+    static Consumer<Object> registerSink(String name) throws InterruptedException {
         counter++;
-        return lambdas.get(name);
+        while (null == lambdas.get(name)){
+            logger.warn("Waiting on registerSink, this shouldn't happen");
+            Thread.sleep(100);
+        }
+        return lambdas.get(name).take();
     }
 
-    static BlockingQueue<Object> registerSource(String name) {
+    static BlockingQueue<Object> registerSource(String name) throws InterruptedException {
         counter++;
-        return queues.get(name);
+        while (null == queues.get(name)){
+            logger.warn("Waiting on registerSource, this shouldn't happen");
+            Thread.sleep(100);
+        }
+        return queues.get(name).take();
     }
 
     public static boolean isReady() {
+        logger.info("JsEngine Polled, registrationTarget = " + registrationTarget + ", counter = " + counter);
         return registrationTarget == counter;
     }
 

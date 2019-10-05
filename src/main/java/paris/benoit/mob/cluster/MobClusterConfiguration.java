@@ -62,7 +62,14 @@ public class MobClusterConfiguration {
                     .spliterator()
                 , false
              )
-            .sorted(Comparator.comparing(a -> a.getFileName().toString()))
+            .sorted(Comparator.comparing(a -> {
+                try {
+                    return Integer.valueOf(a.getFileName().toString().split("_")[0]);
+                } catch (NumberFormatException e) {
+                    return -1; // Arbitrary order
+                }
+            }
+            ))
             .map(it -> {
                 try {
                     String[] fileParts = it.getFileName().toString().split("\\.");

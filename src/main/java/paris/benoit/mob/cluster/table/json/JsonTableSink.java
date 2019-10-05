@@ -75,9 +75,10 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
-        return ds  
+        return ds
             .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
             .addSink(actorFunction)
+            .setParallelism(ds.getExecutionConfig().getMaxParallelism())
             .name(configuration.name);
     }
 

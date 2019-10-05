@@ -21,11 +21,11 @@ public class JsTableSource implements StreamTableSource<Row> {
     private TypeInformation<Row> jsonTypeInfo;
     private String[] fieldNames;
     private TypeInformation<?>[] fieldTypes;
-    private MobTableConfiguration configuration;
 
     private RichParallelSourceFunction actorFunction;
+    private MobTableConfiguration configuration;
 
-    public JsTableSource(MobTableConfiguration configuration) {
+    public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
 
         jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
         fieldNames = new String[] {
@@ -37,7 +37,7 @@ public class JsTableSource implements StreamTableSource<Row> {
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
 //        jrds = new JsonRowDeserializationSchema.Builder(jsonTypeInfo).build();
-        actorFunction = new JsSource(configuration);
+        actorFunction = new JsSource(parentConfiguration);
         this.configuration = configuration;
 
     }

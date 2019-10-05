@@ -66,7 +66,9 @@ public class MobClusterRegistry {
         sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         
         sEnv.setStreamTimeCharacteristic(configuration.processingtime);
+        // TODO sort out setParallelism vs setMaxParallelism
         sEnv.setParallelism(configuration.streamParallelism);
+        sEnv.setMaxParallelism(configuration.streamParallelism); // "It also defines the number of key groups used for partitioned state. "
         sEnv.setBufferTimeout(configuration.maxBufferTimeMillis);
         
         EnvironmentSettings bsSettings = 
@@ -97,6 +99,9 @@ public class MobClusterRegistry {
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
             try {
+                if (null == sqlConf.confType) {
+                    throw new RuntimeException("Configuration type required for " + sqlConf);
+                }
                 switch (sqlConf.confType) {
                     case TABLE:
                         tEnv.registerTable(sqlConf.name, tEnv.sqlQuery(sqlConf.content));
@@ -137,15 +142,6 @@ public class MobClusterRegistry {
         }).start();
     }
 
-    // TODO static à enlever quand on pourra injecter dans l'actor
-    //   @FiberSpringBootApplication
-    //   Spring too big? Pas pour now
-    // TODO déplacer dans un ActorSources.register quand on aura du multi-input? 
-    //          (et ça sera register d'un channel,nom)
-    //   avec du ActorSources.getClusterSender as well (on garde clsutersender en tant que tel)
-    //     et on enlève le nom registry de cette classe
-    //     et avec du ActorSources.waitSourcesRegistered (qui obersera d'abord combien de types de sources il doit recevoir)
-    //    ActorSources, ou bien Sources, ou bien (Json?)TableSources
     public static class NameSenderPair {
         public String name;
         public Integer loopbackIndex;

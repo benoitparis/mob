@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class MobTableConfiguration implements Serializable {
     public enum CONF_TYPE {
-        TABLE, STATE, UPDATE,
+        TABLE, STATE, UPDATE, JS_ENGINE,
         // TODO: use?
-        JS_ENGINE, IN_JSONSCHEMA, OUT_JSONSCHEMA
+        IN_JSONSCHEMA, OUT_JSONSCHEMA
     }
 
     private static final long serialVersionUID = 1L;

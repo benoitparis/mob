@@ -30,11 +30,11 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
     private RichSinkFunction actorFunction;
     private MobTableConfiguration configuration;
 
-    public JsTableSink(MobTableConfiguration configuration) {
+    public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
 
         jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
         fieldNames = new String[] {
-                "watermark",
+                "insert_time",
                 "payload"
         };
         fieldTypes = new TypeInformation[] {
@@ -45,7 +45,7 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
 
 //        nécessaire?
 //        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
-        actorFunction = new JsSink(configuration);
+        actorFunction = new JsSink(parentConfiguration);
         this.configuration = configuration;
     }
 

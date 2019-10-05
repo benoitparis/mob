@@ -1,0 +1,8 @@
+No operators defined in streaming topology. Cannot execute.
+
+Se produit quand on ne tire pas sur une toutes les table source. (et aussi mettre des choses dans tous les table sinks?)
+
+
+!! peut se produire facilement si on ne fait qu'alimenter un engine js sans tirer sur sa sortie, qui est un table source
+
+
