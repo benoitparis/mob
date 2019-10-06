@@ -37,7 +37,7 @@ public class JsTableSource implements StreamTableSource<Row> {
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
 //        jrds = new JsonRowDeserializationSchema.Builder(jsonTypeInfo).build();
-        actorFunction = new JsSource(parentConfiguration);
+        actorFunction = new JsSource(parentConfiguration, configuration);
         this.configuration = configuration;
 
     }
@@ -64,8 +64,8 @@ public class JsTableSource implements StreamTableSource<Row> {
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-                .setParallelism(1)
                 .addSource(actorFunction, getReturnType())
+                .setParallelism(1)
                 .name(configuration.name);
     }
 

@@ -163,8 +163,8 @@ public class MobClusterRegistry {
     private void waitRegistrationsReady() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
-        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) && !JsTableEngine.isReady()) {
-            logger.info("Waiting to receive all senders: " + parallelism + " != " + clusterSenderRaw.size() + " and JsTableEngines");
+        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) || !JsTableEngine.isReady()) {
+            logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * configuration.inSchemas.size() + " and JsTableEngines");
             Thread.sleep(POLL_INTERVAL);
         };
         doClusterSendersMatching(parallelism);

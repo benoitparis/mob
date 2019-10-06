@@ -60,23 +60,23 @@ public class JsTableEngine {
         }
     }
 
-    static Map<String, BlockingQueue<BlockingQueue<Object>>> queues = new HashMap<>();
-    static Map<String, BlockingQueue<Consumer<Object>>> lambdas = new HashMap<>();
+    static Map<String, BlockingQueue<BlockingQueue<Map>>> queues = new HashMap<>();
+    static Map<String, BlockingQueue<Consumer<Map>>> lambdas = new HashMap<>();
 
+    // TODO remove, useful??
     static volatile int registrationTarget = 0;
     static volatile int counter = 0;
 
     static void registerEngine(String name, String invokeFunction, Invocable inv) {
-
-        BlockingQueue<BlockingQueue<Object>> exchangeQueue = new ArrayBlockingQueue(1);
-        BlockingQueue<Consumer<Object>> exchangeLambda = new ArrayBlockingQueue(1);
+        BlockingQueue<BlockingQueue<Map>> exchangeQueue = new ArrayBlockingQueue(1);
+        BlockingQueue<Consumer<Map>> exchangeLambda = new ArrayBlockingQueue(1);
         queues.put(name, exchangeQueue);
         lambdas.put(name, exchangeLambda);
 
-        BlockingQueue<Object> queue = new ArrayBlockingQueue(100);
-        Consumer<Object> lambda = it -> {
+        BlockingQueue<Map> queue = new ArrayBlockingQueue(100);
+        Consumer<Map> lambda = it -> {
             try {
-                queue.add(inv.invokeFunction(invokeFunction, it));
+                queue.add((Map) inv.invokeFunction(invokeFunction, it));
             } catch (ScriptException e) {
                 e.printStackTrace();
             } catch (NoSuchMethodException e) {
@@ -90,7 +90,7 @@ public class JsTableEngine {
 
     }
 
-    static Consumer<Object> registerSink(String name) throws InterruptedException {
+    static Consumer<Map> registerSink(String name) throws InterruptedException {
         counter++;
         while (null == lambdas.get(name)){
             logger.warn("Waiting on registerSink, this shouldn't happen");
@@ -99,7 +99,7 @@ public class JsTableEngine {
         return lambdas.get(name).take();
     }
 
-    static BlockingQueue<Object> registerSource(String name) throws InterruptedException {
+    static BlockingQueue<Map> registerSource(String name) throws InterruptedException {
         counter++;
         while (null == queues.get(name)){
             logger.warn("Waiting on registerSource, this shouldn't happen");

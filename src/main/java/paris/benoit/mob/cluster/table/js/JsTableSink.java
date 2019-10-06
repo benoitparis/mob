@@ -45,7 +45,7 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
 
 //        nécessaire?
 //        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
-        actorFunction = new JsSink(parentConfiguration);
+        actorFunction = new JsSink(parentConfiguration, configuration);
         this.configuration = configuration;
     }
 
