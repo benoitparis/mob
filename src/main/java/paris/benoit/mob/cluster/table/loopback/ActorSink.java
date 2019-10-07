@@ -37,7 +37,8 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     
     @Override
     public void invoke(Tuple2<Boolean, Row> value, Context context) throws Exception {
-        
+
+        //noinspection StatementWithEmptyBody
         if (value.f0) { // Add
             
             Row row = value.f1;
@@ -47,7 +48,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
             String identity = (String) row.getField(1);
             Row payload = (Row) row.getField(2);
 
-            if (!loopbackIndex.equals(loopbackIndex)) {
+            if (!loopbackIndex.equals(this.loopbackIndex)) {
                 logger.error("Assumption broken on lookbackIndex: " + loopbackIndex + " vs " + this.loopbackIndex);
             }
             

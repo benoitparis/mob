@@ -1,14 +1,5 @@
 package paris.benoit.mob.cluster;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.MetricOptions;
@@ -18,13 +9,15 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
 
-import javax.script.ScriptException;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 
 public class MobClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterRegistry.class);
@@ -82,7 +75,7 @@ public class MobClusterRegistry {
     }
 
 
-    public void registerInputOutputTables() throws IOException {
+    private void registerInputOutputTables() {
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             AppendStreamTableUtils.createAndRegisterTableSource(tEnv, inSchema);
@@ -94,7 +87,7 @@ public class MobClusterRegistry {
         
     }
 
-    public void registerDataFlow() throws IOException {
+    private void registerDataFlow() {
 
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
@@ -143,18 +136,21 @@ public class MobClusterRegistry {
     }
 
     public static class NameSenderPair {
-        public String name;
-        public Integer loopbackIndex;
-        public MobClusterSender sender;
-        public NameSenderPair(String name, Integer loopbackIndex, MobClusterSender sender) {
+        String name;
+        Integer loopbackIndex;
+        MobClusterSender sender;
+        NameSenderPair(String name, Integer loopbackIndex, MobClusterSender sender) {
             this.name = name;
             this.loopbackIndex = loopbackIndex;
             this.sender = sender;
         }
+        public Integer getLoopbackIndex() {
+            return loopbackIndex;
+        }
     }
-    private static CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<NameSenderPair>();
+    private static CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
     private static List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
-    public static void registerClusterSender(String tableName, MobClusterSender sender, Integer loopbackIndex) throws InterruptedException {
+    public static void registerClusterSender(String tableName, MobClusterSender sender, Integer loopbackIndex) {
         clusterSenderRaw.add(new NameSenderPair(tableName, loopbackIndex, sender));
     }
 
@@ -166,14 +162,14 @@ public class MobClusterRegistry {
         while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) || !JsTableEngine.isReady()) {
             logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * configuration.inSchemas.size() + " and JsTableEngines");
             Thread.sleep(POLL_INTERVAL);
-        };
+        }
         doClusterSendersMatching(parallelism);
     }
 
-    private void doClusterSendersMatching(int parallelism) throws InterruptedException {
+    private void doClusterSendersMatching(int parallelism) {
 
         Map<String, List<NameSenderPair>> byName = clusterSenderRaw.stream()
-            .sorted((a, b) -> a.loopbackIndex > b.loopbackIndex ? -1 : 1)
+            .sorted(Comparator.comparing(NameSenderPair::getLoopbackIndex))
             .collect(
             Collectors.groupingBy(
                 it -> it.name,
@@ -184,7 +180,7 @@ public class MobClusterRegistry {
         logger.info("Cluster senders names: " + byName.keySet());
         
         for (int i = 0; i < parallelism; i++) {
-            HashMap<String, MobClusterSender> localMap = new HashMap<String, MobClusterSender>();
+            HashMap<String, MobClusterSender> localMap = new HashMap<>();
             for(MobTableConfiguration ci: configuration.inSchemas) {
                 localMap.put(ci.name, byName.get(ci.name).get(i).sender);
             }
@@ -196,10 +192,10 @@ public class MobClusterRegistry {
     }
 
     public static Map<String, MobClusterSender> getClusterSender(String random) throws InterruptedException {
-        while (false == registrationDone) {
+        while (!registrationDone) {
             logger.info("Waiting on registration");
             Thread.sleep(POLL_INTERVAL);
-        };
+        }
         
         return clusterSenders.get(Math.abs(random.hashCode()) % clusterSenders.size());
     }

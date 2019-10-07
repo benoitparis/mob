@@ -1,24 +1,22 @@
 package paris.benoit.mob.cluster.table;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.TemporalTableFunction;
-
 import paris.benoit.mob.cluster.MobTableConfiguration;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TemporalTableUtils {
     
-    public static final String TEMPORAL_TABLE_PATTERN_REGEX = "CREATE TEMPORAL TABLE ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS\\s+(TABLE_SCAN ([^ ]+))?(.*)";
-    public static final Pattern TEMPORAL_TABLE_PATTERN = Pattern.compile(TEMPORAL_TABLE_PATTERN_REGEX, Pattern.DOTALL);
+    private static final String TEMPORAL_TABLE_PATTERN_REGEX = "CREATE TEMPORAL TABLE ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS\\s+(TABLE_SCAN ([^ ]+))?(.*)";
+    private static final Pattern TEMPORAL_TABLE_PATTERN = Pattern.compile(TEMPORAL_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
     public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = TEMPORAL_TABLE_PATTERN.matcher(state.content);
         
         if (m.matches()) {
-            String sqlCode = m.group(4);
             Table historyTable;
             if (null != m.group(4) && m.group(4).trim().startsWith("TABLE_SCAN")) {
                 historyTable = tEnv.scan(m.group(5).trim());

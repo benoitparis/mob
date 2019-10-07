@@ -9,11 +9,9 @@ public class MobTableConfiguration implements Serializable {
         IN_JSONSCHEMA, OUT_JSONSCHEMA
     }
 
-    private static final long serialVersionUID = 1L;
-
     public String name;
     public String content;
-    public CONF_TYPE confType;
+    CONF_TYPE confType;
 
     public MobTableConfiguration(String name, String content, CONF_TYPE confType) {
         super();

@@ -1,15 +1,14 @@
 package paris.benoit.mob.cluster;
 
-import java.io.IOException;
-
-import org.apache.flink.formats.json.JsonRowDeserializationSchema;
-import org.apache.flink.types.Row;
-
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.Channel;
 import co.paralleluniverse.strands.channels.Channels;
-import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
+import co.paralleluniverse.strands.channels.ThreadReceivePort;
+import org.apache.flink.formats.json.JsonRowDeserializationSchema;
+import org.apache.flink.types.Row;
+
+import java.io.IOException;
 
 // TODO fusionner avec ActorSource, channel, receivePort, jrds largment partagé, et la construction de row à deux endroits
 //   et en plus l'acteur pourra faure un Sources.getChannels, ce qui sémantiquement est plus propre, et clyclomatiquement ne lie plus .cluster à actors
@@ -18,13 +17,13 @@ public class MobClusterSender {
     
     private JsonRowDeserializationSchema jrds;
     private Channel<Row> channel;
-    ThreadReceivePort<Row> receiveport;
+    private ThreadReceivePort<Row> receiveport;
     
     public MobClusterSender(JsonRowDeserializationSchema jrds) {
         super();
         this.jrds = jrds;
         this.channel = Channels.newChannel(100_000, OverflowPolicy.BACKOFF, false, false);
-        this.receiveport = new ThreadReceivePort<Row>(channel);
+        this.receiveport = new ThreadReceivePort<>(channel);
     }
     
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
