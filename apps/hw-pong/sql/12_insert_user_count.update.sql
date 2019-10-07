@@ -1,3 +1,4 @@
+/* implicit subscription style? */
 INSERT INTO user_count
 SELECT
   loopback_index,
@@ -14,5 +15,6 @@ JOIN (
     COUNT(DISTINCT CASE WHEN payload.side = 'right' THEN actor_identity ELSE 'none' END) - 1 AS countRight,
     COUNT(DISTINCT actor_identity) AS countGlobal
   FROM choose_side
-) ON 1 = 1
+) ON true
 /* faudra mettre du last_value dans tout ça */
+/* et du WITH DELAY p */
