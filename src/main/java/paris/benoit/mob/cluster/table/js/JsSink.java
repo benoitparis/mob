@@ -34,6 +34,7 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
     String invokeFunction;
     String code;
+    Invocable inv;
 
     JsSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
         this.parentConfiguration = parentConfiguration;
@@ -54,17 +55,7 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
         ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
         graaljsEngine.eval(code);
-        Invocable inv = (Invocable) graaljsEngine;
-
-        consumer = it -> {
-            try {
-                Map out = (Map) inv.invokeFunction(invokeFunction, it);
-                HashMap copy = new HashMap<>(out); // prevent multithreaded access
-                queue.add(copy);
-            } catch (NoSuchMethodException | ScriptException e) {
-                throw new RuntimeException("Js invocation failed", e);
-            }
-        };
+        inv = (Invocable) graaljsEngine;
 
     }
 
@@ -76,7 +67,15 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
             // par convention
             //Integer insertTime = (Integer) row.getField(0); ?
             Row payload = (Row) row.getField(1);
-            consumer.accept(convertRowToMap(payload));
+
+            try {
+                Map out = (Map) inv.invokeFunction(invokeFunction, convertRowToMap(payload));
+                HashMap copy = new HashMap<>(out); // prevent multithreaded access
+                queue.add(copy);
+            } catch (NoSuchMethodException | ScriptException e) {
+                throw new RuntimeException("Js invocation failed", e);
+            }
+
         }
 
     }

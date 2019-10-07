@@ -65,6 +65,11 @@
       ballY = msg.payload.ballY;
       leftY  = msg.payload.leftY;
       rightY = msg.payload.rightY;
+    } else if (msg.table === 'user_count') {
+      var countLeft = msg.payload.countLeft;
+      var countRight = msg.payload.countRight;
+      var countGlobal  = msg.payload.countGlobal;
+      document.getElementById('user-count').innerHTML = countLeft + ' ' + countRight + ' ' + countGlobal;
     } else {
       console.log('received msg of unknown table:');
       console.log(msg);
@@ -147,6 +152,13 @@
       <input type="radio" id="side-right-chosen" name="side-chosen" value="right" disabled>
       <label for="side-right">Right</label>
       (3. Server ack)
+    </div>
+    
+    <div id="user-count-display">
+    User count: (left right total)
+      <div id="user-count">
+        0 0 0
+      </div>
     </div>
     
   </div>

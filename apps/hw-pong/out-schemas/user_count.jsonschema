@@ -3,13 +3,13 @@
   "type": "object",
   "properties": {
     "countLeft": {
-      "type": "number"
+      "type": "string"
     },
     "countRight": {
-      "type": "number"
+      "type": "string"
     },
     "countGlobal": {
-      "type": "number"
+      "type": "string"
     }
   }
 }
