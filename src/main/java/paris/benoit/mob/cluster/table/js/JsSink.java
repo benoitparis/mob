@@ -16,6 +16,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
@@ -57,7 +58,9 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
         consumer = it -> {
             try {
-                queue.add((Map) inv.invokeFunction(invokeFunction, it));
+                Map out = (Map) inv.invokeFunction(invokeFunction, it);
+                HashMap copy = new HashMap<>(out); // prevent multithreaded access
+                queue.add(copy);
             } catch (NoSuchMethodException | ScriptException e) {
                 throw new RuntimeException("Js invocation failed", e);
             }

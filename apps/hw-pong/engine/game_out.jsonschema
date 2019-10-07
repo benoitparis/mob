@@ -10,6 +10,12 @@
     },
     "ballY": {
       "type": "number"
+    },
+    "leftY": {
+      "type": "number"
+    },
+    "rightY": {
+      "type": "number"
     }
   }
 }

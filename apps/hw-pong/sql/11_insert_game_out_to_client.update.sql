@@ -5,7 +5,9 @@ SELECT
   ROW(
     CAST(gqpf.proctime AS VARCHAR),
     ballX,
-    ballY
+    ballY,
+    leftY,
+    rightY
   )
 FROM query_global_position_flat AS gqpf
    , LATERAL TABLE (game_out_temporal(gqpf.proctime)) AS got

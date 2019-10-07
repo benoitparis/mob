@@ -3,5 +3,7 @@ SELECT
   COALESCE('1', CAST(ballX AS VARCHAR)) dummy_key,
   proctime game_out_time,
   ballX,
-  ballY
+  ballY,
+  leftY,
+  rightY
 FROM game_engine_out

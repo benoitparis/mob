@@ -41,7 +41,9 @@ function gameTick(inString) {
   var out = {
     "position_timestamp" : insertTime,
     "ballX" : ballX, 
-    "ballY" : ballY
+    "ballY" : ballY, 
+    "leftY" : leftY, 
+    "rightY" : rightY
   };
   
   console.log(JSON.stringify(out));
