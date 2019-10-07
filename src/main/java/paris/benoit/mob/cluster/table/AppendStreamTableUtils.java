@@ -19,13 +19,13 @@ public class AppendStreamTableUtils {
         final JsonTableSource tableSource = new JsonTableSource(configuration);
         tEnv.registerTableSource(configuration.name + "_raw", tableSource);
         logger.info("Registering as TableSource: " + configuration.name + "_raw");
-        Table hashInputTable = tEnv.sqlQuery(
+        Table rawTableSource = tEnv.sqlQuery(
             "SELECT\n" + 
             "  " + StringUtils.join(tableSource.getTableSchema().getFieldNames(), ",\n  ") + "\n" +
             "FROM " + configuration.name + "_raw" + "\n"
         );
         DataStream<Row> appendStream = tEnv
-            .toAppendStream(hashInputTable, tableSource.getReturnType());
+            .toAppendStream(rawTableSource, tableSource.getReturnType());
         logger.info("Registering as Table: " + configuration.name);
         tEnv.registerTable(configuration.name, tEnv.fromDataStream(appendStream, 
             StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +

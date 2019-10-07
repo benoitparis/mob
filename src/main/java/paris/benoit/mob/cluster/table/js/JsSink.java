@@ -21,11 +21,11 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private static final Logger logger = LoggerFactory.getLogger(JsSink.class);
 
     private MobTableConfiguration parentConfiguration;
-    private Consumer<Map> consumer;
+    private Consumer<String> consumer;
 
     private JsonRowSerializationSchema jrs;
     private ObjectMapper mapper = new ObjectMapper();
-    private MapType type = mapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
+//    private MapType type = mapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
 
     public JsSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
         this.parentConfiguration = parentConfiguration;
@@ -56,9 +56,10 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
     }
 
-    public Map convertRowToMap(Row row) throws IOException {
+    public String convertRowToMap(Row row) throws IOException {
         // TODO fix seri/deseri
-        return mapper.readValue(jrs.serialize(row), type);
+//        return mapper.readValue(jrs.serialize(row), type);
+        return new String(jrs.serialize(row));
     }
 
 }

@@ -3,7 +3,7 @@
   "type": "object",
   "properties": {
     "position_timestamp": {
-      "type": "number"
+      "type": "string"
     },
     "ballX": {
       "type": "number"

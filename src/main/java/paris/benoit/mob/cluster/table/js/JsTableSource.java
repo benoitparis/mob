@@ -1,7 +1,6 @@
 package paris.benoit.mob.cluster.table.js;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -13,7 +12,6 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.loopback.ActorSource;
 
 public class JsTableSource implements StreamTableSource<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSource.class);

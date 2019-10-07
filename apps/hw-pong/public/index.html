@@ -63,6 +63,9 @@
     } else if (msg.table === 'racket_positions') {
       leftY  = msg.payload.leftY;
       rightY = msg.payload.rightY;
+    } else if (msg.table === 'game_out_to_client') {
+      ballX = msg.payload.ballX;
+      ballY = msg.payload.ballY;
     } else {
       console.log('received msg of unknown table:');
       console.log(msg);

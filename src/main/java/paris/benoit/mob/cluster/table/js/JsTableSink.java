@@ -1,24 +1,18 @@
 package paris.benoit.mob.cluster.table.js;
 
-import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.functions.IdPartitioner;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
-import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
-import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
-import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.loopback.ActorSink;
 
 public class JsTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSink.class);

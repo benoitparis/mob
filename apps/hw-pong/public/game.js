@@ -14,10 +14,14 @@ var ballX = 300;
 var ballY = 300;
 var speedX = 20;
 var speedY = 20;
+var insertTime = 'dsadsa';
 
-function gameTick(inObj) {
+function gameTick(inString) {
   
-  var watermark = inObj.watermark;
+  var inObj = JSON.parse(inString);
+  console.log(inObj);
+  
+  var insertTime = inObj['insert_time'];
   var leftY = inObj.leftY;
   var rightY = inObj.rightY;
   
@@ -34,9 +38,12 @@ function gameTick(inObj) {
   ballX += speedX;
   ballY += speedY;
   
-  return {
-    "watermarkIn" : watermark,
+  var out = {
+    "position_timestamp" : insertTime,
     "ballX" : ballX, 
     "ballY" : ballY
-  }; 
+  };
+  
+  console.log(JSON.stringify(out));
+  return out;
 }
