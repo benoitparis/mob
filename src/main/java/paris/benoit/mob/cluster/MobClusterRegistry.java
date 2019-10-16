@@ -6,6 +6,7 @@ import org.apache.flink.configuration.MetricOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,6 +92,7 @@ public class MobClusterRegistry {
 
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
+            logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
             try {
                 if (null == sqlConf.confType) {
                     throw new RuntimeException("Configuration type required for " + sqlConf);
@@ -109,11 +111,19 @@ public class MobClusterRegistry {
                         // TODO payload: Row
                         // PayloadedTableUtils.wrapPrettyErrorAndUpdate
                         // ou bien un mode où infer le out schema? yep, contrat d'interface good
-                        tEnv.sqlUpdate(sqlConf.content);
+                        try {
+                            tEnv.sqlUpdate(sqlConf.content);
+                        } catch (ValidationException e) {
+
+                        }
+
                         break;
                         default:
                             throw new RuntimeException("No SQL type was specified");
                 }
+
+
+                logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
 
             }
             catch (Throwable t) {

@@ -1,0 +1,4 @@
+cf le JIRA
+
+le query side de la lateral table veut du pur TableSource et pas du Table
+

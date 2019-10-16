@@ -9,7 +9,7 @@
       "type": "string"
     },
     "countGlobal": {
-      "type": "string"
+      "type": "number"
     }
   }
 }

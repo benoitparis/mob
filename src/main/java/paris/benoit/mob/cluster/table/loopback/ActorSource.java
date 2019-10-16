@@ -12,6 +12,8 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.MobClusterSender;
 
+import java.util.Random;
+
 @SuppressWarnings("serial")
 public class ActorSource extends RichParallelSourceFunction<Row> {
     
@@ -46,6 +48,7 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
             Row row = receivePort.receive();
             // By convention
             row.setField(0, loopbackIndex);
+            row.setField(3, "" + new Random().nextInt(2)); // temporary, to be removed when Blink can to Tables and not TableSources
             sc.collect(row);
 
         }

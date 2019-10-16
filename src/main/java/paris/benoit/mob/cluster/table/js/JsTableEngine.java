@@ -96,6 +96,7 @@ public class JsTableEngine {
     }
 
     static BlockingQueue<Map> registerSink(String name) throws InterruptedException {
+        logger.warn("Registering JS Sink function " + name);
         while (null == queuesSink.get(name)){
             logger.warn("Waiting on registerSink, this shouldn't happen");
             Thread.sleep(100);
@@ -105,6 +106,7 @@ public class JsTableEngine {
     }
 
     static BlockingQueue<Map> registerSource(String name) throws InterruptedException {
+        logger.warn("Registering JS Source function " + name);
         while (null == queuesSource.get(name)){
             logger.warn("Waiting on registerSource, this shouldn't happen");
             Thread.sleep(100);

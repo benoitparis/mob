@@ -32,12 +32,14 @@ public class JsonTableSource implements StreamTableSource<Row> {
         fieldNames = new String[] { 
             "loopback_index",
             "actor_identity",
-            "payload"
+            "payload",
+            "constant_dummy_source"
         };
         fieldTypes = new TypeInformation[] {
             Types.INT(),
             Types.STRING(),
-            jsonTypeInfo
+            jsonTypeInfo,
+            Types.STRING()
         };
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 

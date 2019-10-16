@@ -30,7 +30,7 @@ public class MobClusterSender {
         
         try {
 
-            Row root = new Row(3);
+            Row root = new Row(4);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);
             root.setField(2, jrds.deserialize(payload.getBytes()));

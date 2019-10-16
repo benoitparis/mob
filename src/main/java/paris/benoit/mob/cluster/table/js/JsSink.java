@@ -36,7 +36,7 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     String code;
     Invocable inv;
 
-    JsSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
+    public JsSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
         this.parentConfiguration = parentConfiguration;
 
         TypeInformation<Row> jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);

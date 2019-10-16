@@ -19,7 +19,8 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
 
     private TypeInformation<Row> jsonTypeInfo;
     private String[] fieldNames;
-    private TypeInformation<?>[] fieldTypes;
+//    private DataType[] fieldTypes;
+    private TypeInformation<?>[] fieldTypesOld;
 
     private RichSinkFunction actorFunction;
     private MobTableConfiguration configuration;
@@ -31,10 +32,15 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
                 "insert_time",
                 "payload"
         };
-        fieldTypes = new TypeInformation[] {
+        fieldTypesOld = new TypeInformation[] {
                 Types.SQL_TIMESTAMP(),
                 jsonTypeInfo
         };
+        // TODO tester TypeConversions pour aider
+//        fieldTypes = new DataType[] {
+//                DataTypes.TIMESTAMP(),
+//                DataTypes.ANY(jsonTypeInfo)
+//        };
         logger.info("Created Js Sink with json schema: " + jsonTypeInfo.toString());
 
 //        nécessaire?
@@ -57,14 +63,19 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
         return fieldNames;
     }
 
+//    @Override
+//    public TableSchema getTableSchema() {
+//        return TableSchema.builder().fields(fieldNames, fieldTypes).build();
+//    }
+
     @Override
     public TypeInformation<?>[] getFieldTypes() {
-        return fieldTypes;
+        return fieldTypesOld;
     }
 
     @Override
     public TypeInformation<Row> getRecordType() {
-        return Types.ROW(fieldNames, fieldTypes);
+        return Types.ROW(fieldNames, fieldTypesOld);
     }
 
     @Override
