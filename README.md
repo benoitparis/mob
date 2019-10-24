@@ -1,8 +1,8 @@
-# mob-lib: (M)assive (O)nline emergent (B)ehavior 
+# MOB: (M)assively (O)nline emergent (B)ehavior 
 
 ## Real-time crowd interactions server on top of distributed streaming
 
-Mob-lib consists of a websocket server, serviced by actors, that communicate to each other through Flink and benefit from it's map-reduce capabilities. 
+Mob-lib consists of a websocket server, serviced by actors, that communicate to each other through distributed streaming with Flink and benefit from it's low-latency map-reduce capabilities. 
 
 A particular setup of stream processing enables controlling the colocation of system input and output, thus allowing messages to be routed to their intended recipients.
 
