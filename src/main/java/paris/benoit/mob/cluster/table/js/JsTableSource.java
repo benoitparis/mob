@@ -20,7 +20,7 @@ public class JsTableSource implements StreamTableSource<Row> {
     private String[] fieldNames;
     private TypeInformation<?>[] fieldTypes;
 
-    private RichParallelSourceFunction actorFunction;
+    private RichParallelSourceFunction function;
     private MobTableConfiguration configuration;
 
     public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
@@ -32,11 +32,11 @@ public class JsTableSource implements StreamTableSource<Row> {
         fieldTypes = new TypeInformation[] {
                 jsonTypeInfo
         };
-        logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
 //        jrds = new JsonRowDeserializationSchema.Builder(jsonTypeInfo).build();
-        actorFunction = new JsSource(parentConfiguration, configuration);
+        function = new JsSourceFunction(parentConfiguration, configuration);
         this.configuration = configuration;
+        logger.info("Instanciated JsTableSink with json schema: " + jsonTypeInfo.toString());
 
     }
 
@@ -62,7 +62,7 @@ public class JsTableSource implements StreamTableSource<Row> {
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-                .addSource(actorFunction, getReturnType())
+                .addSource(function, getReturnType())
                 .setParallelism(1)
                 .name(configuration.name);
     }

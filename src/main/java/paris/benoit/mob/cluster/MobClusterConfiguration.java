@@ -1,5 +1,10 @@
 package paris.benoit.mob.cluster;
 
+import org.apache.flink.streaming.api.TimeCharacteristic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import paris.benoit.mob.server.UnderTowLauncher;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -8,16 +13,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import paris.benoit.mob.server.UnderTowLauncher;
-
 public class MobClusterConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterConfiguration.class);
     
-    protected String name;
+    public String name;
     
     protected UnderTowLauncher underTowLauncher;
     

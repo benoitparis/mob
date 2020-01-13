@@ -105,7 +105,7 @@ public class MobClusterRegistry {
                         TemporalTableUtils.createAndRegister(tEnv, sqlConf);
                         break;
                     case JS_ENGINE:
-                        JsTableEngine.createAndRegister(tEnv, sqlConf);
+                        JsTableEngine.createAndRegister(tEnv, sqlConf, configuration);
                         break;
                     case UPDATE:
                         // TODO payload: Row
@@ -169,7 +169,9 @@ public class MobClusterRegistry {
     private void waitRegistrationsReady() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
-        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size()) || !JsTableEngine.isReady()) {
+        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size())
+                //|| !JsTableEngine.isReady()
+        ) {
             logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * configuration.inSchemas.size() + " and JsTableEngines");
             Thread.sleep(POLL_INTERVAL);
         }

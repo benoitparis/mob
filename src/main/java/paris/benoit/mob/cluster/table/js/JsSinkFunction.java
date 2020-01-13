@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Consumer;
 
-public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
-    private static final Logger logger = LoggerFactory.getLogger(JsSink.class);
+public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
+    private static final Logger logger = LoggerFactory.getLogger(JsSinkFunction.class);
 
     private MobTableConfiguration parentConfiguration;
     private BlockingQueue<Map> queue;
@@ -30,13 +30,12 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
     private JsonRowSerializationSchema jrs;
     private ObjectMapper mapper = new ObjectMapper();
-//    private MapType type = mapper.getTypeFactory().constructMapType(Map.class, String.class, Object.class);
 
     String invokeFunction;
     String code;
     Invocable inv;
 
-    public JsSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
+    public JsSinkFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
         this.parentConfiguration = parentConfiguration;
 
         TypeInformation<Row> jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
@@ -44,7 +43,7 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
         this.invokeFunction = invokeFunction;
         this.code = code;
-        logger.info("Created Sink with json schema: " + jsonTypeInfo.toString());
+        logger.info("Instanciated JsSinkFunction with json schema: " + jsonTypeInfo.toString());
     }
 
     @Override
@@ -57,6 +56,7 @@ public class JsSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
         graaljsEngine.eval(code);
         inv = (Invocable) graaljsEngine;
 
+        logger.info("Opened JsSinkFunction" );
     }
 
     @Override

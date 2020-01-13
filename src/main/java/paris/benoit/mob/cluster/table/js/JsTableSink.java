@@ -22,7 +22,7 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
 //    private DataType[] fieldTypes;
     private TypeInformation<?>[] fieldTypesOld;
 
-    private RichSinkFunction actorFunction;
+    private RichSinkFunction function;
     private MobTableConfiguration configuration;
 
     public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
@@ -41,12 +41,12 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
 //                DataTypes.TIMESTAMP(),
 //                DataTypes.ANY(jsonTypeInfo)
 //        };
-        logger.info("Created Js Sink with json schema: " + jsonTypeInfo.toString());
 
 //        nécessaire?
 //        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
-        actorFunction = new JsSink(parentConfiguration, configuration, invokeFunction, code);
+        function = new JsSinkFunction(parentConfiguration, configuration, invokeFunction, code);
         this.configuration = configuration;
+        logger.info("Instanciated JsTableSink with json schema: " + jsonTypeInfo.toString());
     }
 
     public String getName() {
@@ -86,7 +86,7 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         return ds
-            .addSink(actorFunction)
+            .addSink(function)
             .setParallelism(1)
             .name(configuration.name);
     }

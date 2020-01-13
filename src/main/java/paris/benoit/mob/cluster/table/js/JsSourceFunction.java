@@ -14,8 +14,8 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-public class JsSource extends RichParallelSourceFunction<Row> {
-    private static final Logger logger = LoggerFactory.getLogger(JsSource.class);
+public class JsSourceFunction extends RichParallelSourceFunction<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(JsSourceFunction.class);
 
     private MobTableConfiguration parentConfiguration;
     private BlockingQueue<Map> queue;
@@ -24,11 +24,12 @@ public class JsSource extends RichParallelSourceFunction<Row> {
     private JsonRowDeserializationSchema jrds;
     private ObjectMapper mapper;
 
-    public JsSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
+    public JsSourceFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
         this.parentConfiguration = parentConfiguration;
 
         TypeInformation<Row> jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
         jrds = new JsonRowDeserializationSchema.Builder(jsonTypeInfo).build();
+        logger.info("Instanciated JsSourceFunction with json schema: " + jsonTypeInfo.toString());
     }
 
     @Override
@@ -37,6 +38,7 @@ public class JsSource extends RichParallelSourceFunction<Row> {
         logger.info("Parallelism of jsEngine source " + parentConfiguration.name + " : " + getRuntimeContext().getNumberOfParallelSubtasks());
         queue = JsTableEngine.registerSource(parentConfiguration.name);
         mapper = new ObjectMapper();
+        logger.info("Opened JsSourceFunction");
     }
 
     @Override

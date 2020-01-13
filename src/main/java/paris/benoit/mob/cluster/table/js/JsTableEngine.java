@@ -6,6 +6,7 @@ import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 import javax.script.ScriptException;
@@ -32,17 +33,17 @@ public class JsTableEngine {
             "INVOKE '([^\\s]+)'[\\s]*";
     private static final Pattern JS_TABLE_PATTERN = Pattern.compile(JS_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration conf) throws IOException, ScriptException {
+    public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration conf, MobClusterConfiguration configuration) throws IOException, ScriptException {
         Matcher m = JS_TABLE_PATTERN.matcher(conf.content);
 
         if (m.matches()) {
             if (!m.group(1).trim().equalsIgnoreCase(conf.name.trim())) {
                 throw new RuntimeException("Created table must match with file name");
             }
-            // TODO gérer avec conf globale dans MobCLusterConfiguration
-            String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(2))));
-            String inSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(3))));
-            String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/hw-pong/" + m.group(4))));
+
+            String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + configuration.name + "/" + m.group(2))));
+            String inSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + configuration.name + "/" + m.group(3))));
+            String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + configuration.name + "/" + m.group(4))));
             String invokeFunction = m.group(5);
 
 
@@ -54,7 +55,7 @@ public class JsTableEngine {
             tEnv.registerTableSink(sink.getName(), sink);
 
             tEnv.registerTableSource(source.getName() + "_raw", source);
-            // TODO refactor ça avec le AppendStreamTableUTils
+            // TODO refactor ça avec le AppendStreamTableUtils
             Table rawTableSource = tEnv.sqlQuery(
                 "SELECT\n" +
                 "  " + StringUtils.join(source.getTableSchema().getFieldNames(), ",\n  ") + "\n" +
