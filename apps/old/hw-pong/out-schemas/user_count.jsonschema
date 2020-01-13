@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "countLeft": {
+      "type": "string"
+    },
+    "countRight": {
+      "type": "string"
+    },
+    "countGlobal": {
+      "type": "number"
+    }
+  }
+}
