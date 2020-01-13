@@ -1,2 +1,0 @@
-CREATE TEMPORAL TABLE global_position TIME ATTRIBUTE max_proctime PRIMARY KEY constant_dummy AS
-TABLE_SCAN global_position_history

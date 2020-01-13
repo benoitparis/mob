@@ -29,8 +29,8 @@ public class MobClusterSender {
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
         
         try {
-
-            Row root = new Row(4);
+            // TODO valeur dépendante de JsonTableSource, faudrait prendre l'arity de là, et globalement réduire les déps
+            Row root = new Row(5);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);
             root.setField(2, jrds.deserialize(payload.getBytes()));

@@ -10,7 +10,7 @@ import java.util.regex.Pattern;
 
 public class TemporalTableUtils {
     
-    private static final String TEMPORAL_TABLE_PATTERN_REGEX = "CREATE TEMPORAL TABLE ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS\\s+(TABLE_SCAN ([^ ]+))?(.*)";
+    private static final String TEMPORAL_TABLE_PATTERN_REGEX = "CREATE TEMPORAL TABLE FUNCTION ([^ ]+) TIME ATTRIBUTE ([^ ]+) PRIMARY KEY ([^ ]+) AS\\s+(TABLE_SCAN ([^ ]+))?(.*)";
     private static final Pattern TEMPORAL_TABLE_PATTERN = Pattern.compile(TEMPORAL_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
     public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {

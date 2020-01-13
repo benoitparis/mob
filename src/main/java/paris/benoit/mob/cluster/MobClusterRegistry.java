@@ -10,10 +10,10 @@ import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
+import paris.benoit.mob.cluster.table.json.JsonTableSource;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -47,7 +47,9 @@ public class MobClusterRegistry {
         logger.info("Web UI at: http://localhost:" + configuration.flinkWebUiPort);
         logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
         logger.info("Plan is: \n" + sEnv.getExecutionPlan());
-        
+
+        // pour debug
+        JsTableEngine.isReady();
     }
     
     private void setupFlink() {
@@ -67,19 +69,18 @@ public class MobClusterRegistry {
         
         EnvironmentSettings bsSettings = 
             EnvironmentSettings.newInstance()
-                .useOldPlanner()
-//                .useBlinkPlanner()
+//                .useOldPlanner()
+                .useBlinkPlanner()
                 .inStreamingMode()
             .build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
         
     }
 
-
     private void registerInputOutputTables() {
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
-            AppendStreamTableUtils.createAndRegisterTableSource(tEnv, inSchema);
+            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {

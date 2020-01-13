@@ -8,15 +8,17 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.api.Types;
+import org.apache.flink.table.sources.DefinedProctimeAttribute;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSource;
 
-public class JsonTableSource implements StreamTableSource<Row> {
+import javax.annotation.Nullable;
+
+public class JsonTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
 
     private TypeInformation<Row> jsonTypeInfo;
@@ -33,13 +35,15 @@ public class JsonTableSource implements StreamTableSource<Row> {
             "loopback_index",
             "actor_identity",
             "payload",
-            "constant_dummy_source"
+            "constant_dummy_source", //TODO remove?
+            "proctime" // TODO on clarifie le nom avec <le nom de la table>_time ? ça aidera pr les ambiguités
         };
         fieldTypes = new TypeInformation[] {
             Types.INT(),
             Types.STRING(),
             jsonTypeInfo,
-            Types.STRING()
+            Types.STRING(),
+            Types.SQL_TIMESTAMP()
         };
         logger.info("Created Source with json schema: " + jsonTypeInfo.toString());
 
@@ -73,4 +77,9 @@ public class JsonTableSource implements StreamTableSource<Row> {
         return jrds;
     }
 
+    @Nullable
+    @Override
+    public String getProctimeAttribute() {
+        return "proctime";
+    }
 }
