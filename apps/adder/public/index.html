@@ -59,7 +59,9 @@
   }
   
   function log(str) {
-    document.getElementById("console").value += str;
+    var consoleElement = document.getElementById('console');
+    consoleElement.value += str;
+    consoleElement.scrollTop = consoleElement.scrollHeight;
   }
 	
   wsConnect();

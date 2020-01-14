@@ -1,0 +1,36 @@
+Caused by: java.lang.AssertionError: Cannot add expression of different type to set:
+set type is RecordType(INTEGER loopback_index, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" actor_identity, RecordType:peek_no_expand(VARCHAR(2147483647) CHARACTER SET "UTF-16LE" k) payload, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" constant_dummy_source, TIME ATTRIBUTE(PROCTIME) proctime, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" k, TIME ATTRIBUTE(PROCTIME) last_proctime, BIGINT key_count) NOT NULL
+expression type is RecordType(INTEGER loopback_index, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" actor_identity, RecordType:peek_no_expand(VARCHAR(2147483647) CHARACTER SET "UTF-16LE" k) payload, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" constant_dummy_source, TIME ATTRIBUTE(PROCTIME) proctime, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" k, TIME ATTRIBUTE(PROCTIME) last_proctime, BIGINT NOT NULL key_count) NOT NULL
+set is rel#60:LogicalCorrelate.NONE.any.None: 0.false.UNKNOWN(left=HepRelVertex#58,right=HepRelVertex#59,correlation=$cor0,joinType=inner,requiredColumns={4})
+expression is LogicalJoin(condition=[__TEMPORAL_JOIN_CONDITION($4, $5)], joinType=[inner])
+  LogicalTableScan(table=[[default_catalog, default_database, query_state, source: [Json Source]]])
+  LogicalProject(k=[CASE(IS NOT NULL($0), $0, _UTF-16LE'':VARCHAR(2147483647) CHARACTER SET "UTF-16LE")], last_proctime=[$1], key_count=[$2])
+    LogicalAggregate(group=[{0}], last_proctime=[LAST_VALUE($1)], key_count=[COUNT()])
+      LogicalProject($f0=[$2.k], proctime=[$4])
+        LogicalTableScan(table=[[default_catalog, default_database, write_state, source: [Json Source]]])
+
+	at org.apache.calcite.plan.RelOptUtil.verifyTypeEquivalence(RelOptUtil.java:384)
+	at org.apache.calcite.plan.hep.HepRuleCall.transformTo(HepRuleCall.java:57)
+	at org.apache.calcite.plan.RelOptRuleCall.transformTo(RelOptRuleCall.java:236)
+	at org.apache.flink.table.planner.plan.rules.logical.LogicalCorrelateToJoinFromTemporalTableFunctionRule.onMatch(LogicalCorrelateToJoinFromTemporalTableFunctionRule.scala:135)
+	at
+  
+
+avec diff: BIGINT key_count vs BIGINT NOT NULL key_count
+avec temporal table functions
+
+reported:
+
+https://issues.apache.org/jira/browse/FLINK-14297
+
+mais là pas avec la key, avec les values de la row
+
+ça part de INTEGER, et ça rajoute le join en mode INTEGER NOT NULL
+  le correlate a été lu en nullable, et pas le join
+    aller lire comment le join build le NOT NULL?
+    
+workaround:
+  hyp: rendre compatible l'expression de la ligne 2 avec la ligne 1, aka la rendre nullable:
+  REM prendre l'expression qui définit la temp table function, pas le join/insert qui va la trigger
+  SUM(1) key_count -> COALESCE(SUM(1), null) key_count
+    (qui ne se fait pas simplifier)

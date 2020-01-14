@@ -4,9 +4,6 @@
   "properties": {
     "k": {
       "type": "string"
-    },
-    "v": {
-      "type": "string"
     }
   }
 }
