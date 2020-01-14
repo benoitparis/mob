@@ -9,10 +9,10 @@ import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
-import paris.benoit.mob.cluster.table.json.JsonTableSource;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -79,8 +79,15 @@ public class MobClusterRegistry {
     private void registerInputOutputTables() {
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
-            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
-            logger.debug("Registered Table Source: " + inSchema);
+//            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
+
+//            tEnv.registerTableSource(inSchema.name + "_raw", new JsonTableSource(inSchema));
+//            Table tableSourceRaw = tEnv.sqlQuery("SELECT * FROM " + inSchema.name + "_raw");
+//            DataStream<Row> tableSourceRawAsAppendStream = tEnv.toAppendStream(tableSourceRaw, tableSourceRaw.getSchema().toRowType());
+//            tEnv.registerTable(inSchema.name, tEnv.fromDataStream(tableSourceRawAsAppendStream));
+//            logger.debug("Registered Table Source: " + inSchema);
+
+            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, inSchema);
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {
@@ -155,6 +162,10 @@ public class MobClusterRegistry {
         public Integer getLoopbackIndex() {
             return loopbackIndex;
         }
+        @Override
+        public String toString() {
+            return "NameSenderPair{" + "name='" + name + '\'' + ", loopbackIndex=" + loopbackIndex + ", sender=" + sender + '}';
+        }
     }
     private static CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
     private static List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
@@ -167,10 +178,13 @@ public class MobClusterRegistry {
     private void waitRegistrationsReady() throws InterruptedException {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
+        // FIXME idéalement on fait que react à quand c'est prêt
         while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size())
-                //|| !JsTableEngine.isReady()
+                || !JsTableEngine.isReady()
         ) {
             logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * configuration.inSchemas.size() + " and JsTableEngines");
+            logger.info("" + clusterSenderRaw);
+            logger.info("Plan is: \n" + sEnv.getExecutionPlan());
             Thread.sleep(POLL_INTERVAL);
         }
         doClusterSendersMatching(parallelism);

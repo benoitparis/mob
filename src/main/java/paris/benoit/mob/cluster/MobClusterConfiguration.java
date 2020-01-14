@@ -61,6 +61,7 @@ public class MobClusterConfiguration {
                     .spliterator()
                 , false
              )
+            .filter(it -> !Files.isDirectory(it))
             .sorted(Comparator.comparing(a -> {
                 try {
                     return Integer.valueOf(a.getFileName().toString().split("_")[0]);

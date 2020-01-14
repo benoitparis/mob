@@ -11,8 +11,8 @@ public class MobServer {
 //        setupCluster("ack");
 //        setupCluster("set-state-full-join");
 //        setupCluster("set-state-temporal-join");
-        setupCluster("adder");
-//        setupCluster("hw-global-average");
+//        setupCluster("adder");
+        setupCluster("hw-pong");
 //        setupCluster("hw-pong-minimal-no-table");
     }
 

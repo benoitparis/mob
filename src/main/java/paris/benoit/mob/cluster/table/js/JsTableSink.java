@@ -29,16 +29,13 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
 
         jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
         fieldNames = new String[] {
-                "insert_time",
                 "payload"
         };
         fieldTypesOld = new TypeInformation[] {
-                Types.SQL_TIMESTAMP(),
                 jsonTypeInfo
         };
         // TODO tester TypeConversions pour aider
 //        fieldTypes = new DataType[] {
-//                DataTypes.TIMESTAMP(),
 //                DataTypes.ANY(jsonTypeInfo)
 //        };
 

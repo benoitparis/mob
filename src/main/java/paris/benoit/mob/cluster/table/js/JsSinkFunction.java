@@ -65,8 +65,7 @@ public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
         if (value.f0) {
             Row row = value.f1;
             // par convention
-            //Integer insertTime = (Integer) row.getField(0); ?
-            Row payload = (Row) row.getField(1);
+            Row payload = (Row) row.getField(0);
 
             try {
                 Map out = (Map) inv.invokeFunction(invokeFunction, convertRowToMap(payload));

@@ -1,0 +1,16 @@
+at paris.benoit.mob.cluster.MobClusterRegistry.registerDataFlow(MobClusterRegistry.java:135)
+	at paris.benoit.mob.cluster.MobClusterRegistry.start(MobClusterRegistry.java:38)
+	at paris.benoit.mob.server.MobServer.setupCluster(MobServer.java:40)
+	at paris.benoit.mob.server.MobServer.main(MobServer.java:15)
+Caused by: org.apache.flink.table.api.ValidationException: Non rowtime timeAttribute [TIMESTAMP(3)] used to create TemporalTableFunction
+	at org.apache.flink.table.planner.plan.nodes.physical.stream.StreamExecTemporalJoinToCoProcessTranslator$TemporalJoinConditionExtractor.visitCall(StreamExecTemporalJoin.scala:372)
+	at org.apache.flink.table.planner.plan.nodes.physical.stream.StreamExecTemporalJoinToCoProcessTranslator$TemporalJoinConditionExtractor.visitCall(StreamExecTemporalJoin.scala:338)
+	at org.apache.calcite.rex.RexCall.accept(RexCall.java:191)
+	at org.apache.calcite.rex.RexShuttle.apply(RexShuttle.java:277)
+	at
+  
+FIX:
+    vrai proctime pour la création des temporal table functions
+      ça prend pas les timestamp
+      si on doit convertir les tables en appending, ça se fait materializer en TIMESTAMP(3)
+      et du coup il faut utiliser proctime_append_stream en time attribute
