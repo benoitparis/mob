@@ -37,6 +37,7 @@ public class JsonTableSource implements StreamTableSource<Row>, DefinedProctimeA
             "payload",
             "constant_dummy_source", //TODO remove?
             "proctime" // TODO on clarifie le nom avec <le nom de la table>_time ? ça aidera pr les ambiguités
+                // TODO mettre avant le payload
         };
         fieldTypes = new TypeInformation[] {
             Types.INT(),

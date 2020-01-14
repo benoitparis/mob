@@ -6,7 +6,6 @@ import org.apache.flink.configuration.MetricOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -81,10 +80,12 @@ public class MobClusterRegistry {
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
+            logger.debug("Registered Table Source: " + inSchema);
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {
             tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema));
+            logger.debug("Registered Table Sink: " + outSchema);
         }
         
     }
@@ -112,11 +113,7 @@ public class MobClusterRegistry {
                         // TODO payload: Row
                         // PayloadedTableUtils.wrapPrettyErrorAndUpdate
                         // ou bien un mode où infer le out schema? yep, contrat d'interface good
-                        try {
-                            tEnv.sqlUpdate(sqlConf.content);
-                        } catch (ValidationException e) {
-
-                        }
+                        tEnv.sqlUpdate(sqlConf.content);
 
                         break;
                         default:
