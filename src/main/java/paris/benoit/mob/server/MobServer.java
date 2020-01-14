@@ -8,7 +8,9 @@ import paris.benoit.mob.cluster.MobClusterRegistry;
 public class MobServer {
     
     public static void main(String[] args) throws Exception {
-        setupCluster("ack");
+//        setupCluster("ack");
+//        setupCluster("set-state-full-join");
+        setupCluster("set-state-temporal-join");
 //        setupCluster(""adder);
 //        setupCluster("hw-global-average");
 //        setupCluster("hw-pong-minimal-no-table");

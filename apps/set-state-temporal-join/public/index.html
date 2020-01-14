@@ -28,27 +28,28 @@
 		ws.onmessage = doOnMessage;
 	}
   
-	function send(tableName, msg) {
+	function writeTable(table, msg) {
   	if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-				table : tableName,
+				table : table,
 				payload : msg
 			};
 			console.log(serverMsg);
 			ws.send(JSON.stringify(serverMsg));
-      log('Sent payload to ' + tableName + ': ' + JSON.stringify(msg) + '\n');
+      log('Sent payload    : ' + JSON.stringify(msg) + '\n');
 		}
   }
   
-	function incrementKey() {
-    send('write_state', {
-				k : 'k' + getRandomInt(3)
+	function pushKeyValue() {
+    writeTable('write_state', {
+				k : 'k' + getRandomInt(3),
+				v : 'v' + getRandomInt(3)
 			}
     );
 	}
 	function queryKey() {
-    send('query_state', {
+    writeTable('query_state', {
 				k : 'k' + getRandomInt(3)
 			}
     );
@@ -68,7 +69,7 @@
 <body>
   <div>
 	  <button onclick="wsConnect()">Connect WS</button>
-	  <button onclick="incrementKey()">Increment Key</button>
+	  <button onclick="pushKeyValue()">Push KeyValue</button>
 	  <button onclick="queryKey()">Query Key</button>
   </div>
   <div>

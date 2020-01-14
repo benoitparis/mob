@@ -6,6 +6,7 @@
 	function doOnOpen(evt) {
 		console.log('doOnOpen');
 		console.log(evt);
+    log('Connected\n');
 	};
   	function doOnClose(evt) {
 		console.log("doOnClose");
@@ -14,6 +15,7 @@
 	function doOnMessage(evt) {
 		console.log("doOnMessage");
 		console.log(evt);
+    log('Received payload: ' + JSON.stringify(JSON.parse(evt.data).payload) + '\n');
 	};
 
 	var ws;
@@ -35,6 +37,7 @@
 			};
 			console.log(serverMsg);
 			ws.send(JSON.stringify(serverMsg));
+      log('Sent payload    : ' + JSON.stringify(msg) + '\n');
 		}
   }
   
@@ -48,12 +51,21 @@
   function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
   }
+  
+  function log(str) {
+    document.getElementById("console").value += str;
+  }
 	
+  wsConnect();
 </script>
 </head>
 <body>
-	HELLO
-	<button onclick="wsConnect()">Connect WS</button>
-	<button onclick="pushValue()">Push Value</button>
+  <div>
+	  <button onclick="wsConnect()">Connect WS</button>
+	  <button onclick="pushValue()">Push Value</button>
+  </div>
+  <div>
+    <textarea id="console" cols="100" rows="30" readonly></textarea>
+  </div>
 </body>
 </html>

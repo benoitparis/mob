@@ -1,0 +1,16 @@
+18:57:38.520 [main] DEBUG o.a.c.s.parser - Reduced `qs`.`k` = `kvs`.`k`                                                                    <---------
+18:57:38.860 [main] INFO  p.b.m.c.MobClusterRegistry - Tables are: [query_state, write_to_state, send_client]                              
+java.lang.IllegalStateException: No operators defined in streaming topology. Cannot execute.                                               <---------
+	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.getStreamGraphGenerator(StreamExecutionEnvironment.java:1545)   
+	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.getStreamGraph(StreamExecutionEnvironment.java:1540)            
+	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.execute(StreamExecutionEnvironment.java:1507)                   
+	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.execute(StreamExecutionEnvironment.java:1489)                   
+	at paris.benoit.mob.cluster.MobClusterRegistry.lambda$startFlink$0(MobClusterRegistry.java:141)                                          
+  
+  
+???/
+  
+ptet il faut un touch?
+  https://stackoverflow.com/questions/54977290/flink-no-operators-defined-in-streaming-topology-cannot-execute
+  
+-> le ValidationException était catch silencieusement!

@@ -5,6 +5,7 @@ SELECT
   ROW(
     v
   )
-FROM query_state                           AS qs
-   , LATERAL TABLE (kv_state(qs.proctime)) AS kvs
-WHERE qs.k = kvs.k
+FROM query_state AS qs
+JOIN write_state AS ws
+  ON qs.k = ws.k
+        
