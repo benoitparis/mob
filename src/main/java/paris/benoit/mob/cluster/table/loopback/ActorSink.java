@@ -64,7 +64,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
                 logger.error("Actor named " + identity + " was not found on sink #" + loopbackIndex);
             }
 
-            logger.debug("new msg in sink: " + row);
+            //logger.debug("new msg in sink: " + row);
             
         } else { 
             // Retract. Do nothing

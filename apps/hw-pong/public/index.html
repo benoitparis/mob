@@ -42,6 +42,7 @@
     }
 		fill(0, 0, 0);
     rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
+    frameRate(60);
 	}
 
   // Network setup
@@ -54,13 +55,13 @@
 
 	function processServerMessage(evt) {
     // TODO from which table?
-		console.log(evt);
-		console.log(JSON.parse(evt.data));
+		//console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
       side = msg.payload.side;
     } else if (msg.table === 'game_out_to_client') {
+      console.log('query latency: ' + (Date.now() - parseInt(msg.payload.now, 10)) + ' ms')
       ballX = msg.payload.ballX;
       ballY = msg.payload.ballY;
       leftY  = msg.payload.leftY;
@@ -77,7 +78,7 @@
     
 		//leftY = msg.leftY;
 		//rightY = msg.rightY;
-		draw();
+		//draw();
 	};
   
   function sendToServer(table, msg) {
@@ -125,9 +126,14 @@
   // Ou bien plus subtil avec du onMouseMove?
 	setInterval(sendPosition, 40);
 
-
+  var now = Date.now();
 	function getGlobalPosition() { // temp subscription
-    var msg = {};
+    var last_now = now;
+    now = Date.now();
+    console.log('set interval latency: ' + (now - last_now))
+    var msg = {
+      now: '' + Date.now()
+    };
     sendToServer('query_global_position', msg);
 	}
   // Ou bien plus subtil avec du onMouseMove?

@@ -1,11 +1,5 @@
 package paris.benoit.mob.front;
 
-import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.BasicActor;
 import co.paralleluniverse.actors.ExitMessage;
@@ -15,10 +9,15 @@ import co.paralleluniverse.comsat.webactors.WebDataMessage;
 import co.paralleluniverse.comsat.webactors.WebSocketOpened;
 import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.MobClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
+
+import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
@@ -56,7 +55,7 @@ public class FrontActor extends BasicActor<Object, Void> {
             }
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;
-                logger.debug("Got a WS message: " + msg);
+                //logger.debug("Got a WS message: " + msg);
                 
                 ToServerMessage cMsg = new ToServerMessage(msg.getStringBody());
                 

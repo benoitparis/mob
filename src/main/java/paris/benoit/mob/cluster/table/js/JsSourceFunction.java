@@ -51,7 +51,7 @@ public class JsSourceFunction extends RichParallelSourceFunction<Row> {
             Row row = new Row(1);
             // TODO fix seri/deseri
             row.setField(0, jrds.deserialize(mapper.writeValueAsString(item).getBytes()));
-            logger.debug("" + row);
+            //logger.debug("" + row);
             ctx.collect(row);
         }
 

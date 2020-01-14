@@ -1,18 +1,15 @@
 package paris.benoit.mob.cluster.table.loopback;
 
+import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import co.paralleluniverse.strands.channels.ThreadReceivePort;
-import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.MobClusterSender;
-
-import java.util.Random;
+import paris.benoit.mob.cluster.MobTableConfiguration;
 
 @SuppressWarnings("serial")
 public class ActorSource extends RichParallelSourceFunction<Row> {
@@ -48,7 +45,7 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
             Row row = receivePort.receive();
             // By convention
             row.setField(0, loopbackIndex);
-            row.setField(3, "" + new Random().nextInt(2)); // temporary, to be removed when Blink can to Tables and not TableSources
+            row.setField(3, "1"); // temporary, to be removed when Blink can to Tables and not TableSources
             sc.collect(row);
 
         }
