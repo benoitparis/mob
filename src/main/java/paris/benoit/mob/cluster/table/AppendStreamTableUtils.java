@@ -20,21 +20,18 @@ public class AppendStreamTableUtils {
     //   REM accidentellement, en ayant la redondance avec kafka, ça irait lire aux bons offsets?
     //   REM si on fixe ça il faudrat mettre des DefinedProctimeAttribute aux sources
     public static void createAndRegisterTableSourceDoMaterializeAsAppendStream(StreamTableEnvironment tEnv, StreamTableSource tableSource, String name) {
+
         tEnv.registerTableSource(name + "_raw", tableSource);
-        logger.info("Registering as TableSource: " + name + "_raw");
-        Table rawTableSource = tEnv.sqlQuery(
-                "SELECT\n" +
-                "  " + StringUtils.join(tableSource.getTableSchema().getFieldNames(), ",\n  ") + "\n" +
-                "FROM " + name + "_raw" + "\n"
-        );
-        DataStream<Row> appendStream = tEnv
-                .toAppendStream(rawTableSource, tableSource.getReturnType());
+
+        Table rawTable = tEnv.fromTableSource(tableSource);
+        DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, tableSource.getReturnType());
         logger.info("Registering as Table: " + name);
         tEnv.registerTable(name, tEnv.fromDataStream(appendStream,
                 StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
                 ", proctime_append_stream.proctime"
             )
         );
+
     }
 
 }
