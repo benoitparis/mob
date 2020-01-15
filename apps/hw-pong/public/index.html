@@ -55,7 +55,7 @@
 
 	function processServerMessage(evt) {
     // TODO from which table?
-		//console.log(JSON.parse(evt.data));
+		console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
@@ -66,11 +66,14 @@
       ballY = msg.payload.ballY;
       leftY  = msg.payload.leftY;
       rightY = msg.payload.rightY;
+      var scoreLeft  = msg.payload.scoreLeft;
+      var scoreRight  = msg.payload.scoreRight;
+      document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' - ' + scoreRight;
     } else if (msg.table === 'user_count') {
       var countLeft = msg.payload.countLeft;
       var countRight = msg.payload.countRight;
       var countGlobal  = msg.payload.countGlobal;
-      document.getElementById('user-count').innerHTML = countLeft + ' ' + countRight + ' ' + countGlobal;
+      document.getElementById('user-count').innerHTML = 'User count: ' + countLeft + ' + ' + countRight + ' = ' + countGlobal;
     } else {
       console.log('received msg of unknown table:');
       console.log(msg);
@@ -160,11 +163,12 @@
       (3. Server ack)
     </div>
     
-    <div id="user-count-display">
-    User count: (left right total)
-      <div id="user-count">
-        0 0 0
-      </div>
+    <div id="user-count">
+      User count: 0 + 0 = 0
+    </div>
+    
+    <div id="score">
+      Score: 0 - 0
     </div>
     
   </div>

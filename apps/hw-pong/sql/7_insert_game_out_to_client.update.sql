@@ -8,7 +8,9 @@ SELECT
     ballX,
     ballY,
     leftY,
-    rightY
+    rightY,
+    scoreLeft,
+    scoreRight
   )
 FROM query_global_position AS gqp
    , LATERAL TABLE (game_out_temporal(gqp.proctime_append_stream)) AS got

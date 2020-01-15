@@ -5,5 +5,7 @@ SELECT
   ballX,
   ballY,
   leftY,
-  rightY
+  rightY,
+  scoreLeft,
+  scoreRight
 FROM game_engine_out

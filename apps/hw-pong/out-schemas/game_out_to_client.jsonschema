@@ -19,6 +19,12 @@
     },
     "rightY": {
       "type": "number"
+    },
+    "scoreLeft": {
+      "type": "number"
+    },
+    "scoreRight": {
+      "type": "number"
     }
   }
 }
