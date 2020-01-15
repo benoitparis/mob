@@ -8,42 +8,43 @@ import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
-import org.apache.flink.table.api.Types;
+import org.apache.flink.table.api.DataTypes;
+import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSink;
 
 public class JsonTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
 
-    private TypeInformation<Row> jsonTypeInfo;
-    private String[] fieldNames;
-    private TypeInformation<?>[] fieldTypes;
+    private DataType jsonDataType;
+    private static final String[] fieldNames = new String[] {
+            "loopback_index",
+            "actor_identity",
+            "payload"
+    };
+    private DataType[] fieldTypes;
 
     private RichSinkFunction actorFunction;
     private JsonRowSerializationSchema jrs;
     private MobTableConfiguration configuration;
 
     public JsonTableSink(MobTableConfiguration configuration) {
-        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
-        fieldNames = new String[] { 
-            "loopback_index", 
-            "actor_identity",
-            "payload" 
+        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+        fieldTypes = new DataType[] {
+            DataTypes.INT(),
+            DataTypes.STRING(),
+            jsonDataType
         };
-        fieldTypes = new TypeInformation[] {
-            Types.INT(),
-            Types.STRING(),
-            jsonTypeInfo
-        };
-        logger.info("Created Sink with json schema: " + jsonTypeInfo.toString());
+        logger.info("Created Sink with json schema: " + jsonDataType.toString());
 
-        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
+        jrs = new JsonRowSerializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         actorFunction = new ActorSink(configuration, jrs);
         this.configuration = configuration;
     }
@@ -54,25 +55,15 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     }
 
     @Override
-    public String[] getFieldNames() {
-        return fieldNames;
-    }
-
-    @Override
-    public TypeInformation<?>[] getFieldTypes() {
-        return fieldTypes;
-    }
-
-    @Override
-    public TypeInformation<Row> getRecordType() {
-        return Types.ROW(fieldNames, fieldTypes);
+    public TableSchema getTableSchema() {
+        return TableSchema.builder().fields(fieldNames, fieldTypes).build();
     }
 
     @Override
     public void emitDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         consumeDataStream(ds);
     }
-    
+
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         return ds
@@ -83,5 +74,10 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
             .name(configuration.name);
     }
 
+    // TODO enlever quand ils seront prêt
+    @Override
+    public TypeInformation<Row> getRecordType() {
+        return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(this.getTableSchema().toRowDataType());
+    }
 
 }

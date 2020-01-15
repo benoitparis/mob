@@ -7,6 +7,7 @@ import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.types.Row;
+import paris.benoit.mob.cluster.table.json.JsonTableSource;
 
 import java.io.IOException;
 
@@ -18,6 +19,7 @@ public class MobClusterSender {
     private JsonRowDeserializationSchema jrds;
     private Channel<Row> channel;
     private ThreadReceivePort<Row> receiveport;
+    private static final int fieldCount = JsonTableSource.getFieldCount();
     
     public MobClusterSender(JsonRowDeserializationSchema jrds) {
         super();
@@ -29,8 +31,7 @@ public class MobClusterSender {
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
         
         try {
-            // TODO valeur dépendante de JsonTableSource, faudrait prendre l'arity de là, et globalement réduire les déps
-            Row root = new Row(5);
+            Row root = new Row(fieldCount);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);
             root.setField(2, jrds.deserialize(payload.getBytes()));

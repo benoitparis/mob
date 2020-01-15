@@ -6,9 +6,11 @@ import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
-import org.apache.flink.table.api.Types;
+import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,37 +19,21 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 public class JsTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSink.class);
 
-    private TypeInformation<Row> jsonTypeInfo;
-    private String[] fieldNames;
-//    private DataType[] fieldTypes;
-    private TypeInformation<?>[] fieldTypesOld;
+    private DataType jsonDataType;
+    private static final String[] fieldNames = new String[] { "payload" };
+    private DataType[] fieldTypes;
 
     private RichSinkFunction function;
     private MobTableConfiguration configuration;
 
     public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
 
-        jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
-        fieldNames = new String[] {
-                "payload"
-        };
-        fieldTypesOld = new TypeInformation[] {
-                jsonTypeInfo
-        };
-        // TODO tester TypeConversions pour aider
-//        fieldTypes = new DataType[] {
-//                DataTypes.ANY(jsonTypeInfo)
-//        };
+        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+        fieldTypes = new DataType[] { jsonDataType };
 
-//        nécessaire?
-//        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
         function = new JsSinkFunction(parentConfiguration, configuration, invokeFunction, code);
         this.configuration = configuration;
-        logger.info("Instanciated JsTableSink with json schema: " + jsonTypeInfo.toString());
-    }
-
-    public String getName() {
-        return configuration.name;
+        logger.info("Instanciated JsTableSink with json schema: " + jsonDataType.toString());
     }
 
     @Override
@@ -56,23 +42,8 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
     }
 
     @Override
-    public String[] getFieldNames() {
-        return fieldNames;
-    }
-
-//    @Override
-//    public TableSchema getTableSchema() {
-//        return TableSchema.builder().fields(fieldNames, fieldTypes).build();
-//    }
-
-    @Override
-    public TypeInformation<?>[] getFieldTypes() {
-        return fieldTypesOld;
-    }
-
-    @Override
-    public TypeInformation<Row> getRecordType() {
-        return Types.ROW(fieldNames, fieldTypesOld);
+    public TableSchema getTableSchema() {
+        return TableSchema.builder().fields(fieldNames, fieldTypes).build();
     }
 
     @Override
@@ -86,6 +57,16 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
             .addSink(function)
             .setParallelism(1)
             .name(configuration.name);
+    }
+
+    // TODO enlever quand ils seront prêt
+    @Override
+    public TypeInformation<Row> getRecordType() {
+        return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(this.getTableSchema().toRowDataType());
+    }
+
+    public String getName() {
+        return configuration.name;
     }
 
 }
