@@ -32,7 +32,6 @@ public class MobClusterConfiguration {
 
     private String basePath;
 
-
     public MobClusterConfiguration(String appName, UnderTowLauncher underTowLauncher, TimeCharacteristic processingtime, int streamParallelism, int maxBufferTimeMillis, int flinkWebUiPort, long latencyTrackingInterval) throws IOException {
         super();
         this.name = appName;
@@ -80,7 +79,6 @@ public class MobClusterConfiguration {
                             getConfType(fileParts[1])
                         );
                 } catch (IOException e) {
-                    // eww
                     throw new RuntimeException(e);
                 }
             })

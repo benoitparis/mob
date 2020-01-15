@@ -33,7 +33,6 @@ public class JsTableSource implements StreamTableSource<Row> {
                 jsonTypeInfo
         };
 
-//        jrds = new JsonRowDeserializationSchema.Builder(jsonTypeInfo).build();
         function = new JsSourceFunction(parentConfiguration, configuration);
         this.configuration = configuration;
         logger.info("Instanciated JsTableSink with json schema: " + jsonTypeInfo.toString());

@@ -88,5 +88,4 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
             .name(configuration.name);
     }
 
-
 }

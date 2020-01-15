@@ -4,7 +4,7 @@ SELECT
   actor_identity,
   ROW(
     CAST(gqp.now AS VARCHAR),
-    CAST(gqp.proctime AS VARCHAR),
+    CAST(gqp.proctime_append_stream AS VARCHAR),
     ballX,
     ballY,
     leftY,

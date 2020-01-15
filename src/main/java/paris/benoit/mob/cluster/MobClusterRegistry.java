@@ -13,6 +13,7 @@ import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
+import paris.benoit.mob.cluster.table.json.JsonTableSource;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -46,9 +47,6 @@ public class MobClusterRegistry {
         logger.info("Web UI at: http://localhost:" + configuration.flinkWebUiPort);
         logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
         logger.info("Plan is: \n" + sEnv.getExecutionPlan());
-
-        // pour debug
-        JsTableEngine.isReady();
     }
     
     private void setupFlink() {
@@ -79,15 +77,10 @@ public class MobClusterRegistry {
     private void registerInputOutputTables() {
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
+            // wait for bug fix / understanding TableSource duplication
 //            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
 
-//            tEnv.registerTableSource(inSchema.name + "_raw", new JsonTableSource(inSchema));
-//            Table tableSourceRaw = tEnv.sqlQuery("SELECT * FROM " + inSchema.name + "_raw");
-//            DataStream<Row> tableSourceRawAsAppendStream = tEnv.toAppendStream(tableSourceRaw, tableSourceRaw.getSchema().toRowType());
-//            tEnv.registerTable(inSchema.name, tEnv.fromDataStream(tableSourceRawAsAppendStream));
-//            logger.debug("Registered Table Source: " + inSchema);
-
-            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, inSchema);
+            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, new JsonTableSource(inSchema), inSchema.name);
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {
@@ -98,7 +91,6 @@ public class MobClusterRegistry {
     }
 
     private void registerDataFlow() {
-
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
             logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
@@ -117,16 +109,13 @@ public class MobClusterRegistry {
                         JsTableEngine.createAndRegister(tEnv, sqlConf, configuration);
                         break;
                     case UPDATE:
-                        // TODO payload: Row
-                        // PayloadedTableUtils.wrapPrettyErrorAndUpdate
-                        // ou bien un mode où infer le out schema? yep, contrat d'interface good
+                        // TODO wait for detailed Row schema printing
                         tEnv.sqlUpdate(sqlConf.content);
 
                         break;
                         default:
                             throw new RuntimeException("No SQL type was specified");
                 }
-
 
                 logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
 
@@ -145,7 +134,7 @@ public class MobClusterRegistry {
                 sEnv.execute();
                 logger.info("Stream END");
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("Stream execution failure", e);
             }
         }).start();
     }

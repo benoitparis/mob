@@ -5,7 +5,6 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
-import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
@@ -19,21 +18,18 @@ import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.function.Consumer;
 
 public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private static final Logger logger = LoggerFactory.getLogger(JsSinkFunction.class);
 
     private MobTableConfiguration parentConfiguration;
     private BlockingQueue<Map> queue;
-    private Consumer<String> consumer;
 
     private JsonRowSerializationSchema jrs;
-    private ObjectMapper mapper = new ObjectMapper();
 
-    String invokeFunction;
-    String code;
-    Invocable inv;
+    private String invokeFunction;
+    private String code;
+    private Invocable inv;
 
     public JsSinkFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
         this.parentConfiguration = parentConfiguration;
@@ -63,9 +59,8 @@ public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
     public void invoke(Tuple2<Boolean, Row> value, Context context) {
 
         if (value.f0) {
-            Row row = value.f1;
             // par convention
-            Row payload = (Row) row.getField(0);
+            Row payload = (Row) value.f1.getField(0);
 
             try {
                 Map out = (Map) inv.invokeFunction(invokeFunction, convertRowToMap(payload));
