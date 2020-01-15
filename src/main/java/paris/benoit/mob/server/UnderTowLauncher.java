@@ -46,7 +46,7 @@ public class UnderTowLauncher {
 
         final PathHandler routingHandler = Handlers.path().addPrefixPath("/service", actorHandler).addPrefixPath("/", fileHandler);
 
-        server = Undertow.builder().addHttpListener(inetPort, "localhost").setHandler(routingHandler).build();
+        server = Undertow.builder().addHttpListener(inetPort, "0.0.0.0").setHandler(routingHandler).build();
 
         server.start();
         logger.info("Undertow is up at: " + baseUrl);
