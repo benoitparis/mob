@@ -59,6 +59,7 @@ public class JsTableSource implements StreamTableSource<Row> {
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
                 .addSource(function, getReturnType())
+                // .forceNonParallel() et il y a du typage SingleDataStream et aussi du maxparallelism et un flag pour opts?
                 .setParallelism(1)
                 .name(configuration.name);
     }

@@ -24,6 +24,7 @@ public class AppendStreamTableUtils {
         tEnv.registerTableSource(name + "_raw", tableSource);
 
         Table rawTable = tEnv.fromTableSource(tableSource);
+
         DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, tableSource.getReturnType());
         logger.info("Registering as Table: " + name);
         tEnv.registerTable(name, tEnv.fromDataStream(appendStream,

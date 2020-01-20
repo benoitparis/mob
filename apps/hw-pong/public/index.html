@@ -42,7 +42,8 @@
     }
 		fill(0, 0, 0);
     rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
-    frameRate(60);
+    // draw se fait requestAnimationFramer? du coup on mettrait de l'interpolation ici?
+    
 	}
 
   // Network setup
@@ -54,8 +55,7 @@
 	};
 
 	function processServerMessage(evt) {
-    // TODO from which table?
-		console.log(JSON.parse(evt.data));
+		//console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
@@ -78,10 +78,6 @@
       console.log('received msg of unknown table:');
       console.log(msg);
     }
-    
-		//leftY = msg.leftY;
-		//rightY = msg.rightY;
-		//draw();
 	};
   
   function sendToServer(table, msg) {
@@ -139,7 +135,6 @@
     };
     sendToServer('query_global_position', msg);
 	}
-  // Ou bien plus subtil avec du onMouseMove?
 	setInterval(getGlobalPosition, 41);
 	
 </script>

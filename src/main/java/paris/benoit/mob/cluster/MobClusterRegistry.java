@@ -14,6 +14,7 @@ import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
 import paris.benoit.mob.cluster.table.json.JsonTableSource;
+import paris.benoit.mob.cluster.table.tick.TickTableSource;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -75,6 +76,11 @@ public class MobClusterRegistry {
     }
 
     private void registerInputOutputTables() {
+
+
+        // TODO put in conf
+        //AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, new TickTableSource(20), "tick_service");
+        tEnv.registerTableSource("tick_service", new TickTableSource(20));
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             // wait for bug fix / understanding TableSource duplication
@@ -91,6 +97,7 @@ public class MobClusterRegistry {
     }
 
     private void registerDataFlow() {
+
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
             logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);

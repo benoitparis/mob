@@ -1,0 +1,53 @@
+SELECT
+  ROW(
+    CAST(max_proctime AS VARCHAR),
+    CAST(leftY AS VARCHAR), -- lié au non détail de Row FLINK-15584
+    CAST(rightY AS VARCHAR) -- lié au non détail de Row FLINK-15584
+  ) AS payload
+FROM tick_service AS ts
+   , LATERAL TABLE (global_position_temporal(ts.tick_proctime)) AS gpt
+WHERE ts.constant_dummy_source = gpt.dummy_key
+', confType=UPDATE}
+	at paris.benoit.mob.cluster.MobClusterRegistry.registerDataFlow(MobClusterRegistry.java:128)
+	at paris.benoit.mob.cluster.MobClusterRegistry.start(MobClusterRegistry.java:40)
+	at paris.benoit.mob.server.MobServer.setupCluster(MobServer.java:39)
+	at paris.benoit.mob.server.MobServer.main(MobServer.java:15)
+Caused by: java.lang.AssertionError: Cannot add expression of different type to set:
+set type is RecordType(INTEGER tick_number, TIME ATTRIBUTE(PROCTIME) tick_proctime, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" constant_dummy_source, TIME ATTRIBUTE(PROCTIME) max_proctime, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" dummy_key, DECIMAL(38, 18) leftY, DECIMAL(38, 18) rightY) NOT NULL
+expression type is RecordType(INTEGER tick_number, TIME ATTRIBUTE(PROCTIME) tick_proctime, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" constant_dummy_source, TIME ATTRIBUTE(PROCTIME) max_proctime, VARCHAR(2147483647) CHARACTER SET "UTF-16LE" dummy_key, DECIMAL(38, 15) leftY, DECIMAL(38, 15) rightY) NOT NULL
+set is rel#523:LogicalCorrelate.NONE.any.None: 0.false.UNKNOWN(left=HepRelVertex#521,right=HepRelVertex#522,correlation=$cor0,joinType=inner,requiredColumns={1})
+expression is LogicalJoin(condition=[__TEMPORAL_JOIN_CONDITION($1, $4)], joinType=[inner])
+  LogicalTableScan(table=[[default_catalog, default_database, tick_service, source: [Tick Source]]])
+  LogicalProject(max_proctime=[$0], dummy_key=[CAST(_UTF-16LE'1':VARCHAR(2147483647) CHARACTER SET "UTF-16LE"):VARCHAR(2147483647) CHARACTER SET "UTF-16LE"], leftY=[/($2, +(0.001:DECIMAL(4, 3), $3))], rightY=[/($4, +(0.001:DECIMAL(4, 3), $5))])
+    LogicalAggregate(group=[{}], max_proctime=[MAX($0)], agg#1=[MAX($1)], agg#2=[SUM($2)], agg#3=[SUM($3)], agg#4=[SUM($4)], agg#5=[SUM($5)])
+      LogicalProject(proctime_append_stream=[$1], actor_identity=[$0], $f2=[CASE(=($4, _UTF-16LE'left'), $2, 0:DECIMAL(38, 18))], $f3=[CASE(=($4, _UTF-16LE'left'), 1, 0)], $f4=[CASE(=($4, _UTF-16LE'right'), $2, 0:DECIMAL(38, 18))], $f5=[CASE(=($4, _UTF-16LE'right'), 1, 0)])
+        LogicalJoin(condition=[=($0, $3)], joinType=[inner])
+          LogicalAggregate(group=[{0}], proctime_append_stream=[MAX($1)], y=[LAST_VALUE($2)])
+            LogicalProject(actor_identity=[$1], proctime_append_stream=[$4], $f2=[$2.y])
+              LogicalTableScan(table=[[Unregistered_DataStream_9]])
+          LogicalAggregate(group=[{0}], side=[LAST_VALUE($1)])
+            LogicalProject(actor_identity=[$1], $f1=[$2.side])
+              LogicalTableScan(table=[[Unregistered_DataStream_3]])
+
+	at org.apache.calcite.plan.RelOptUtil.verifyTypeEquivalence(RelOptUtil.java:384)
+	at org.apache.calcite.plan.hep.HepRuleCall.transformTo(HepRuleCall.java:57)
+	at org.apache.calcite.plan.RelOptRuleCall.transformTo(RelOptRuleCall.java:236)
+	at org.apache.flink.table.planner.plan.rules.logical.LogicalCorrelateToJoinFromTemporalTableFunctionRule.onMatch(LogicalCorrelateToJoinFromTemporalTableFunctionRule.scala:135)
+	at
+  
+  
+  
+DECIMAL(38, 18) rightY
+vs
+DECIMAL(38, 15) rightY
+
+
+DECIMAL(38, 18) c'est un entier apparemment
+et DECIMAL(38, 14) c'est qqs chiffres après la virgule
+
+Résolution:
+
+
+CAST(X as DOUBLE) dans la table qui va construire la temporal table function
+
+  
