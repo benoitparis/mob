@@ -8,12 +8,12 @@ import paris.benoit.mob.cluster.MobClusterRegistry;
 public class MobServer {
     
     public static void main(String[] args) throws Exception {
-//        setupCluster("ack");
-//        setupCluster("set-state-full-join");
-//        setupCluster("set-state-temporal-join");
-        setupCluster("adder");
-//        setupCluster("tick");
-//        setupCluster("pong");
+//        launchApp("ack");
+//        launchApp("set-state-full-join");
+//        launchApp("set-state-temporal-join");
+//        launchApp("adder");
+//        launchApp("tick");
+        launchApp("pong");
     }
 
     public final static int STREAM_PARALLELISM = 4;
@@ -24,7 +24,7 @@ public class MobServer {
     public final static int FLINK_WEB_UI_PORT = 8082;
     public final static long LATENCY_TRACKING_INTERVAL = -1;
     
-    public static void setupCluster(String appName) throws Exception {
+    public static void launchApp(String appName) throws Exception {
 
         MobClusterConfiguration configuration = new MobClusterConfiguration(
             appName,

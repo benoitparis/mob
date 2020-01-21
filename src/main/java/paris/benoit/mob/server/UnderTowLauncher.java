@@ -3,10 +3,10 @@ package paris.benoit.mob.server;
 import co.paralleluniverse.comsat.webactors.undertow.AutoWebActorHandler;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
 import io.undertow.server.handlers.RequestDumpingHandler;
 import io.undertow.server.handlers.resource.PathResourceManager;
-import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.session.InMemorySessionManager;
 import io.undertow.server.session.SessionAttachmentHandler;
 import io.undertow.server.session.SessionCookieConfig;
@@ -38,9 +38,11 @@ public class UnderTowLauncher {
         sessionConfig.setMaxAge(60);
         final SessionAttachmentHandler sessionAttachmentHandler = new SessionAttachmentHandler(sessionManager, sessionConfig);
 
-        final ResourceHandler fileHandler = Handlers
-                .resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + appName + "/public"), 100))
-                .setWelcomeFiles("index.html");
+        HttpHandler fileHandler = Handlers.disableCache(
+                Handlers
+                        .resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + appName + "/public"), 100))
+                        .setWelcomeFiles("index.html")
+        );
 
         final RequestDumpingHandler actorHandler = new RequestDumpingHandler(sessionAttachmentHandler.setNext(new AutoWebActorHandler()));
 
