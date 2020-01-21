@@ -1,8 +1,12 @@
 No operators defined in streaming topology. Cannot execute.
 
-Se produit quand on ne tire pas sur une toutes les table source. (et aussi mettre des choses dans tous les table sinks?)
 
+Type A
+  Se produit quand on ne tire pas sur toutes les table source. (et aussi mettre des choses dans tous les table sinks?)
+  !! peut se produire facilement si on ne fait qu'alimenter un engine js sans tirer sur sa sortie, qui est un table source
 
-!! peut se produire facilement si on ne fait qu'alimenter un engine js sans tirer sur sa sortie, qui est un table source
-
+Type B
+  Le call est fait quand on demande un plan, mais c'est juste qu'on a pas eu le temps d'en définir. On avait starté l'engine dans un autre thread.
+  On a un bug?
+    reprod minimale n'a pas le bug
 
