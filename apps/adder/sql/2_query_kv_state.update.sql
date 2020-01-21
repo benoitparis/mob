@@ -5,6 +5,6 @@ SELECT
   ROW(
     CAST(key_count AS VARCHAR)
   )
-FROM (SELECT loopback_index, actor_identity, k, proctime FROM query_state)                           AS qs
-   , LATERAL TABLE (kv_state(qs.proctime)) AS kvs
+FROM (SELECT loopback_index, actor_identity, k, proctime_append_stream FROM query_state) AS qs
+   , LATERAL TABLE (kv_state(qs.proctime_append_stream)) AS kvs
 WHERE qs.k = kvs.k

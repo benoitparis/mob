@@ -11,9 +11,9 @@ public class MobServer {
 //        setupCluster("ack");
 //        setupCluster("set-state-full-join");
 //        setupCluster("set-state-temporal-join");
-//        setupCluster("adder");
+        setupCluster("adder");
 //        setupCluster("tick");
-        setupCluster("pong");
+//        setupCluster("pong");
     }
 
     public final static int STREAM_PARALLELISM = 4;
