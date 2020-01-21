@@ -5,7 +5,9 @@ import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.sources.DefinedProctimeAttribute;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.utils.TypeConversions;
@@ -14,10 +16,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
-public class JsTableSource implements StreamTableSource<Row> {
+import javax.annotation.Nullable;
+
+public class JsTableSource implements StreamTableSource<Row>
+        , DefinedProctimeAttribute
+{
     private static final Logger logger = LoggerFactory.getLogger(JsTableSource.class);
 
-    private static final String[] fieldNames = new String[] {"payload"};
+    private static final String[] fieldNames = new String[] {
+            "payload",
+            "proctime_append_stream"
+    };
     private DataType[] fieldTypes;
 
     private RichParallelSourceFunction<Row> function;
@@ -26,7 +35,10 @@ public class JsTableSource implements StreamTableSource<Row> {
     public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
 
         DataType jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
-        fieldTypes = new DataType[] { jsonDataType };
+        fieldTypes = new DataType[] {
+                jsonDataType,
+                DataTypes.TIMESTAMP(3),
+        };
 
         function = new JsSourceFunction(parentConfiguration, configuration);
         this.configuration = configuration;
@@ -66,4 +78,11 @@ public class JsTableSource implements StreamTableSource<Row> {
     public String getName() {
         return configuration.name;
     }
+
+    @Nullable
+    @Override
+    public String getProctimeAttribute() {
+        return "proctime_append_stream";
+    }
+
 }

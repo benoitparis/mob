@@ -48,7 +48,7 @@ public class JsSourceFunction extends RichParallelSourceFunction<Row> {
             Map item = queue.take();
 
             // By convention
-            Row row = new Row(1);
+            Row row = new Row(2);
             // TODO fix seri/deseri
             row.setField(0, jrds.deserialize(mapper.writeValueAsString(item).getBytes()));
             //logger.debug("" + row);

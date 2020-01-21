@@ -17,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSource;
 
-public class JsonTableSource implements StreamTableSource<Row> {
+public class JsonTableSource implements StreamTableSource<Row>
+//        , DefinedProctimeAttribute
+{
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
 
     private DataType jsonDataType;
@@ -26,6 +28,7 @@ public class JsonTableSource implements StreamTableSource<Row> {
             "actor_identity",
             "payload",
             "constant_dummy_source", //TODO remove?
+//            "proctime_append_stream"
     };
     private DataType[] fieldTypes;
     
@@ -39,7 +42,8 @@ public class JsonTableSource implements StreamTableSource<Row> {
             DataTypes.INT(),
             DataTypes.STRING(),
             jsonDataType,
-            DataTypes.STRING()
+            DataTypes.STRING(),
+//            DataTypes.TIMESTAMP(3),
         };
         logger.info("Created Source with json schema: " + jsonDataType.toString());
 
@@ -72,7 +76,8 @@ public class JsonTableSource implements StreamTableSource<Row> {
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-            .addSource(actorFunction, getReturnType())
+            .addSource(actorFunction, configuration.name, getReturnType())
+            //.forceNonParallel()
             .name(configuration.name);
     }
     
@@ -84,4 +89,9 @@ public class JsonTableSource implements StreamTableSource<Row> {
         return fieldNames.length;
     }
 
+//    @Nullable
+//    @Override
+//    public String getProctimeAttribute() {
+//        return "proctime_append_stream";
+//    }
 }

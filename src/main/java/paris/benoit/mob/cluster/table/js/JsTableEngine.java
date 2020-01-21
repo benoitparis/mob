@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -49,7 +48,8 @@ public class JsTableEngine {
             JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.name + "_out", outSchema, null));
 
             tEnv.registerTableSink(sink.getName(), sink);
-            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, source, source.getName());
+            tEnv.registerTableSource(source.getName(), source);
+            //AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, source, source.getName());
 
         } else {
             throw new RuntimeException("Failed to create js table. They must conform to: " + JS_TABLE_PATTERN_REGEX + "\nSQL was: \n" + tableConf);
