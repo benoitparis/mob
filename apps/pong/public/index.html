@@ -55,13 +55,13 @@
 	};
 
 	function processServerMessage(evt) {
-		//console.log(JSON.parse(evt.data));
+		console.log(JSON.parse(evt.data));
 		var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
       side = msg.payload.side;
     } else if (msg.table === 'game_out_to_client') {
-      console.log('query latency: ' + (Date.now() - parseInt(msg.payload.now, 10)) + ' ms')
+      //console.log('query latency: ' + (Date.now() - parseInt(msg.payload.now, 10)) + ' ms')
       ballX = msg.payload.ballX;
       ballY = msg.payload.ballY;
       leftY  = msg.payload.leftY;
@@ -129,7 +129,7 @@
 	function getGlobalPosition() { // temp subscription
     var last_now = now;
     now = Date.now();
-    console.log('set interval latency: ' + (now - last_now))
+    //console.log('set interval latency: ' + (now - last_now))
     var msg = {
       now: '' + Date.now()
     };
