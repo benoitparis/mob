@@ -40,7 +40,6 @@ public class TickSourceFunction extends RichParallelSourceFunction<Row> implemen
             Row row = new Row(3);
             row.setField(0, (offset + counter));
             row.setField(1, "1");
-            row.setField(2, null);
 
             Thread.sleep(Math.max(0, (initialTs + interval * counter) - System.currentTimeMillis()));
 
