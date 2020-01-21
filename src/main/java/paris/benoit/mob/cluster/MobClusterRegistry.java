@@ -49,7 +49,7 @@ public class MobClusterRegistry {
         logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
         logger.info("Plan is: \n" + sEnv.getExecutionPlan());
     }
-    
+
     private void setupFlink() {
         Configuration conf = new Configuration();
         conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
@@ -77,10 +77,20 @@ public class MobClusterRegistry {
 
     private void registerInputOutputTables() {
 
-
         // TODO put in conf
-        //AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, new TickTableSource(20), "tick_service");
-        tEnv.registerTableSource("tick_service", new TickTableSource(20));
+//        AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, new TickTableSource(20), "tick_service");
+
+        tEnv.registerTableSource("tick_service", new TickTableSource(200));
+
+//        Table rawTickTable = tEnv.fromTableSource(new TickTableSource(20));
+//        DataStream<Row> appendStream = tEnv.toAppendStream(rawTickTable, rawTickTable.getReturnType());
+//        logger.info("Registering as Table: " + name);
+//        tEnv.registerTable(name, tEnv.fromDataStream(appendStream,
+//                StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
+//                        ", proctime_append_stream.proctime"
+//                )
+//        );
+
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             // wait for bug fix / understanding TableSource duplication
@@ -97,7 +107,6 @@ public class MobClusterRegistry {
     }
 
     private void registerDataFlow() {
-
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
             logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
@@ -145,6 +154,7 @@ public class MobClusterRegistry {
             }
         }).start();
     }
+
 
     public static class NameSenderPair {
         String name;

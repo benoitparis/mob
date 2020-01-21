@@ -72,8 +72,8 @@ public class JsonTableSource implements StreamTableSource<Row> {
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-                .addSource(actorFunction, getReturnType())
-                .name(configuration.name);
+            .addSource(actorFunction, getReturnType())
+            .name(configuration.name);
     }
     
     public JsonRowDeserializationSchema getJsonRowDeserializationSchema() {
