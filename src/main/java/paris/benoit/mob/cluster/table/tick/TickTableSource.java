@@ -13,8 +13,8 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute
-{
+public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
+
     private static final Logger logger = LoggerFactory.getLogger(TickTableSource.class);
 
     private static final String[] fieldNames = new String[] {

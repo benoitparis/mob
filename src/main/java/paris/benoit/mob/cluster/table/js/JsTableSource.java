@@ -20,7 +20,7 @@ public class JsTableSource implements StreamTableSource<Row> {
     private static final String[] fieldNames = new String[] {"payload"};
     private DataType[] fieldTypes;
 
-    private RichParallelSourceFunction function;
+    private RichParallelSourceFunction<Row> function;
     private MobTableConfiguration configuration;
 
     public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
@@ -59,8 +59,7 @@ public class JsTableSource implements StreamTableSource<Row> {
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
                 .addSource(function, getReturnType())
-                // .forceNonParallel() et il y a du typage SingleDataStream et aussi du maxparallelism et un flag pour opts?
-                .setParallelism(1)
+                .forceNonParallel()
                 .name(configuration.name);
     }
 

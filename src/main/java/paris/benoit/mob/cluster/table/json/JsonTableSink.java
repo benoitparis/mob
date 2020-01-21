@@ -31,7 +31,7 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     };
     private DataType[] fieldTypes;
 
-    private RichSinkFunction actorFunction;
+    private RichSinkFunction<Tuple2<Boolean, Row>> actorFunction;
     private JsonRowSerializationSchema jrs;
     private MobTableConfiguration configuration;
 
