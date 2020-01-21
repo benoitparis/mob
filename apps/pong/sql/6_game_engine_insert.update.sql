@@ -1,3 +1,5 @@
+
+/*
 INSERT INTO game_engine_in
 SELECT
   ROW(
@@ -6,8 +8,10 @@ SELECT
     CAST(rightY AS VARCHAR) -- lié au non détail de Row FLINK-15584
   ) AS payload
 FROM global_position_history
+*/
 
-/*
+
+
 INSERT INTO game_engine_in
 SELECT
   ROW(
@@ -20,4 +24,3 @@ FROM tick_service AS ts
 WHERE ts.constant_dummy_source = gpt.dummy_key
 
 
-*/

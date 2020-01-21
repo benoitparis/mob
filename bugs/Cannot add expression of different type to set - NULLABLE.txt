@@ -34,3 +34,9 @@ workaround:
   REM prendre l'expression qui définit la temp table function, pas le join/insert qui va la trigger
   SUM(1) key_count -> COALESCE(SUM(1), null) key_count
     (qui ne se fait pas simplifier)
+    
+--------------
+
+
+oui, le COALESCE('1', null) ça marche bien aussi    
+    

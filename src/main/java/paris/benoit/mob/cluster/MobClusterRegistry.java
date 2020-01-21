@@ -77,20 +77,7 @@ public class MobClusterRegistry {
 
     private void registerInputOutputTables() {
 
-        // TODO put in conf
-//        AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, new TickTableSource(20), "tick_service");
-
-        tEnv.registerTableSource("tick_service", new TickTableSource(200));
-
-//        Table rawTickTable = tEnv.fromTableSource(new TickTableSource(20));
-//        DataStream<Row> appendStream = tEnv.toAppendStream(rawTickTable, rawTickTable.getReturnType());
-//        logger.info("Registering as Table: " + name);
-//        tEnv.registerTable(name, tEnv.fromDataStream(appendStream,
-//                StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
-//                        ", proctime_append_stream.proctime"
-//                )
-//        );
-
+        tEnv.registerTableSource("tick_service", new TickTableSource(20));
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             // wait for bug fix / understanding TableSource duplication

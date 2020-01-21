@@ -50,4 +50,7 @@ Résolution:
 
 CAST(X as DOUBLE) dans la table qui va construire la temporal table function
 
-  
+-----------
+
+On peut aussi avoir du VARCHAR(1) vs VARCHAR(123456789)
+  -> caster en VARCHAR
