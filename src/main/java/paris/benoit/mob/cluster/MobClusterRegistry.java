@@ -67,7 +67,6 @@ public class MobClusterRegistry {
         
         EnvironmentSettings bsSettings = 
             EnvironmentSettings.newInstance()
-//                .useOldPlanner()
                 .useBlinkPlanner()
                 .inStreamingMode()
             .build();
