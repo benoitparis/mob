@@ -1,0 +1,27 @@
+TableException Unsupported conversion from data type TIMESTAMP 6
+
+
+
+Caused by: org.apache.flink.table.api.TableException: Unsupported conversion from data type 'TIMESTAMP(6)' (conversion class: java.time.LocalDateTime) to type information. Only data types that originated from type information fully support a reverse conversion.
+	at
+  
+  
+  
+Exception in thread "main" org.apache.flink.table.api.ValidationException: Processing time field 'tick_proctime' has invalid type TIME(0). Processing time attributes must be of type SQL_TIMESTAMP.
+
+
+Caused by: org.apache.flink.table.api.TableException: TableSource of type paris.benoit.mob.cluster.table.tick.TickTableSource returned a DataStream of data type ROW<`tick_number` INT, `tick_proctime` TIMESTAMP(3), `constant_dummy_source` STRING> that does not match with the data type 
+ROW<`tick_number` INT, `tick_proctime` TIMESTAMP(3), `constant_dummy_source` STRING> declared by the TableSource.getProducedDataType() method. Please validate the implementation of the TableSource.
+
+
+quand on essaie de query les temporal table functions, des fois on a des difficultés à donner le bon time
+
+avec des DefinedProctimeAttribute c'est difficile, surtout dans le contexte de changements de types Blink/old
+
+
+Solution:
+On materialize avec le bon vieux appendstream, et on le laisse définir le time attribute
+  (il faudra aller regarder leur impl, pour voir comment le proctime est rajouté)
+
+
+
