@@ -46,8 +46,10 @@ public class MobClusterRegistry {
         logger.info("Mob Cluster is up");
         logger.info("Front at: " + configuration.underTowLauncher.getUrl());
         logger.info("Web UI at: http://localhost:" + configuration.flinkWebUiPort);
-        logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
-        logger.info("Plan is: \n" + sEnv.getExecutionPlan());
+        String[] tables = tEnv.listTables();
+        String plan = sEnv.getExecutionPlan();
+        logger.info("Tables are: " + Arrays.asList(tables));
+        logger.info("Plan is: \n" + plan);
     }
 
     private void setupFlink() {
