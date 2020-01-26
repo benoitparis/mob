@@ -31,7 +31,11 @@ public class MobClusterRegistry {
     public MobClusterRegistry(MobClusterConfiguration clusterConfiguration) {
         this.configuration = clusterConfiguration;
     }
-    
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_CYAN = "\u001B[36m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+
     public void start() throws Exception {
 
         configuration.underTowLauncher.launchUntertow(configuration.name);
@@ -44,12 +48,12 @@ public class MobClusterRegistry {
         waitRegistrationsReady();
 
         String plan = sEnv.getExecutionPlan();
-        logger.info("Plan is: \n" + plan);
-        logger.info("Front at: " + configuration.underTowLauncher.getUrl());
-        logger.info("Web UI at: http://localhost:" + configuration.flinkWebUiPort);
+        logger.info(ANSI_YELLOW + "Plan is: \n" + ANSI_RESET + plan);
+        logger.info("Front: " + ANSI_YELLOW + configuration.underTowLauncher.getUrl() + ANSI_RESET);
+        logger.info("Web UI: " + ANSI_YELLOW + "http://localhost:" + configuration.flinkWebUiPort + ANSI_RESET);
         String[] tables = tEnv.listTables();
-        logger.info("Tables are: " + Arrays.asList(tables));
-        logger.info("Mob Cluster is up");
+        logger.info("Tables: " + ANSI_YELLOW + Arrays.asList(tables) + ANSI_RESET);
+        logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
     }
 
     private void setupFlink() {
