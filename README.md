@@ -8,13 +8,17 @@ A particular setup of stream processing enables controlling the colocation of sy
 
 It is my opinion that this can enable crowds to interact with themselves; And that it opens a relatively easy pathway to try and test new ways to scale real-time multi-user experiences to massive sizes.
 
-## API
-
-Developpers only have to specify html and javascript; and SQL for distributed processing. A JS engine is made available inside the distributed stream, in order to share business logic that is common between client and server.
-
 ## A new design space
 
 Pong is a 2-player game; And one can ask: what would be a 10k-player pong? There are lots of different answers, and MOB enables exploring this design space.
 
 One app is available: 'hello-world-pong'; where half of the players are on the left, half on the right. And the paddles' position is the average of each individual's position. Each crowd has to synchronize with itself in order to win.
 
+## API
+
+Developpers only have to specify html and javascript; and SQL for distributed processing. A JS engine is made available inside the distributed stream, in order to share business logic that is common between client and server.
+
+## Launching
+
+    git clone https://github.com/benoitparis/mob
+    mvnw clean install exec:exec
