@@ -15,6 +15,8 @@
         <quasar-undertow.version>0.7.0</quasar-undertow.version>
         <flink-scala.version>2.11</flink-scala.version>
         <graalvm.version>19.2.0</graalvm.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <profiles>

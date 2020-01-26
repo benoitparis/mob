@@ -2,12 +2,29 @@ package paris.benoit.mob.server;
 
 import org.apache.flink.streaming.api.TimeCharacteristic;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 
 public class MobServer {
-    
+    private static final Logger logger = LoggerFactory.getLogger(MobServer.class);
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+
     public static void main(String[] args) throws Exception {
+
+        logger.info("\n" + ANSI_GREEN +
+            "::::    ::::   ::::::::  :::::::::  :::        ::::::::::: :::::::::  \n" +
+            "+:+:+: :+:+:+ :+:    :+: :+:    :+: :+:            :+:     :+:    :+: \n" +
+            "+:+ +:+:+ +:+ +:+    +:+ +:+    +:+ +:+            +:+     +:+    +:+ \n" +
+            "+#+  +:+  +#+ +#+    +:+ +#++:++#+  +#+            +#+     +#++:++#+  \n" +
+            "+#+       +#+ +#+    +#+ +#+    +#+ +#+            +#+     +#+    +#+ \n" +
+            "#+#       #+# #+#    #+# #+#    #+# #+#            #+#     #+#    #+# \n" +
+            "###       ###  ########  #########  ########## ########### #########  \n" +
+        ANSI_RESET);
+
         if(getVersion() != 8) {
             System.out.println("Error: A Java 8 runtime must be used");
             System.out.println("Maven exec:exec goals can specify an executable path with: -Djava.executable=path/to/java");
