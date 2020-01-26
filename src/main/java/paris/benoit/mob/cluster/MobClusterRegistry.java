@@ -42,14 +42,14 @@ public class MobClusterRegistry {
         
         configuration.underTowLauncher.waitUnderTowAvailable();
         waitRegistrationsReady();
-        
-        logger.info("Mob Cluster is up");
+
+        String plan = sEnv.getExecutionPlan();
+        logger.info("Plan is: \n" + plan);
         logger.info("Front at: " + configuration.underTowLauncher.getUrl());
         logger.info("Web UI at: http://localhost:" + configuration.flinkWebUiPort);
         String[] tables = tEnv.listTables();
-        String plan = sEnv.getExecutionPlan();
         logger.info("Tables are: " + Arrays.asList(tables));
-        logger.info("Plan is: \n" + plan);
+        logger.info("Mob Cluster is up");
     }
 
     private void setupFlink() {
@@ -178,7 +178,7 @@ public class MobClusterRegistry {
         ) {
             logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * configuration.inSchemas.size() + " and JsTableEngines");
             logger.info("" + clusterSenderRaw);
-            logger.info("Plan is: \n" + sEnv.getExecutionPlan());
+            //logger.info("Plan is: \n" + sEnv.getExecutionPlan());
             Thread.sleep(POLL_INTERVAL);
         }
         doClusterSendersMatching(parallelism);

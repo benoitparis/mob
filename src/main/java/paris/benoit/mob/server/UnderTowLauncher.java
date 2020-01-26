@@ -54,6 +54,8 @@ public class UnderTowLauncher {
         logger.info("Undertow is up at: " + baseUrl);
         
         pokeActorService();
+
+
         
     }
 

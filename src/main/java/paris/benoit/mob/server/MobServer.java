@@ -8,11 +8,18 @@ import paris.benoit.mob.cluster.MobClusterRegistry;
 public class MobServer {
     
     public static void main(String[] args) throws Exception {
+        if(getVersion() != 8) {
+            System.out.println("Error: A Java 8 runtime must be used");
+            System.out.println("Maven exec:exec goals can specify an executable path with: -Djava.executable=path/to/java");
+            System.exit(-1);
+        }
+
 //        launchApp("ack");
 //        launchApp("set-state-full-join");
 //        launchApp("set-state-temporal-join");
 //        launchApp("adder");
 //        launchApp("tick");
+
         launchApp("pong");
     }
 
@@ -41,4 +48,14 @@ public class MobServer {
         
     }
 
+    private static int getVersion() {
+        String version = System.getProperty("java.version");
+        System.out.println("Java version: " + version);
+        if(version.startsWith("1.")) {
+            version = version.substring(2, 3);
+        } else {
+            int dot = version.indexOf(".");
+            if(dot != -1) { version = version.substring(0, dot); }
+        } return Integer.parseInt(version);
+    }
 }
