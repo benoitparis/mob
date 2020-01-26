@@ -16,6 +16,6 @@ JOIN (
     SUM(1) AS countGlobal
   FROM user_side
 ) ON true
-/* faudra mettre du last_value dans tout ça */
+/* faudra mettre du last_value dans tout ï¿½a */
 /* et du WITH DELAY p */
   
