@@ -20,6 +20,5 @@ Developpers only have to specify html and javascript; and SQL for distributed pr
 
 ## Launching
 
-    git clone https://github.com/benoitparis/mob
-    cd mob
+    git clone https://github.com/benoitparis/mob && cd mob
     mvnw clean install exec:exec
