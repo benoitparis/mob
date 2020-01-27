@@ -1,0 +1,50 @@
+java lang IllegalArgumentException at co paralleluniverse asm ClassReader init Unknown Source
+
+Throwing lots of error like these:
+
+java.lang.IllegalArgumentException
+        at co.paralleluniverse.asm.ClassReader.<init>(Unknown Source)
+        at co.paralleluniverse.asm.ClassReader.<init>(Unknown Source)
+        at co.paralleluniverse.asm.ClassReader.<init>(Unknown Source)
+        at co.paralleluniverse.fibers.instrument.MethodDatabase.checkFileAndClose(MethodDatabase.java:340)
+        at co.paralleluniverse.fibers.instrument.MethodDatabase.checkClass(MethodDatabase.java:320)
+        at co.paralleluniverse.fibers.instrument.MethodDatabase.getOrLoadClassEntry(MethodDatabase.java:180)
+        at co.paralleluniverse.fibers.instrument.SimpleSuspendableClassifier.isSuspendable(SimpleSuspendableClassifier.java:156)
+        at co.paralleluniverse.fibers.instrument.SimpleSuspendableClassifier.isSuspendable(SimpleSuspendableClassifier.java:164)
+        at co.paralleluniverse.fibers.instrument.DefaultSuspendableClassifier.isSuspendable(DefaultSuspendableClassifier.java:47)
+        at co.paralleluniverse.fibers.instrument.InstrumentClass.visitMethod(InstrumentClass.java:150)
+        at co.paralleluniverse.asm.ClassReader.b(Unknown Source)
+        at co.paralleluniverse.asm.ClassReader.accept(Unknown Source)
+        at co.paralleluniverse.asm.ClassReader.accept(Unknown Source)
+        at co.paralleluniverse.fibers.instrument.QuasarInstrumentor.instrumentClass(QuasarInstrumentor.java:118)
+        at co.paralleluniverse.fibers.instrument.QuasarInstrumentor.instrumentClass(QuasarInstrumentor.java:85)
+        at co.paralleluniverse.fibers.instrument.JavaAgent$Transformer.transform(JavaAgent.java:190)
+        at java.instrument/java.lang.instrument.ClassFileTransformer.transform(Unknown Source)
+        at java.instrument/sun.instrument.TransformerManager.transform(Unknown Source)
+        at java.instrument/sun.instrument.InstrumentationImpl.transform(Unknown Source)
+        at java.base/java.lang.ClassLoader.defineClass1(Native Method)
+        at java.base/java.lang.ClassLoader.defineClass(Unknown Source)
+        at java.base/java.security.SecureClassLoader.defineClass(Unknown Source)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.defineClass(Unknown Source)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.findClassOnClassPathOrNull(Unknown Source)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.loadClassOrNull(Unknown Source)
+        at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(Unknown Source)
+        at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(Unknown Source)
+        at java.base/java.lang.ClassLoader.loadClass(Unknown Source)
+        at org.slf4j.LoggerFactory.bind(LoggerFactory.java:128)
+        at org.slf4j.LoggerFactory.performInitialization(LoggerFactory.java:108)
+        at org.slf4j.LoggerFactory.getILoggerFactory(LoggerFactory.java:279)
+        at org.slf4j.LoggerFactory.getLogger(LoggerFactory.java:252)
+        at org.slf4j.LoggerFactory.getLogger(LoggerFactory.java:265)
+        at paris.benoit.mob.server.MobServer.<clinit>(MobServer.java:11)
+        
+        
+Cause: the javaagent actor lib quasar doesn't work well with Java 8
+
+Solution: provide a Java 8 vm
+This can be done on the maven exec:exec goal with the option -Djava.executable="path/to/jdk1.8/bin/java"
+
+
+        
+        
+        

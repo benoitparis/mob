@@ -8,6 +8,14 @@ import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 
 public class MobServer {
+    static {
+        if(getVersion() != 8) {
+            System.out.println("Error: A Java 8 runtime must be used");
+            System.out.println("The maven exec:exec goal can take an executable path with: -Djava.executable=path/to/java");
+            System.exit(-2);
+        }
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(MobServer.class);
 
     public static final String ANSI_RESET = "\u001B[0m";
