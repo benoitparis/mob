@@ -1,7 +1,7 @@
 package paris.benoit.mob.server;
 
+import org.apache.commons.cli.*;
 import org.apache.flink.streaming.api.TimeCharacteristic;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
@@ -25,19 +25,24 @@ public class MobServer {
             "###       ###  ########  #########  ########## ########### #########  \n" +
         ANSI_RESET);
 
-        if(getVersion() != 8) {
-            System.out.println("Error: A Java 8 runtime must be used");
-            System.out.println("Maven exec:exec goals can specify an executable path with: -Djava.executable=path/to/java");
+        final CommandLineParser parser = new DefaultParser();
+        CommandLine cmdLine = null;
+        try {
+            cmdLine = parser.parse(cliOptions(), args);
+        } catch (MissingOptionException e) {
+            System.out.println(e.getMessage());
+            new HelpFormatter().printHelp("MobLib", cliOptions(), true);
             System.exit(-1);
         }
+        String name = cmdLine.getOptionValue("app-name");
 
-//        launchApp("ack");
-//        launchApp("set-state-full-join");
-//        launchApp("set-state-temporal-join");
-//        launchApp("adder");
-//        launchApp("tick");
+        if(getVersion() != 8) {
+            System.out.println("Error: A Java 8 runtime must be used");
+            System.out.println("The maven exec:exec goal can take an executable path with: -Djava.executable=path/to/java");
+            System.exit(-2);
+        }
 
-        launchApp("pong");
+        launchApp(name);
     }
 
     public final static int STREAM_PARALLELISM = 4;
@@ -74,5 +79,19 @@ public class MobServer {
             int dot = version.indexOf(".");
             if(dot != -1) { version = version.substring(0, dot); }
         } return Integer.parseInt(version);
+    }
+
+    private static Options cliOptions() {
+
+        final Option appName = Option.builder("a")
+                .longOpt("app-name") //
+                .desc("The app name, located under apps/")
+                .hasArg(true)
+                .required(true)
+                .build();
+
+        final Options options = new Options();
+        options.addOption(appName);
+        return options;
     }
 }

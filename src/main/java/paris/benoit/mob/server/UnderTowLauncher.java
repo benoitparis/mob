@@ -55,8 +55,6 @@ public class UnderTowLauncher {
         
         pokeActorService();
 
-
-        
     }
 
     private volatile boolean isUp = false;

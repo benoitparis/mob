@@ -12,7 +12,7 @@ It is my opinion that this can enable crowds to interact with themselves; And th
 
 Pong is a 2-player game; And one can ask: what would be a 10k-player pong? There are lots of different answers, and MOB enables exploring this design space.
 
-One app is available: 'hello-world-pong'; where half of the players are on the left, half on the right. And the paddles' position is the average of each individual's position. Each crowd has to synchronize with itself in order to win.
+One app is available: 'pong'; where half of the players are on the left, half on the right. And the paddles' position is the average of each individual's position. Each crowd has to synchronize with itself in order to win.
 
 ## API
 
@@ -20,5 +20,7 @@ Developpers only have to specify html and javascript; and SQL for distributed pr
 
 ## Launching
 
+We'll launch the pong here. Place your app under the apps/ folder.
+
     git clone https://github.com/benoitparis/mob && cd mob
-    mvnw clean install exec:exec
+    mvnw -Dexec.args="-a pong" clean install exec:exec
