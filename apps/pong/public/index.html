@@ -68,7 +68,7 @@
       rightY = msg.payload.rightY;
       var scoreLeft  = msg.payload.scoreLeft;
       var scoreRight  = msg.payload.scoreRight;
-      document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' - ' + scoreRight;
+      document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' : ' + scoreRight;
     } else if (msg.table === 'user_count') {
       var countLeft = msg.payload.countLeft;
       var countRight = msg.payload.countRight;
@@ -116,11 +116,17 @@
     sendToServer('choose_side', msg);
   }
   
+  var lastSentMouseY;
 	function sendPosition() {
-    var msg = {
-      y : mouseY
-    };
-    sendToServer('write_y', msg);
+    if(lastSentMouseY !== mouseY) {
+      var msg = {
+        y : mouseY
+      };
+      lastSentMouseY = mouseY;
+      console.log('Sent position: ' + mouseY);
+      sendToServer('write_y', msg);
+    }
+    
 	}
   // Ou bien plus subtil avec du onMouseMove?
 	setInterval(sendPosition, 40);
@@ -163,7 +169,7 @@
     </div>
     
     <div id="score">
-      Score: 0 - 0
+      Score: 0 : 0
     </div>
     
   </div>
