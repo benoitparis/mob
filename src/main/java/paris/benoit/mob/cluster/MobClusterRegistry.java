@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
+import paris.benoit.mob.cluster.table.debug.DebugTableSink;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
 import paris.benoit.mob.cluster.table.json.JsonTableSource;
@@ -18,7 +19,6 @@ import paris.benoit.mob.cluster.table.tick.TickTableSource;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-
 
 public class MobClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterRegistry.class);
@@ -38,10 +38,11 @@ public class MobClusterRegistry {
     public void start() throws Exception {
 
         configuration.underTowLauncher.launchUntertow(configuration.name);
-        setupFlink();
+        setupEnvironment();
+        registerServiceTables();
         registerInputOutputTables();
         registerDataFlow();
-        startFlink();
+        executeEnvironment();
         
         configuration.underTowLauncher.waitUnderTowAvailable();
         waitRegistrationsReady();
@@ -55,7 +56,7 @@ public class MobClusterRegistry {
         logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
     }
 
-    private void setupFlink() {
+    private void setupEnvironment() {
         Configuration conf = new Configuration();
         conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
@@ -78,9 +79,14 @@ public class MobClusterRegistry {
         
     }
 
+
+    private void registerServiceTables() {
+        tEnv.registerTableSource("tick_service", new TickTableSource(20));
+        tEnv.registerTableSink("debug_sink", new DebugTableSink());
+    }
+
     private void registerInputOutputTables() {
 
-        tEnv.registerTableSource("tick_service", new TickTableSource(20));
         
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             // wait for bug fix / understanding TableSource duplication
@@ -117,12 +123,10 @@ public class MobClusterRegistry {
                     case UPDATE:
                         // TODO wait for detailed Row schema printing
                         tEnv.sqlUpdate(sqlConf.content);
-
                         break;
                         default:
                             throw new RuntimeException("No SQL type was specified");
                 }
-
                 logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
 
             }
@@ -133,7 +137,7 @@ public class MobClusterRegistry {
 
     }
     
-    private void startFlink() {
+    private void executeEnvironment() {
         new Thread(() -> {
             try {
                 // Blocking until cancellation
