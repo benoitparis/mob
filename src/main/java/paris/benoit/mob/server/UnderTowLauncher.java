@@ -22,13 +22,13 @@ public class UnderTowLauncher {
     private static final Logger logger = LoggerFactory.getLogger(UnderTowLauncher.class);
 
     private Undertow server;
-    private final int inetPort;
+    private final int port;
     private final String baseUrl;
     
     public UnderTowLauncher(int port) {
         super();
-        this.inetPort = port;
-        this.baseUrl = "http://localhost:" + inetPort;
+        this.port = port;
+        this.baseUrl = "http://localhost:" + port;
     }
 
     public void launchUntertow(String appName) {
@@ -48,7 +48,7 @@ public class UnderTowLauncher {
 
         final PathHandler routingHandler = Handlers.path().addPrefixPath("/service", actorHandler).addPrefixPath("/", fileHandler);
 
-        server = Undertow.builder().addHttpListener(inetPort, "0.0.0.0").setHandler(routingHandler).build();
+        server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(routingHandler).build();
 
         server.start();
         logger.info("Undertow is up at: " + baseUrl);

@@ -2,7 +2,6 @@ package paris.benoit.mob.cluster;
 
 import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
-import org.apache.flink.configuration.MetricOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
@@ -60,7 +59,6 @@ public class MobClusterRegistry {
         Configuration conf = new Configuration();
         conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
         conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
-        conf.setLong(MetricOptions.LATENCY_INTERVAL, configuration.latencyTrackingInterval);
         
         // ça passe en mode cluster, ça?
         sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
