@@ -20,7 +20,7 @@ Developpers only have to specify html and javascript; and SQL for distributed pr
 
 ## Launching
 
-We'll launch the pong here. Place your app under the apps/ folder.
+We'll launch pong here. Place your app under the apps/ folder.
 
     git clone https://github.com/benoitparis/mob && cd mob
     mvnw -Dapp-name="pong" clean install exec:exec

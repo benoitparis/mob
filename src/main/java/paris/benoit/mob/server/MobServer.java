@@ -34,7 +34,7 @@ public class MobServer {
             new HelpFormatter().printHelp("MobLib", cliOptions(), true);
             System.exit(-1);
         }
-        String name = cmdLine.getOptionValue("app-name");
+        String name = cmdLine.getOptionValue("app-name").trim();
 
         if(getVersion() != 8) {
             System.out.println("Error: A Java 8 runtime must be used");
