@@ -7,9 +7,13 @@ import paris.benoit.mob.server.UnderTowLauncher;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -51,13 +55,18 @@ public class MobClusterConfiguration {
     }
 
     private List<MobTableConfiguration> buildConfigurationItem(final String folder) throws IOException {
-        
-        return StreamSupport.stream(
-                Files
+
+        Spliterator<Path> files;
+        try {
+            files = Files
                     .newDirectoryStream(Paths.get(basePath).resolve(folder))
-                    .spliterator()
-                , false
-             )
+                    .spliterator();
+        } catch (NoSuchFileException e) {
+            files = Spliterators.emptySpliterator();
+        }
+        
+        return StreamSupport
+            .stream(files, false)
             .filter(it -> !Files.isDirectory(it))
             .sorted(Comparator.comparing(a -> {
                 try {
