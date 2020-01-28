@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class MobTableConfiguration implements Serializable {
     public enum CONF_TYPE {
-        TABLE, STATE, UPDATE, JS_ENGINE, RETRACT,
+        TABLE, STATE, UPDATE, JS_ENGINE, RETRACT, APPEND,
         // TODO: use?
         IN_JSONSCHEMA, OUT_JSONSCHEMA
     }

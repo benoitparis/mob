@@ -119,7 +119,10 @@ public class MobClusterRegistry {
                         TemporalTableFunctionUtils.createAndRegister(tEnv, sqlConf);
                         break;
                     case RETRACT:
-                        RetractStreamTableUtils.createAndRegister(tEnv, sqlConf);
+                        RetractStreamTableUtils.convertAndRegister(tEnv, sqlConf);
+                        break;
+                    case APPEND:
+                        AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
                     case JS_ENGINE:
                         JsTableEngine.createAndRegister(tEnv, sqlConf, configuration);
