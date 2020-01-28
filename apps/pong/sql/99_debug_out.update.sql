@@ -1,0 +1,3 @@
+INSERT INTO debug_sink
+SELECT debug_message
+FROM debug_global
