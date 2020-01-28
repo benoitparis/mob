@@ -13,12 +13,7 @@ public class AppendStreamTableUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(AppendStreamTableUtils.class);
 
-    // FIXME
-    // Why?
-    // Si on crée pas une barrière de matérialization, alors l'engine crée plein d'instances de TableSource
-    //   alors qu'on a qu'une fois le message
-    //   REM accidentellement, en ayant la redondance avec kafka, ça irait lire aux bons offsets?
-    //   REM si on fixe ça il faudrat mettre des DefinedProctimeAttribute aux sources
+    // FIXME https://issues.apache.org/jira/browse/FLINK-15775
     public static void createAndRegisterTableSourceDoMaterializeAsAppendStream(StreamTableEnvironment tEnv, StreamTableSource tableSource, String name) {
 
         tEnv.registerTableSource(name + "_raw", tableSource);

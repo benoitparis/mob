@@ -10,7 +10,7 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class RetractUtils {
+public class RetractStreamTableUtils {
 
     private static final String RETRACT_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO RETRACT STREAM(.*)";
     private static final Pattern RETRACT_TABLE_PATTERN = Pattern.compile(RETRACT_TABLE_PATTERN_REGEX, Pattern.DOTALL);
