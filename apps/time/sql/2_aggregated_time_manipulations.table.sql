@@ -1,4 +1,3 @@
-INSERT INTO debug_sink
 SELECT COALESCE(CAST('aggregated time manipulations: '
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  tick_count 
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  max_proctime_append_stream 
@@ -10,7 +9,7 @@ SELECT COALESCE(CAST('aggregated time manipulations: '
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  ''
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  ''
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  ''
-  AS VARCHAR), '')
+  AS VARCHAR), '') AS debug_message
 FROM (
   SELECT 
     count(*) AS tick_count,

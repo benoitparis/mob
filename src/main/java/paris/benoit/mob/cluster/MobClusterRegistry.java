@@ -9,6 +9,7 @@ import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
+import paris.benoit.mob.cluster.table.RetractUtils;
 import paris.benoit.mob.cluster.table.TemporalTableUtils;
 import paris.benoit.mob.cluster.table.debug.DebugTableSink;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
@@ -116,6 +117,9 @@ public class MobClusterRegistry {
                         break;
                     case STATE:
                         TemporalTableUtils.createAndRegister(tEnv, sqlConf);
+                        break;
+                    case RETRACT:
+                        RetractUtils.createAndRegister(tEnv, sqlConf);
                         break;
                     case JS_ENGINE:
                         JsTableEngine.createAndRegister(tEnv, sqlConf, configuration);
