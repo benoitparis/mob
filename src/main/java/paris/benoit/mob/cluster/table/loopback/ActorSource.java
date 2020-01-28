@@ -46,6 +46,7 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
             // By convention
             row.setField(0, loopbackIndex);
             row.setField(3, "1"); // temporary, to be removed when Blink can to Tables and not TableSources
+            row.setField(4, System.currentTimeMillis());
             sc.collect(row);
 
         }

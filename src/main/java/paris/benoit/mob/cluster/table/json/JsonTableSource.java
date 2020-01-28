@@ -28,6 +28,7 @@ public class JsonTableSource implements StreamTableSource<Row>
             "actor_identity",
             "payload",
             "constant_dummy_source", //TODO remove?
+            "unix_time_insert",
 //            "proctime_append_stream"
     };
     private DataType[] fieldTypes;
@@ -43,6 +44,7 @@ public class JsonTableSource implements StreamTableSource<Row>
             DataTypes.STRING(),
             jsonDataType,
             DataTypes.STRING(),
+            DataTypes.BIGINT(),
 //            DataTypes.TIMESTAMP(3),
         };
         logger.info("Created Source with json schema: " + jsonDataType.toString());
