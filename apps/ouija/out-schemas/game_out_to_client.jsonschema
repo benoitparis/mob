@@ -1,0 +1,15 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "debug": {
+      "type": "string"
+    },
+    "ballX": {
+      "type": "string"
+    },
+    "ballY": {
+      "type": "string"
+    }
+  }
+}

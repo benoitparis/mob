@@ -1,0 +1,163 @@
+<html>
+<head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+<script>
+
+  // UI
+  var mouseY;
+	function setup() {
+		createCanvas(1200, 600);
+    mouseY = mouseY;
+    mouseX = mouseX;
+	}
+  
+  var height = 600;
+  var width = 1200;
+  var racketHeight = 100;
+  var racketWidth = 20;
+  var racketBorderDistance = 100;
+  var ballDiameter = 50;
+  var ballRadius = ballDiameter/2;
+  var leftDistance  = racketBorderDistance         - racketWidth/2;
+  var rightDistance = width - racketBorderDistance - racketWidth/2;
+  
+  var leftY = 300;
+  var rightY = 300;
+  var side;
+  var ballX = 300;
+  var ballY = 300;
+  
+
+	function draw() {
+		background(255, 247, 240);
+		fill(0, 0, 0);
+    rect(leftDistance , leftY  - racketHeight/2, racketWidth, racketHeight);
+    rect(rightDistance, rightY - racketHeight/2, racketWidth, racketHeight);
+		fill(0, 0, 255);
+    rect(mouseX, mouseY - racketHeight/2, racketWidth, racketHeight);
+		fill(0, 0, 0);
+    rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
+    // draw se fait requestAnimationFramer? du coup on mettrait de l'interpolation ici?
+    
+	}
+
+  // Network setup
+	var ws;
+  
+	function greetInit(evt) {
+		console.log('connection established');
+		console.log(evt);
+	};
+
+	function processServerMessage(evt) {
+		console.log(JSON.parse(evt.data));
+		var msg = JSON.parse(evt.data);
+    if (msg.table === 'ack_side') {
+      document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
+      side = msg.payload.side;
+    } else if (msg.table === 'game_out_to_client') {
+      //console.log('query latency: ' + (Date.now() - parseInt(msg.payload.now, 10)) + ' ms')
+      ballX = msg.payload.ballX;
+      ballY = msg.payload.ballY;
+      leftY  = msg.payload.leftY;
+      rightY = msg.payload.rightY;
+      var scoreLeft  = msg.payload.scoreLeft;
+      var scoreRight  = msg.payload.scoreRight;
+      document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' : ' + scoreRight;
+    } else if (msg.table === 'user_count') {
+      var countLeft = msg.payload.countLeft;
+      var countRight = msg.payload.countRight;
+      var countGlobal  = msg.payload.countGlobal;
+      document.getElementById('user-count').innerHTML = 'User count: ' + countLeft + ' + ' + countRight + ' = ' + countGlobal;
+    } else {
+      console.log('received msg of unknown table:');
+      console.log(msg);
+    }
+	};
+  
+  function sendToServer(table, msg) {
+    // TODO queuing? because si ws était pas prête, on drop
+		if (ws && ws.readyState === WebSocket.OPEN) {
+			var serverMsg = {
+				intent : 'WRITE',
+				table : table,
+				payload : msg
+			};
+			ws.send(JSON.stringify(serverMsg));
+		}
+  }
+  
+	function wsOnClose(evt) {
+		console.log("WS CLOSE");
+		console.log(evt);
+	}
+  
+	function wsConnect() {
+		var mypath = "/service"
+		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+		ws = new WebSocket(wsUrl);
+		ws.onopen = greetInit;
+		ws.onmessage = processServerMessage;
+		ws.onclose = wsOnClose;
+	}
+    
+  var lastSentMouseY;
+	function sendPosition() {
+    if(lastSentMouseY !== mouseY) {
+      var msg = {
+        y : mouseY,
+        x : mouseX
+      };
+      lastSentMouseY = mouseY;
+      console.log('Sent position: ' + mouseY);
+      sendToServer('write_position', msg);
+    }
+    
+	}
+  // Ou bien plus subtil avec du onMouseMove?
+	setInterval(sendPosition, 40);
+
+  var now = Date.now();
+	function getGlobalPosition() { // temp subscription
+    var last_now = now;
+    now = Date.now();
+    //console.log('set interval latency: ' + (now - last_now))
+    var msg = {
+      now: '' + Date.now()
+    };
+    sendToServer('query_global_position', msg);
+	}
+	setInterval(getGlobalPosition, 41);
+	
+</script>
+</head>
+<body>
+	<button onclick="wsConnect()">1. Connect WS</button>
+  <div>
+    <div id="side-chooser">
+      <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');" style="border:1px black;">
+      <label for="side-left">Left</label>
+      <input type="radio" id="side-right" name="side" value="right" onclick="chooseSide('right');">
+      <label for="side-right">Right</label>
+      (2. Choose side)
+    </div>
+    
+    <div id="side-chosen">
+      <input type="radio" id="side-left-chosen"  name="side-chosen" value="left" disabled>
+      <label for="side-left">Left</label>
+      <input type="radio" id="side-right-chosen" name="side-chosen" value="right" disabled>
+      <label for="side-right">Right</label>
+      (3. Server ack)
+    </div>
+    
+    <div id="user-count">
+      User count: 0 + 0 = 0
+    </div>
+    
+    <div id="score">
+      Score: 0 : 0
+    </div>
+    
+  </div>
+</body>
+</html>
