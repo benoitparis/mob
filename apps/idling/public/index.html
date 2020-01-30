@@ -1,0 +1,73 @@
+<html>
+<head>
+<script>
+
+
+	function doOnOpen(evt) {
+		console.log('doOnOpen');
+		console.log(evt);
+    log('Connected\n');
+	};
+  function doOnClose(evt) {
+		console.log("doOnClose");
+		console.log(evt);
+	};
+	function doOnMessage(evt) {
+		console.log("doOnMessage");
+		console.log(evt);
+    log('Received payload: ' + JSON.stringify(JSON.parse(evt.data).payload) + '\n');
+	};
+
+	var ws;
+  function wsConnect() {
+		var mypath = "/service"
+		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+		ws = new WebSocket(wsUrl);
+		ws.onopen = doOnOpen;
+		ws.onclose = doOnClose;
+		ws.onmessage = doOnMessage;
+	}
+  
+	function send(tableName, msg) {
+  	if (ws && ws.readyState === WebSocket.OPEN) {
+			var serverMsg = {
+				intent : 'WRITE',
+				table : tableName,
+				payload : msg
+			};
+			console.log(serverMsg);
+			ws.send(JSON.stringify(serverMsg));
+      log('Sent payload to ' + tableName + ': ' + JSON.stringify(msg) + '\n');
+		}
+  }
+  
+	function registerActivity() {
+    send('write_state', {
+				k : 'k' + getRandomInt(3)
+			}
+    );
+	}
+	
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+  
+  function log(str) {
+    var consoleElement = document.getElementById('console');
+    consoleElement.value += str;
+    consoleElement.scrollTop = consoleElement.scrollHeight;
+  }
+	
+  wsConnect();
+</script>
+</head>
+<body>
+  <div>
+	  <button onclick="wsConnect()">Connect WS</button>
+	  <button onclick="registerActivity()">Register Activity</button>
+  </div>
+  <div>
+    <textarea id="console" cols="100" rows="30" readonly></textarea>
+  </div>
+</body>
+</html>
