@@ -5,10 +5,10 @@
 
   // UI
   var mouseY;
-	function setup() {
-		createCanvas(1200, 600);
+  function setup() {
+    createCanvas(1200, 600);
     mouseY = mouseY;
-	}
+  }
   
   var height = 600;
   var width = 1200;
@@ -27,12 +27,12 @@
   var ballY = 300;
   
 
-	function draw() {
-		background(255, 247, 240);
-		fill(0, 0, 0);
+  function draw() {
+    background(255, 247, 240);
+    fill(0, 0, 0);
     rect(leftDistance , leftY  - racketHeight/2, racketWidth, racketHeight);
     rect(rightDistance, rightY - racketHeight/2, racketWidth, racketHeight);
-		fill(0, 0, 255);
+    fill(0, 0, 255);
     if (side) {
       if (side === 'left') {
         rect(leftDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
@@ -40,23 +40,23 @@
         rect(rightDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
       }
     }
-		fill(0, 0, 0);
+    fill(0, 0, 0);
     rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
     // draw se fait requestAnimationFramer? du coup on mettrait de l'interpolation ici?
     
-	}
+  }
 
   // Network setup
-	var ws;
+  var ws;
   
-	function greetInit(evt) {
-		console.log('connection established');
-		console.log(evt);
-	};
+  function greetInit(evt) {
+    console.log('connection established');
+    console.log(evt);
+  };
 
-	function processServerMessage(evt) {
-		console.log(JSON.parse(evt.data));
-		var msg = JSON.parse(evt.data);
+  function processServerMessage(evt) {
+    console.log(JSON.parse(evt.data));
+    var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
       side = msg.payload.side;
@@ -78,46 +78,46 @@
       console.log('received msg of unknown table:');
       console.log(msg);
     }
-	};
+  };
   
   function sendToServer(table, msg) {
     // TODO queuing? because si ws était pas prête, on drop
-		if (ws && ws.readyState === WebSocket.OPEN) {
-			var serverMsg = {
-				intent : 'WRITE',
-				table : table,
-				payload : msg
-			};
-			ws.send(JSON.stringify(serverMsg));
-		}
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      var serverMsg = {
+        intent : 'WRITE',
+        table : table,
+        payload : msg
+      };
+      ws.send(JSON.stringify(serverMsg));
+    }
   }
   
-	function wsOnClose(evt) {
-		console.log("WS CLOSE");
-		console.log(evt);
-	}
+  function wsOnClose(evt) {
+    console.log("WS CLOSE");
+    console.log(evt);
+  }
   
-	function wsConnect() {
-		var mypath = "/service"
-		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
-		ws = new WebSocket(wsUrl);
-		ws.onopen = greetInit;
-		ws.onmessage = processServerMessage;
-		ws.onclose = wsOnClose;
-	}
+  function wsConnect() {
+    var mypath = "/service"
+    var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+    ws = new WebSocket(wsUrl);
+    ws.onopen = greetInit;
+    ws.onmessage = processServerMessage;
+    ws.onclose = wsOnClose;
+  }
   
   // Network business
   function chooseSide(e) {
     var msg = {
-				side : e
-		};
+        side : e
+    };
     console.log('Trying to send to choose_side: ');
     console.log(msg);
     sendToServer('choose_side', msg);
   }
   
   var lastSentMouseY;
-	function sendPosition() {
+  function sendPosition() {
     if(lastSentMouseY !== mouseY) {
       var msg = {
         y : mouseY
@@ -127,12 +127,12 @@
       sendToServer('write_y', msg);
     }
     
-	}
+  }
   // Ou bien plus subtil avec du onMouseMove?
-	setInterval(sendPosition, 40);
+  setInterval(sendPosition, 40);
 
   var now = Date.now();
-	function getGlobalPosition() { // temp subscription
+  function getGlobalPosition() { // temp subscription
     var last_now = now;
     now = Date.now();
     //console.log('set interval latency: ' + (now - last_now))
@@ -140,13 +140,13 @@
       now: '' + Date.now()
     };
     sendToServer('query_global_position', msg);
-	}
-	setInterval(getGlobalPosition, 41);
-	
+  }
+  setInterval(getGlobalPosition, 41);
+  
 </script>
 </head>
 <body>
-	<button onclick="wsConnect()">1. Connect WS</button>
+  <button onclick="wsConnect()">1. Connect WS</button>
   <div>
     <div id="side-chooser">
       <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');" style="border:1px black;">

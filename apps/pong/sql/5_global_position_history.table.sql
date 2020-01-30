@@ -14,9 +14,8 @@ FROM (
     FROM write_y
     GROUP BY actor_identity
   ) last_y
-  JOIN active_users 
-    ON last_y.actor_identity = active_users.actor_identity
-  WHERE active_users.is_active
+  JOIN user_activity ua ON last_y.actor_identity = ua.actor_identity
+  WHERE ua.active
 ) AS ly
 JOIN user_side AS us 
   ON ly.actor_identity = us.actor_identity
