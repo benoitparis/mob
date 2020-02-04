@@ -1,4 +1,4 @@
-package paris.benoit.mob.server;
+package paris.benoit.mob.front;
 
 import co.paralleluniverse.comsat.webactors.undertow.AutoWebActorHandler;
 import io.undertow.Handlers;
@@ -15,23 +15,26 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.MobClusterConfiguration;
+import paris.benoit.mob.server.ClusterFront;
 
 import java.nio.file.Paths;
 
-public class UnderTowLauncher {
-    private static final Logger logger = LoggerFactory.getLogger(UnderTowLauncher.class);
+public class UndertowFront implements ClusterFront {
+    private static final Logger logger = LoggerFactory.getLogger(UndertowFront.class);
 
     private Undertow server;
     private final int port;
     private final String baseUrl;
     
-    public UnderTowLauncher(int port) {
+    public UndertowFront(int port) {
         super();
         this.port = port;
         this.baseUrl = "http://localhost:" + port;
     }
 
-    public void launchUntertow(String appName) {
+    @Override
+    public void start(MobClusterConfiguration conf) {
 
         final SessionManager sessionManager = new InMemorySessionManager("SESSION_MANAGER", 1, true);
         final SessionCookieConfig sessionConfig = new SessionCookieConfig();
@@ -40,7 +43,7 @@ public class UnderTowLauncher {
 
         HttpHandler fileHandler = Handlers.disableCache(
                 Handlers
-                        .resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + appName + "/public"), 100))
+                        .resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + conf.name + "/public"), 100))
                         .setWelcomeFiles("index.html")
         );
 
@@ -72,13 +75,15 @@ public class UnderTowLauncher {
         }).start();
     }
 
-    public void waitUnderTowAvailable() throws InterruptedException {
+    @Override
+    public void waitReady() throws InterruptedException {
         while (!isUp) {
             Thread.sleep(10);
         }
     }
-    
-    public String getUrl() {
+
+    @Override
+    public String accessString() {
         return baseUrl;
     }
 

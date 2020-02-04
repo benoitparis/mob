@@ -1,11 +1,9 @@
 package paris.benoit.mob.server;
 
 import org.apache.commons.cli.*;
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.MobClusterRegistry;
+import paris.benoit.mob.test.AppTestSuiteRunner;
 
 public class MobServer {
     // Do not move further down
@@ -46,32 +44,14 @@ public class MobServer {
         }
         String name = cmdLine.getOptionValue("app-name").trim();
 
-        logger.info(ANSI_GREEN + "Launching " + name + ANSI_RESET);
-        launchApp(name);
+        if (cmdLine.hasOption("test-suite")) {
+            AppTestSuiteRunner.run(name);
+        } else {
+            logger.info(ANSI_GREEN + "Launching " + name + ANSI_RESET);
+            AppRunner.run(name);
+        }
     }
 
-    public final static int DEFAULT_STREAM_PARALLELISM = 4;
-    // Apparamment à 1ms on est seulement 25% en dessous du max
-    // https://flink.apache.org/2019/06/05/flink-network-stack.html
-    public final static int DEFAULT_MAX_BUFFER_TIME_MILLIS = 5;
-    public final static int DEFAULT_FRONT_PORT = 8090;
-    public final static int DEFAULT_FLINK_WEB_UI_PORT = 8082;
-    
-    public static void launchApp(String appName) throws Exception {
-
-        MobClusterConfiguration configuration = new MobClusterConfiguration(
-            appName,
-            new UnderTowLauncher(DEFAULT_FRONT_PORT),
-            TimeCharacteristic.IngestionTime,
-            DEFAULT_STREAM_PARALLELISM,
-            DEFAULT_MAX_BUFFER_TIME_MILLIS,
-            DEFAULT_FLINK_WEB_UI_PORT
-        );
-        MobClusterRegistry registry = new MobClusterRegistry(configuration);
-        
-        registry.start();
-        
-    }
 
     private static int getVersion() {
         String version = System.getProperty("java.version");
@@ -93,8 +73,14 @@ public class MobServer {
                 .required(true)
                 .build();
 
+        final Option runTests = Option.builder("t")
+                .longOpt("test-suite") //
+                .desc("Run the test suite of an app")
+                .build();
+
         final Options options = new Options();
         options.addOption(appName);
+        options.addOption(runTests);
         return options;
     }
 }

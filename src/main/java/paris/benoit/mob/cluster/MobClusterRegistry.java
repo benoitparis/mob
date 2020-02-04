@@ -38,32 +38,41 @@ public class MobClusterRegistry {
 
     public void start() throws Exception {
 
-        configuration.underTowLauncher.launchUntertow(configuration.name);
+        configuration.clusterFront.start(configuration);
         setupEnvironment();
         registerServiceTables();
         registerInputOutputTables();
         registerDataFlow();
         executeEnvironment();
         
-        configuration.underTowLauncher.waitUnderTowAvailable();
+        configuration.clusterFront.waitReady();
         waitRegistrationsReady();
 
         String plan = sEnv.getExecutionPlan();
         logger.info(ANSI_YELLOW + "Plan is: \n" + ANSI_RESET + plan);
-        logger.info("Front: " + ANSI_YELLOW + configuration.underTowLauncher.getUrl() + ANSI_RESET);
+        logger.info("Front: " + ANSI_YELLOW + configuration.clusterFront.accessString() + ANSI_RESET);
         logger.info("Web UI: " + ANSI_YELLOW + "http://localhost:" + configuration.flinkWebUiPort + ANSI_RESET);
         String[] tables = tEnv.listTables();
         logger.info("Tables: " + ANSI_YELLOW + Arrays.asList(tables) + ANSI_RESET);
         logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
+
     }
 
     private void setupEnvironment() {
-        Configuration conf = new Configuration();
-        conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
-        conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
-        
-        // ça passe en mode cluster, ça?
-        sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+
+        if (MobClusterConfiguration.ENV_MODE.LOCAL_UI.equals(configuration.mode)) {
+            Configuration conf = new Configuration();
+            conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
+            conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
+
+            // ça passe en mode cluster, ça?
+            sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+        } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
+            sEnv = StreamExecutionEnvironment.createLocalEnvironment();
+        } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
+            //TODO
+            //sEnv = StreamExecutionEnvironment.createRemoteEnvironment(...);
+        }
         
         sEnv.setStreamTimeCharacteristic(configuration.processingtime);
         // TODO sort out setParallelism vs setMaxParallelism

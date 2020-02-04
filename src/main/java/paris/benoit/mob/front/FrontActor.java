@@ -26,7 +26,7 @@ public class FrontActor extends BasicActor<Object, Void> {
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
-    private Map<String, MobClusterSender> clusterSender;
+    private Map<String, MobClusterSender> clusterSenders;
     
     public FrontActor() throws InterruptedException {
         // guids? 
@@ -34,7 +34,7 @@ public class FrontActor extends BasicActor<Object, Void> {
         //   des NumberedChannels? oui, et on fait le send+setfield+deseri là?
         // du coup on donnerait pas que channel?
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        clusterSender = MobClusterRegistry.getClusterSender(getName());
+        clusterSenders = MobClusterRegistry.getClusterSender(getName());
     }
 
     @Override
@@ -66,7 +66,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 switch (cMsg.intent) {
                 case WRITE: 
                     {
-                        MobClusterSender specificSender = clusterSender.get(cMsg.table);
+                        MobClusterSender specificSender = clusterSenders.get(cMsg.table);
                         if (null == specificSender) {
                             logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.table);
                         } else {

@@ -3,7 +3,7 @@ package paris.benoit.mob.cluster;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.server.UnderTowLauncher;
+import paris.benoit.mob.server.ClusterFront;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,31 +19,44 @@ import java.util.stream.StreamSupport;
 
 public class MobClusterConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterConfiguration.class);
+
+    public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE};
     
     public String name;
     
-    protected UnderTowLauncher underTowLauncher;
+    protected ClusterFront clusterFront;
     
     protected TimeCharacteristic processingtime;
     protected int streamParallelism;
     protected int maxBufferTimeMillis;
-    protected int flinkWebUiPort;
+    protected Integer flinkWebUiPort;
+    protected ENV_MODE mode;
     
     protected List<MobTableConfiguration> inSchemas;
     protected List<MobTableConfiguration> outSchemas;
     protected List<MobTableConfiguration> sql;
+    protected List<MobTableConfiguration> tests;
 
     private String basePath;
 
-    public MobClusterConfiguration(String appName, UnderTowLauncher underTowLauncher, TimeCharacteristic processingtime, int streamParallelism, int maxBufferTimeMillis, int flinkWebUiPort) throws IOException {
+    public MobClusterConfiguration(
+            String appName,
+            ClusterFront clusterFront,
+            TimeCharacteristic processingtime,
+            int streamParallelism,
+            int maxBufferTimeMillis,
+            Integer flinkWebUiPort,
+            ENV_MODE mode) throws IOException {
+
         super();
         this.name = appName;
         this.processingtime = processingtime;
         this.streamParallelism = streamParallelism;
         this.maxBufferTimeMillis = maxBufferTimeMillis;
         this.flinkWebUiPort = flinkWebUiPort;
+        this.mode = mode;
         
-        this.underTowLauncher = underTowLauncher;
+        this.clusterFront = clusterFront;
         
         this.basePath = System.getProperty("user.dir") + "/apps/" + appName + "/";
         logger.info("Configuration with basePath:" + basePath);
@@ -51,6 +64,7 @@ public class MobClusterConfiguration {
         this.inSchemas = buildConfigurationItem("in-schemas");
         this.outSchemas = buildConfigurationItem("out-schemas");
         this.sql = buildConfigurationItem("sql");
+        this.tests = buildConfigurationItem("tests");
         
     }
 
@@ -100,4 +114,7 @@ public class MobClusterConfiguration {
         }
     }
 
+    public List<MobTableConfiguration> getTests() {
+        return tests;
+    }
 }
