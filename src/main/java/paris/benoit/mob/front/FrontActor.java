@@ -63,6 +63,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 //   y revenir plus tard avec deux niveaux de jsonschema et un resolver perso qui inline
                 //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
 
+                // TODO DRY avec les app test suite
                 switch (cMsg.intent) {
                 case WRITE: 
                     {

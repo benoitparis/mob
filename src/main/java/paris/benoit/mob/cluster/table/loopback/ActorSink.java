@@ -7,11 +7,9 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import co.paralleluniverse.actors.ActorRef;
-import co.paralleluniverse.actors.ActorRegistry;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.message.ToClientMessage;
+import paris.benoit.mob.server.MessageRouter;
 
 @SuppressWarnings("serial")
 public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
@@ -20,11 +18,13 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private Integer loopbackIndex = -1;
     private JsonRowSerializationSchema jrs;
     private MobTableConfiguration configuration;
+    private MessageRouter router;
     
-    public ActorSink(MobTableConfiguration configuration, JsonRowSerializationSchema jrs) {
+    public ActorSink(MobTableConfiguration configuration, JsonRowSerializationSchema jrs, MessageRouter router) {
         super();
         this.jrs = jrs;
         this.configuration = configuration;
+        this.router = router;
     }
 
     @Override
@@ -55,14 +55,8 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
             String payloadString = new String(jrs.serialize(payload));
             
             ToClientMessage message = new ToClientMessage(configuration.name, payloadString);
-            
-            final ActorRef<ToClientMessage> actor = (ActorRef<ToClientMessage>) ActorRegistry.tryGetActor(identity);
-            if (null != actor) {
-                // call to send: not blocking or dropping the message, as his mailbox is unbounded
-                actor.send(message);
-            } else {
-                logger.error("Actor named " + identity + " was not found on sink #" + loopbackIndex);
-            }
+
+            router.routeMessage(loopbackIndex, identity, message);
 
             //logger.debug("new msg in sink: " + row);
             
@@ -71,5 +65,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
         }
 
     }
+
+
 
 }

@@ -1,41 +1,67 @@
 package paris.benoit.mob.test;
 
+import co.paralleluniverse.fibers.SuspendExecution;
+import org.graalvm.polyglot.Context;
+import org.graalvm.polyglot.Engine;
+import org.graalvm.polyglot.Source;
+import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.MobClusterSender;
+import paris.benoit.mob.message.ToClientMessage;
+import paris.benoit.mob.message.ToServerMessage;
 
-import javax.script.Invocable;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
+import java.io.IOException;
 import java.util.Map;
 
 public class ClientSimulator {
     private static final Logger logger = LoggerFactory.getLogger(ClientSimulator.class);
-    private static final Logger testSuiteLogger = LoggerFactory.getLogger("app-test-suite");
 
+    private boolean isReady = false;
     private int progressCounter = 0;
     private String name;
     private String script;
-    private Invocable inv;
+    private Value progress;
+    private Value toServer;
+    private Value fromServer;
+    private Value validate;
     private Map<String, MobClusterSender> clusterSenders;
+    private long lastClusterInteraction = System.currentTimeMillis();
 
+    public String getName() {
+        return name;
+    }
 
     public ClientSimulator(String name, String script) {
         this.name = name;
         this.script = script;
     }
 
-    public void start() throws ScriptException {
+    public void start() throws ScriptException, IOException {
 
-        ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
-        graaljsEngine.eval(script);
-        inv = (Invocable) graaljsEngine;
+        logger.debug("Starting ClientSimulator " + name);
+
+        Context context = Context
+                .newBuilder("js")
+                .build();
+        Engine engine = context.getEngine();
+        Source src = Source
+                .newBuilder("js", script, name)
+                .build();
+        Value exports = context.eval(src);
+        progress = exports.getMember("progress");
+        toServer = exports.getMember("toServer");
+        fromServer = exports.getMember("fromServer");
+        validate = exports.getMember("validate");
+
+        AppTestMessageRouter.registerClientSimulator(this);
 
         new Thread(() -> {
             try {
                 clusterSenders = MobClusterRegistry.getClusterSender(name);
+                isReady = true;
             } catch (InterruptedException e) {
                 logger.debug("Problem getting a ClusterSender", e);
             }
@@ -43,17 +69,75 @@ public class ClientSimulator {
 
     }
 
-    public boolean progress() throws ScriptException, NoSuchMethodException {
-        boolean doContinue = (boolean) inv.invokeFunction("progress", progressCounter);
+    public boolean isReady() {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            logger.debug("Error while waiting", e);
+        }
+        return isReady;
+    }
+
+    public boolean progress() throws ScriptException, NoSuchMethodException, SuspendExecution, InterruptedException {
+        boolean doContinue = progress.execute(progressCounter).asBoolean();
         progressCounter++;
         logger.info("Client Simulator can continue progress: " + doContinue);
 
-
+        while(drainWsMessageQueue());
+        lastClusterInteraction = System.currentTimeMillis();
         return doContinue;
-
 
     }
 
+    private boolean drainWsMessageQueue() throws InterruptedException, SuspendExecution {
 
+        String wsMessage = toServer.execute(progressCounter).asString();
+        if (null == wsMessage) {
+            return false;
+        } else {
 
+            // TODO DRY avec FrontActor
+            ToServerMessage cMsg = new ToServerMessage(wsMessage);
+            logger.info("Got message: " + cMsg);
+            switch (cMsg.intent) {
+                case WRITE: {
+                        MobClusterSender specificSender = clusterSenders.get(cMsg.table);
+                        if (null == specificSender) {
+                            logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.table);
+                        } else {
+                            specificSender.send(name, cMsg.payload.toString());
+                        }
+                    }
+                    break;
+                case QUERY: logger.debug(cMsg.payload.toString());
+                    break;
+                case SUBSCRIBE: logger.debug(cMsg.payload.toString());
+                    break;
+            }
+            return true;
+        }
+
+    }
+
+    public void offerMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
+        if (name.equals(identity)) {
+            logger.info("Message offer matched: " + loopbackIndex + "," + identity + ", message: " + message.toString());
+            lastClusterInteraction = System.currentTimeMillis();
+            fromServer.execute(message.toString());
+        }
+    }
+
+    public static final long QUIET_MILLIS = 5_000;
+    public boolean isQuiet() {
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            logger.debug("Error while waiting", e);
+        }
+        return System.currentTimeMillis() - lastClusterInteraction > QUIET_MILLIS;
+    }
+
+    public boolean validate() {
+        return validate.execute(progressCounter).asBoolean();
+    }
 }

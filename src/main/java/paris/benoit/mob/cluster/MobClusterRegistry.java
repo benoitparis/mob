@@ -106,7 +106,7 @@ public class MobClusterRegistry {
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {
-            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema));
+            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema, configuration.router));
             logger.debug("Registered Table Sink: " + outSchema);
         }
         

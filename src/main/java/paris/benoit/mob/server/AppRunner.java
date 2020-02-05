@@ -3,6 +3,7 @@ package paris.benoit.mob.server;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
+import paris.benoit.mob.cluster.table.loopback.ActorMessageRouter;
 import paris.benoit.mob.front.UndertowFront;
 
 public class AppRunner {
@@ -19,6 +20,7 @@ public class AppRunner {
         MobClusterConfiguration configuration = new MobClusterConfiguration(
                 name,
                 new UndertowFront(DEFAULT_FRONT_PORT),
+                new ActorMessageRouter(),
                 TimeCharacteristic.IngestionTime,
                 DEFAULT_STREAM_PARALLELISM,
                 DEFAULT_MAX_BUFFER_TIME_MILLIS,

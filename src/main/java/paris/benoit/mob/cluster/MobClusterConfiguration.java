@@ -4,6 +4,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.server.ClusterFront;
+import paris.benoit.mob.server.MessageRouter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,17 +22,18 @@ public class MobClusterConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterConfiguration.class);
 
     public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE};
-    
+
     public String name;
-    
+
     protected ClusterFront clusterFront;
-    
+    protected MessageRouter router;
+
     protected TimeCharacteristic processingtime;
     protected int streamParallelism;
     protected int maxBufferTimeMillis;
     protected Integer flinkWebUiPort;
     protected ENV_MODE mode;
-    
+
     protected List<MobTableConfiguration> inSchemas;
     protected List<MobTableConfiguration> outSchemas;
     protected List<MobTableConfiguration> sql;
@@ -42,6 +44,7 @@ public class MobClusterConfiguration {
     public MobClusterConfiguration(
             String appName,
             ClusterFront clusterFront,
+            MessageRouter router,
             TimeCharacteristic processingtime,
             int streamParallelism,
             int maxBufferTimeMillis,
@@ -55,17 +58,18 @@ public class MobClusterConfiguration {
         this.maxBufferTimeMillis = maxBufferTimeMillis;
         this.flinkWebUiPort = flinkWebUiPort;
         this.mode = mode;
-        
+
         this.clusterFront = clusterFront;
-        
+        this.router = router;
+
         this.basePath = System.getProperty("user.dir") + "/apps/" + appName + "/";
         logger.info("Configuration with basePath:" + basePath);
-        
+
         this.inSchemas = buildConfigurationItem("in-schemas");
         this.outSchemas = buildConfigurationItem("out-schemas");
         this.sql = buildConfigurationItem("sql");
         this.tests = buildConfigurationItem("tests");
-        
+
     }
 
     private List<MobTableConfiguration> buildConfigurationItem(final String folder) throws IOException {
@@ -78,7 +82,7 @@ public class MobClusterConfiguration {
         } catch (NoSuchFileException e) {
             files = Spliterators.emptySpliterator();
         }
-        
+
         return StreamSupport
             .stream(files, false)
             .filter(it -> !Files.isDirectory(it))

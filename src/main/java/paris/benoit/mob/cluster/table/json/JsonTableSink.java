@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.table.loopback.ActorSink;
+import paris.benoit.mob.server.MessageRouter;
 
 public class JsonTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
@@ -35,7 +36,7 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     private JsonRowSerializationSchema jrs;
     private MobTableConfiguration configuration;
 
-    public JsonTableSink(MobTableConfiguration configuration) {
+    public JsonTableSink(MobTableConfiguration configuration, MessageRouter router) {
         jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
         fieldTypes = new DataType[] {
             DataTypes.INT(),
@@ -45,7 +46,7 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
         logger.info("Created Sink with json schema: " + jsonDataType.toString());
 
         jrs = new JsonRowSerializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
-        actorFunction = new ActorSink(configuration, jrs);
+        actorFunction = new ActorSink(configuration, jrs, router);
         this.configuration = configuration;
     }
 

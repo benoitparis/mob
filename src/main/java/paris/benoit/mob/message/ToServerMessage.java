@@ -28,4 +28,12 @@ public class ToServerMessage {
         payload = json.getJSONObject("payload");
     }
 
+    @Override
+    public String toString() {
+        return "ToServerMessage{" +
+                "intent=" + intent +
+                ", table='" + table + '\'' +
+                ", payload=" + payload +
+                '}';
+    }
 }
