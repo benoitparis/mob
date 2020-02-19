@@ -9,7 +9,7 @@ import paris.benoit.mob.front.UndertowFront;
 public class AppRunner {
 
 
-    public final static int DEFAULT_STREAM_PARALLELISM = 4;
+    public final static int DEFAULT_STREAM_PARALLELISM = 2;
     // Apparamment à 1ms on est seulement 25% en dessous du max
     // https://flink.apache.org/2019/06/05/flink-network-stack.html
     public final static int DEFAULT_MAX_BUFFER_TIME_MILLIS = 5;
