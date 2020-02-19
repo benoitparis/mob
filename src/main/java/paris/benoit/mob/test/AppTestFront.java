@@ -13,13 +13,13 @@ import java.util.stream.Collectors;
 
 public class AppTestFront implements ClusterFront {
     private static final Logger logger = LoggerFactory.getLogger(AppTestFront.class);
-    private MobClusterConfiguration conf;
     private List<Future<Boolean>> results;
 
-    @Override
-    public void start(MobClusterConfiguration conf) {
+    private MobClusterConfiguration conf;
 
-        this.conf = conf;
+    @Override
+    public void start() {
+
         this.results = conf.getTests()
             .stream()
             .map(this::getClientSimulator)
@@ -81,5 +81,9 @@ public class AppTestFront implements ClusterFront {
             })
             .reduce(true, Boolean::logicalAnd)
         ;
+    }
+
+    public void setConfiguration(MobClusterConfiguration configuration) {
+        this.conf = configuration;
     }
 }

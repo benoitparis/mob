@@ -1,10 +1,8 @@
 package paris.benoit.mob.server;
 
-import paris.benoit.mob.cluster.MobClusterConfiguration;
-
 public interface ClusterFront {
 
-    void start(MobClusterConfiguration conf);
+    void start();
 
     void waitReady() throws InterruptedException;
 

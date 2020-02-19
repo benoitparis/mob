@@ -26,11 +26,10 @@ public class AppTestSuiteRunner {
         }
     }
 
-    private static void runTests(String name) {
-//        front.start(configuration);
-    }
 
     private static void runRegistry(String name) throws Exception {
+
+        front = new AppTestFront();
         configuration = new MobClusterConfiguration(
                 name,
                 front,
@@ -41,6 +40,9 @@ public class AppTestSuiteRunner {
                 null,
                 MobClusterConfiguration.ENV_MODE.LOCAL
         );
+
+        front.setConfiguration(configuration);
+
         MobClusterRegistry registry = new MobClusterRegistry(configuration);
 
         registry.start();

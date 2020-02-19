@@ -38,7 +38,7 @@ public class MobClusterRegistry {
 
     public void start() throws Exception {
 
-        configuration.clusterFront.start(configuration);
+        configuration.clusterFront.start();
         setupEnvironment();
         registerServiceTables();
         registerInputOutputTables();

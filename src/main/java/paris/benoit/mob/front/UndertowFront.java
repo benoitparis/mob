@@ -15,10 +15,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterFront;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class UndertowFront implements ClusterFront {
     private static final Logger logger = LoggerFactory.getLogger(UndertowFront.class);
@@ -34,24 +42,41 @@ public class UndertowFront implements ClusterFront {
     }
 
     @Override
-    public void start(MobClusterConfiguration conf) {
+    public void start() {
 
         final SessionManager sessionManager = new InMemorySessionManager("SESSION_MANAGER", 1, true);
         final SessionCookieConfig sessionConfig = new SessionCookieConfig();
         sessionConfig.setMaxAge(60);
         final SessionAttachmentHandler sessionAttachmentHandler = new SessionAttachmentHandler(sessionManager, sessionConfig);
 
-        HttpHandler fileHandler = Handlers.disableCache(
-                Handlers
-                        .resource(new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + conf.name + "/public"), 100))
-                        .setWelcomeFiles("index.html")
-        );
+
+        Spliterator<Path> files;
+        try {
+            files = Files
+                    .newDirectoryStream(Paths.get(System.getProperty("user.dir") + "/apps/"))
+                    .spliterator();
+        } catch (IOException e) {
+            files = Spliterators.emptySpliterator();
+        }
+        Map<Path, HttpHandler> fileHandlersMap = StreamSupport
+                .stream(files, false)
+                .filter(Files::isDirectory)
+                .map(it -> it.getFileName())
+                .collect(Collectors.toMap(Function.identity(), it ->
+                        Handlers.disableCache(
+                                Handlers.resource(
+                                        new PathResourceManager(Paths.get(System.getProperty("user.dir") + "/apps/" + it + "/public"), 100)
+                                ).setWelcomeFiles("index.html")
+                        )
+                ))
+        ;
 
         final RequestDumpingHandler actorHandler = new RequestDumpingHandler(sessionAttachmentHandler.setNext(new AutoWebActorHandler()));
+        PathHandler handlers = Handlers.path().addPrefixPath("/service", actorHandler);
 
-        final PathHandler routingHandler = Handlers.path().addPrefixPath("/service", actorHandler).addPrefixPath("/", fileHandler);
+        fileHandlersMap.entrySet().stream().forEach(it -> handlers.addPrefixPath("/app/" + it.getKey(), it.getValue()));
 
-        server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(routingHandler).build();
+        server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(handlers).build();
 
         server.start();
         logger.info("Undertow is up at: " + baseUrl);
