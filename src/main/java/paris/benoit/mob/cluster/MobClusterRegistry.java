@@ -64,14 +64,12 @@ public class MobClusterRegistry {
             Configuration conf = new Configuration();
             conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
             conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
-
-            // ça passe en mode cluster, ça?
             sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
             sEnv = StreamExecutionEnvironment.createLocalEnvironment();
-        } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
-            //TODO
-            //sEnv = StreamExecutionEnvironment.createRemoteEnvironment(...);
+        } else if (MobClusterConfiguration.ENV_MODE.REMOTE.equals(configuration.mode)) {
+            // TODO investigate jar and get vs remote
+            sEnv = StreamExecutionEnvironment.createRemoteEnvironment("127.0.0.1", 8081);
         }
         
         sEnv.setStreamTimeCharacteristic(configuration.processingtime);

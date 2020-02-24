@@ -25,30 +25,9 @@
 
     <profiles>
         <profile>
-            <id>Test RC 1.10</id>
+            <id>1.10.0</id>
             <properties>
                 <flink.version>1.10.0</flink.version>
-            </properties>
-            <repositories>
-                <repository>
-                    <id>flink-1.10.0</id>
-                    <url>
-                        https://repository.apache.org/content/repositories/orgapacheflink-1318/
-                    </url>
-                </repository>
-                <repository>
-                    <id>archetype</id>
-                    <url>
-                        https://repository.apache.org/content/repositories/orgapacheflink-1318/
-                    </url>
-                </repository>
-            </repositories>
-        </profile>
-
-        <profile>
-            <id>1.10-SNAPSHOT</id>
-            <properties>
-                <flink.version>1.9-SNAPSHOT</flink.version>
             </properties>
         </profile>
     </profiles>
@@ -66,9 +45,7 @@
             <name>Maven Central</name>
             <layout>default</layout>
             <url>http://central.maven.org/maven2/</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+            <snapshots><enabled>false</enabled></snapshots>
         </repository>
     </repositories>
 
