@@ -95,7 +95,6 @@ public class MobClusterRegistry {
 
     private void registerInputOutputTables() {
 
-        
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             // wait for bug fix / understanding TableSource duplication
 //            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));

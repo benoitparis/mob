@@ -10,12 +10,17 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.FieldsDataType;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.table.LegacyDataTypeTransitionUtils;
 import paris.benoit.mob.cluster.table.loopback.ActorSource;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JsonTableSource implements StreamTableSource<Row>
 //        , DefinedProctimeAttribute
@@ -38,7 +43,10 @@ public class JsonTableSource implements StreamTableSource<Row>
     private MobTableConfiguration configuration;
     
     public JsonTableSource(MobTableConfiguration configuration) {
-        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+        DataType tempType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+
+        jsonDataType = LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(tempType);
+
         fieldTypes = new DataType[] {
             DataTypes.INT(),
             DataTypes.STRING(),
@@ -52,6 +60,28 @@ public class JsonTableSource implements StreamTableSource<Row>
         jrds = new JsonRowDeserializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         actorFunction = new ActorSource(configuration, jrds);
         this.configuration = configuration;
+    }
+
+    private DataType convertDataTypeRemoveLegacy(DataType currentType) {
+
+
+        if (currentType instanceof FieldsDataType) {
+            FieldsDataType casted = (FieldsDataType) currentType;
+
+            Map<String, DataType> fieldDataTypes = casted.getFieldDataTypes()
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(
+                            it -> it.getKey(),
+                            it -> convertDataTypeRemoveLegacy(it.getValue())
+                    ));;
+
+            return new FieldsDataType(casted.getLogicalType(), fieldDataTypes);
+
+        }
+        else {
+            return currentType;
+        }
     }
 
     @Override

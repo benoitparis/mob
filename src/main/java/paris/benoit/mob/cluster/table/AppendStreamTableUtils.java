@@ -52,10 +52,8 @@ public class AppendStreamTableUtils {
 
         Table rawTable = tEnv.fromTableSource(tableSource);
 
-        DataStream<Row> appendStream = tEnv.toAppendStream(rawTable,
-//                Types.ROW(Types.FLOAT)
-                tableSource.getReturnType()
-        );
+        DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, rawTable.getSchema().toRowType());
+
         logger.info("Registering as Table: " + name);
         tEnv.registerTable(name, tEnv.fromDataStream(appendStream,
                 StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +

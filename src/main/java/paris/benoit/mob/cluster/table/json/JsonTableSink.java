@@ -41,7 +41,8 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
         fieldTypes = new DataType[] {
             DataTypes.INT(),
             DataTypes.STRING(),
-            jsonDataType
+                jsonDataType,
+//            LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(jsonDataType)
         };
         logger.info("Created Sink with json schema: " + jsonDataType.toString());
 

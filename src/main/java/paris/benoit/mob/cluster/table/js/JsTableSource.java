@@ -15,6 +15,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.table.LegacyDataTypeTransitionUtils;
 
 import javax.annotation.Nullable;
 
@@ -36,7 +37,7 @@ public class JsTableSource implements StreamTableSource<Row>
 
         DataType jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
         fieldTypes = new DataType[] {
-                jsonDataType,
+                LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(jsonDataType),
                 DataTypes.TIMESTAMP(3),
         };
 
