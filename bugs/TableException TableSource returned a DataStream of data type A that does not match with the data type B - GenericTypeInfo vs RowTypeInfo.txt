@@ -1,6 +1,6 @@
 TableException TableSource returned a DataStream of data type A that does not match with the data type B - GenericTypeInfo vs RowTypeInfo
 
-Caused by: org.apache.flink.table.api.TableException: TableSource of type paris.benoit.mob.cluster.table.tick.TickTableSource returned a DataStream of data type ROW<`tick_number` BIGINT, `constant_dummy_source` STRING, `proctime_append_stream` TIMESTAMP(3)> that does not match with the data type ROW<`tick_number` BIGINT, `constant_dummy_source` STRING, `proctime_append_stream` TIMESTAMP(3)> declared by the TableSource.getProducedDataType() method. Please validate the implementation of the TableSource.
+Caused by: org.apache.flink.table.api.TableException: TableSource of type paris.benoit.mob.cluster.table.services.TickTableSource returned a DataStream of data type ROW<`tick_number` BIGINT, `constant_dummy_source` STRING, `proctime_append_stream` TIMESTAMP(3)> that does not match with the data type ROW<`tick_number` BIGINT, `constant_dummy_source` STRING, `proctime_append_stream` TIMESTAMP(3)> declared by the TableSource.getProducedDataType() method. Please validate the implementation of the TableSource.
 	at org.apache.flink.table.planner.plan.nodes.physical.stream.StreamExecTableSourceScan.translateToPlanInternal(StreamExecTableSourceScan.scala:114)
 	at org.apache.flink.table.planner.plan.nodes.physical.stream.StreamExecTableSourceScan.translateToPlanInternal(StreamExecTableSourceScan.scala:62)
 	at org.apache.flink.table.planner.plan.nodes.exec.ExecNode$class.translateToPlan(ExecNode.scala:58)
