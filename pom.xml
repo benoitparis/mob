@@ -30,6 +30,12 @@
                 <flink.version>1.10.0</flink.version>
             </properties>
         </profile>
+        <profile>
+            <id>1.11-SNAPSHOT</id>
+            <properties>
+                <flink.version>1.11-SNAPSHOT</flink.version>
+            </properties>
+        </profile>
     </profiles>
 
     <repositories>
