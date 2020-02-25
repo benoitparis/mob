@@ -34,7 +34,8 @@ public class UndertowFront implements ClusterFront {
     private Undertow server;
     private final int port;
     private final String baseUrl;
-    
+    private String mainApp;
+
     public UndertowFront(int port) {
         super();
         this.port = port;
@@ -49,7 +50,6 @@ public class UndertowFront implements ClusterFront {
         sessionConfig.setMaxAge(60);
         final SessionAttachmentHandler sessionAttachmentHandler = new SessionAttachmentHandler(sessionManager, sessionConfig);
 
-
         Spliterator<Path> files;
         try {
             files = Files
@@ -58,10 +58,10 @@ public class UndertowFront implements ClusterFront {
         } catch (IOException e) {
             files = Spliterators.emptySpliterator();
         }
-        Map<Path, HttpHandler> fileHandlersMap = StreamSupport
+        Map<String, HttpHandler> fileHandlersMap = StreamSupport
                 .stream(files, false)
                 .filter(Files::isDirectory)
-                .map(it -> it.getFileName())
+                .map(it -> it.getFileName().toString())
                 .collect(Collectors.toMap(Function.identity(), it ->
                         Handlers.disableCache(
                                 Handlers.resource(
@@ -75,6 +75,7 @@ public class UndertowFront implements ClusterFront {
         PathHandler handlers = Handlers.path().addPrefixPath("/service", actorHandler);
 
         fileHandlersMap.entrySet().stream().forEach(it -> handlers.addPrefixPath("/app/" + it.getKey(), it.getValue()));
+        handlers.addPrefixPath("/", fileHandlersMap.get(mainApp));
 
         server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(handlers).build();
 
@@ -112,4 +113,8 @@ public class UndertowFront implements ClusterFront {
         return baseUrl;
     }
 
+    @Override
+    public void setMain(String app) {
+        this.mainApp = app;
+    }
 }

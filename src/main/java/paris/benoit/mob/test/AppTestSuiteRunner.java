@@ -23,6 +23,7 @@ public class AppTestSuiteRunner {
             // TODO PoisonPillException in soruce function to properly terminate? or poison message?
             System.exit(0);
         } else {
+            // FIXME ça s'affiche pas
             logger.info("A test in the test suite failed");
             System.exit(-99);
         }

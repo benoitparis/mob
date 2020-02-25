@@ -1,0 +1,79 @@
+<html>
+<head>
+<script>
+
+
+	function doOnOpen(evt) {
+		console.log('doOnOpen');
+		console.log(evt);
+    getApps();
+    log('Connected\n');
+	};
+  function doOnClose(evt) {
+		console.log("doOnClose");
+		console.log(evt);
+	};
+	function doOnMessage(evt) {
+		console.log("doOnMessage");
+		console.log(evt);
+    log('Received payload: ' + JSON.stringify(JSON.parse(evt.data).payload) + '\n');
+    displayApp(JSON.parse(evt.data).payload);
+	};
+
+	var ws;
+  function wsConnect() {
+		var mypath = "/service"
+		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+		ws = new WebSocket(wsUrl);
+		ws.onopen = doOnOpen;
+		ws.onclose = doOnClose;
+		ws.onmessage = doOnMessage;
+	}
+  
+	//function writeTable(dBname, table, msg) {
+	function writeTable(table, msg) {
+  	if (ws && ws.readyState === WebSocket.OPEN) {
+			var serverMsg = {
+				intent : 'WRITE',
+        // because peut être en root: /
+        table : 'conversation.' + table,
+				payload : msg
+			};
+			console.log(serverMsg);
+			ws.send(JSON.stringify(serverMsg));
+      log('Sent payload    : ' + JSON.stringify(msg) + '\n');
+		}
+  }
+  
+	function getApps() {
+    writeTable('query_state', {});
+	}
+	
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
+  
+  function log(str) {
+    document.getElementById("console").value += str;
+  }
+  function displayApp(payload) {
+    var node = document.createElement("a");
+    node.setAttribute("href", "/app/" + payload.app_name);
+    node.textContent = payload.app_name;
+    var div = document.createElement("div");
+    div.appendChild(node);
+    document.getElementById("apps").appendChild(div);
+  }
+  wsConnect();
+</script>
+</head>
+<body>
+  <div>
+  </div>
+  <div>
+    <div id="apps">
+    </div>
+    <textarea id="console" cols="100" rows="30" readonly style="display:none;"></textarea>
+  </div>
+</body>
+</html>

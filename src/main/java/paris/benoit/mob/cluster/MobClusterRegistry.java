@@ -43,7 +43,7 @@ public class MobClusterRegistry {
     public static final String ANSI_YELLOW = "\u001B[33m";
 
     public void start() throws Exception {
-
+        configuration.clusterFront.setMain(configuration.apps.get(0).name);
         configuration.clusterFront.start();
         setupEnvironment();
         registerServiceTables();

@@ -7,4 +7,6 @@ public interface ClusterFront {
     void waitReady() throws InterruptedException;
 
     public String accessString();
+
+    default public void setMain(String app) {}
 }
