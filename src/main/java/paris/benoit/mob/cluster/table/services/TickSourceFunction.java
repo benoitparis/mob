@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.tick;
+package paris.benoit.mob.cluster.table.services;
 
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;

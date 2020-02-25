@@ -15,11 +15,12 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.table.RetractStreamTableUtils;
 import paris.benoit.mob.cluster.table.TemporalTableFunctionUtils;
-import paris.benoit.mob.cluster.table.debug.DebugTableSink;
+import paris.benoit.mob.cluster.table.services.DebugTableSink;
 import paris.benoit.mob.cluster.table.js.JsTableEngine;
 import paris.benoit.mob.cluster.table.json.JsonTableSink;
 import paris.benoit.mob.cluster.table.json.JsonTableSource;
-import paris.benoit.mob.cluster.table.tick.TickTableSource;
+import paris.benoit.mob.cluster.table.services.DirectoryTableSource;
+import paris.benoit.mob.cluster.table.services.TickTableSource;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -98,11 +99,7 @@ public class MobClusterRegistry {
         catalog = new GenericInMemoryCatalog("mobcatalog");
         tEnv.registerCatalog("mobcatalog", catalog);
         tEnv.useCatalog("mobcatalog");
-
-
-
     }
-
 
     private void registerServiceTables() throws TableAlreadyExistException, DatabaseNotExistException, DatabaseAlreadyExistException {
         catalog.createDatabase("services", new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
@@ -115,6 +112,11 @@ public class MobClusterRegistry {
         catalog.createTable(
                 new ObjectPath("services", "debug"),
                 ConnectorCatalogTable.sink(new DebugTableSink(), false),
+                false
+        );
+        catalog.createTable(
+                new ObjectPath("services", "app_list"),
+                ConnectorCatalogTable.source(new DirectoryTableSource(configuration.apps), false),
                 false
         );
 

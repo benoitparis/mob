@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.debug;
+package paris.benoit.mob.cluster.table.services;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;

@@ -14,7 +14,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.tick.TickTableSource;
+import paris.benoit.mob.cluster.table.services.TickTableSource;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
