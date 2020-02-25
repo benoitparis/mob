@@ -56,7 +56,7 @@ public class JsTableSink implements RetractStreamTableSink<Row> {
         return ds
             .addSink(function)
             .setParallelism(1)
-            .name(configuration.name);
+            .name(configuration.fullyQualifiedName());
     }
 
     // TODO enlever quand ils seront prêt

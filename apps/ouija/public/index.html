@@ -42,6 +42,7 @@
 	}
 
   // Network setup
+  var appName = window.location.pathname.replace('/app/', '').replace('/', '');
 	var ws;
   
 	function greetInit(evt) {
@@ -80,7 +81,7 @@
 		if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-				table : table,
+        table : appName + '.' + table,
 				payload : msg
 			};
 			ws.send(JSON.stringify(serverMsg));

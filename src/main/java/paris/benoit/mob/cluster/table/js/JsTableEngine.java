@@ -7,7 +7,6 @@ import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 import javax.script.ScriptException;
@@ -34,7 +33,7 @@ public class JsTableEngine {
             "INVOKE '([^\\s]+)'[\\s]*";
     private static final Pattern JS_TABLE_PATTERN = Pattern.compile(JS_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void createAndRegister(Catalog catalog, StreamTableEnvironment tEnv, MobTableConfiguration tableConf, MobClusterConfiguration clusterConf) throws IOException, ScriptException, TableAlreadyExistException, DatabaseNotExistException {
+    public static void createAndRegister(Catalog catalog, StreamTableEnvironment tEnv, MobTableConfiguration tableConf) throws IOException, ScriptException, TableAlreadyExistException, DatabaseNotExistException {
         Matcher m = JS_TABLE_PATTERN.matcher(tableConf.content);
 
         if (m.matches()) {
@@ -42,24 +41,25 @@ public class JsTableEngine {
                 throw new RuntimeException("Created table must match with file name");
             }
 
-            String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + clusterConf.name + "/" + m.group(2))));
-            String inSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + clusterConf.name + "/" + m.group(3))));
-            String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + clusterConf.name + "/" + m.group(4))));
+            // TODO move this
+            String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + tableConf.dbName + "/" + m.group(2))));
+            String inSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + tableConf.dbName + "/" + m.group(3))));
+            String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + tableConf.dbName + "/" + m.group(4))));
             String invokeFunction = m.group(5);
 
             setupQueue(tableConf.name);
 
-            JsTableSink sink = new JsTableSink(tableConf, new MobTableConfiguration(tableConf.name + "_in", inSchema, null), invokeFunction, sourceCode);
-            JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.name + "_out", outSchema, null));
+            JsTableSink sink = new JsTableSink(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_in", inSchema, null), invokeFunction, sourceCode);
+            JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_out", outSchema, null));
 
 
             catalog.createTable(
-                    new ObjectPath(clusterConf.name, source.getName()),
+                    new ObjectPath(tableConf.dbName, source.getName()),
                     ConnectorCatalogTable.source(source, false),
                     false
             );
             catalog.createTable(
-                    new ObjectPath(clusterConf.name, sink.getName()),
+                    new ObjectPath(tableConf.dbName, sink.getName()),
                     ConnectorCatalogTable.sink(sink, false),
                     false
             );

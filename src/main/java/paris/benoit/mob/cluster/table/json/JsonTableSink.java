@@ -73,7 +73,7 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
             .addSink(actorFunction)
             .setParallelism(ds.getExecutionConfig().getMaxParallelism())
 //                .getTransformation().setCoLocationGroupKey(configuration.name) // needed ?
-            .name(configuration.name);
+            .name(configuration.fullyQualifiedName());
     }
 
     // TODO enlever quand ils seront prêt

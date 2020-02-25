@@ -18,6 +18,7 @@
     log('Received payload: ' + JSON.stringify(JSON.parse(evt.data).payload) + '\n');
 	};
 
+  var appName = window.location.pathname.replace('/app/', '').replace('/', '');
 	var ws;
   function wsConnect() {
 		var mypath = "/service"
@@ -32,7 +33,7 @@
   	if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-				table : table,
+        table : appName + '.' + table,
 				payload : msg
 			};
 			console.log(serverMsg);

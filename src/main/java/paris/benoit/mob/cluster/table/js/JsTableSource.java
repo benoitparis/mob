@@ -73,7 +73,7 @@ public class JsTableSource implements StreamTableSource<Row>
         return sEnv
                 .addSource(function, getReturnType())
                 .forceNonParallel()
-                .name(configuration.name);
+                .name(configuration.fullyQualifiedName());
     }
 
     public String getName() {

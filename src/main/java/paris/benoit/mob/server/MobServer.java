@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.test.AppTestSuiteRunner;
 
+import java.util.Arrays;
+
 public class MobServer {
     // Do not move further down
     static {
@@ -48,7 +50,7 @@ public class MobServer {
             AppTestSuiteRunner.run(name);
         } else {
             logger.info(ANSI_GREEN + "Launching " + name + ANSI_RESET);
-            AppRunner.run(name);
+            AppRunner.run(Arrays.asList(name.split(",")));
         }
     }
 

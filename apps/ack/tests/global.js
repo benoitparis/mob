@@ -1,12 +1,13 @@
 // lib part
 // TODO: putting wsConnect() should get logged and execute a noop
 // TODO: having writeTable() in a lib, writing to the cluster directly(test), or through a managed ws (prod, with namespacing)
+// TODO: having the name of the app in writeTable for the target table
 
 var wsQueueOut = [];
 function writeTable(table, msg) {
   var serverMsg = {
     intent : 'WRITE',
-    table : table,
+    table : 'ack.' + table,
     payload : msg
   };
   // console for now 

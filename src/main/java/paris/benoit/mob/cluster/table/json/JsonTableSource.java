@@ -110,7 +110,7 @@ public class JsonTableSource implements StreamTableSource<Row>
         return sEnv
             .addSource(actorFunction, configuration.name, getReturnType())
             //.forceNonParallel()
-            .name(configuration.name);
+            .name(configuration.fullyQualifiedName());
     }
     
     public JsonRowDeserializationSchema getJsonRowDeserializationSchema() {

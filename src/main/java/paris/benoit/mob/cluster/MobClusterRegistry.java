@@ -46,10 +46,15 @@ public class MobClusterRegistry {
         configuration.clusterFront.start();
         setupEnvironment();
         registerServiceTables();
-        registerInputOutputTables();
-        registerDataFlow();
+
+        for(MobAppConfiguration app : configuration.apps) {
+            catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
+            tEnv.useDatabase(app.name);
+            registerInputOutputTables(app);
+            registerDataFlow(app);
+        }
+
         executeEnvironment();
-        
         configuration.clusterFront.waitReady();
         waitRegistrationsReady();
 
@@ -57,13 +62,13 @@ public class MobClusterRegistry {
         logger.info(ANSI_YELLOW + "Plan is: \n" + ANSI_RESET + plan);
         logger.info("Front: " + ANSI_YELLOW + configuration.clusterFront.accessString() + ANSI_RESET);
         logger.info("Web UI: " + ANSI_YELLOW + "http://localhost:" + configuration.flinkWebUiPort + ANSI_RESET);
-        String[] tables = tEnv.listTables();  // TODO lister tous les catalogs
+        String[] tables = tEnv.listTables();  // TODO lister tous les catalogs.db.tables
         logger.info("Tables: " + ANSI_YELLOW + Arrays.asList(tables) + ANSI_RESET);
         logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
 
     }
 
-    private void setupEnvironment() throws DatabaseAlreadyExistException {
+    private void setupEnvironment() {
 
         if (MobClusterConfiguration.ENV_MODE.LOCAL_UI.equals(configuration.mode)) {
             Configuration conf = new Configuration();
@@ -94,13 +99,13 @@ public class MobClusterRegistry {
         tEnv.registerCatalog("mobcatalog", catalog);
         tEnv.useCatalog("mobcatalog");
 
-        catalog.createDatabase("services", new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
-        catalog.createDatabase(configuration.name, new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
+
 
     }
 
 
-    private void registerServiceTables() throws TableAlreadyExistException, DatabaseNotExistException {
+    private void registerServiceTables() throws TableAlreadyExistException, DatabaseNotExistException, DatabaseAlreadyExistException {
+        catalog.createDatabase("services", new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
 
         catalog.createTable(
                 new ObjectPath("services", "tick"),
@@ -115,19 +120,19 @@ public class MobClusterRegistry {
 
     }
 
-    private void registerInputOutputTables() throws TableAlreadyExistException, DatabaseNotExistException {
+    private void registerInputOutputTables(MobAppConfiguration app) throws TableAlreadyExistException, DatabaseNotExistException {
 
-        for (MobTableConfiguration inSchema: configuration.inSchemas) {
+        for (MobTableConfiguration inSchema: app.inSchemas) {
             // wait for bug fix / understanding TableSource duplication
 //            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
 
-            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(configuration.name, tEnv, catalog, new JsonTableSource(inSchema), inSchema.name);
+            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(app.name, tEnv, catalog, new JsonTableSource(inSchema), inSchema.name);
         }
 
-        for (MobTableConfiguration outSchema: configuration.outSchemas) {
+        for (MobTableConfiguration outSchema: app.outSchemas) {
 
             catalog.createTable(
-                    new ObjectPath(configuration.name, outSchema.name),
+                    new ObjectPath(app.name, outSchema.name),
                     ConnectorCatalogTable.sink(new JsonTableSink(outSchema, configuration.router), false),
                     false
             );
@@ -137,13 +142,12 @@ public class MobClusterRegistry {
         
     }
 
-    private void registerDataFlow() throws DatabaseNotExistException {
+    private void registerDataFlow(MobAppConfiguration app) throws DatabaseNotExistException {
 
-        tEnv.useDatabase(configuration.name);
-        List<String> tables = catalog.listTables(configuration.name);
+        List<String> tables = catalog.listTables(app.name);
         logger.info("Tables are: " + tables);
 
-        for (MobTableConfiguration sqlConf: configuration.sql) {
+        for (MobTableConfiguration sqlConf: app.sql) {
             logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
             try {
                 if (null == sqlConf.confType) {
@@ -151,19 +155,19 @@ public class MobClusterRegistry {
                 }
                 switch (sqlConf.confType) {
                     case TABLE:
-                        tEnv.createTemporaryView(configuration.name + "." + sqlConf.name, tEnv.sqlQuery(sqlConf.content));
+                        tEnv.createTemporaryView(sqlConf.fullyQualifiedName(), tEnv.sqlQuery(sqlConf.content));
                         break;
                     case STATE:
                         TemporalTableFunctionUtils.createAndRegister(tEnv, sqlConf);
                         break;
                     case RETRACT:
-                        RetractStreamTableUtils.convertAndRegister(configuration.name, tEnv, sqlConf);
+                        RetractStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
                     case APPEND:
-                        AppendStreamTableUtils.convertAndRegister(configuration.name, tEnv, sqlConf);
+                        AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
                     case JS_ENGINE:
-                        JsTableEngine.createAndRegister(catalog, tEnv, sqlConf, configuration);
+                        JsTableEngine.createAndRegister(catalog, tEnv, sqlConf);
                         break;
                     case UPDATE:
                         // TODO wait for detailed Row schema printing
@@ -196,11 +200,11 @@ public class MobClusterRegistry {
 
 
     public static class NameSenderPair {
-        String name;
+        String fullName;
         Integer loopbackIndex;
         MobClusterSender sender;
-        NameSenderPair(String name, Integer loopbackIndex, MobClusterSender sender) {
-            this.name = name;
+        NameSenderPair(String fullName, Integer loopbackIndex, MobClusterSender sender) {
+            this.fullName = fullName;
             this.loopbackIndex = loopbackIndex;
             this.sender = sender;
         }
@@ -209,13 +213,13 @@ public class MobClusterRegistry {
         }
         @Override
         public String toString() {
-            return "NameSenderPair{" + "name='" + name + '\'' + ", loopbackIndex=" + loopbackIndex + ", sender=" + sender + '}';
+            return "NameSenderPair{" + "fullName='" + fullName + '\'' + ", loopbackIndex=" + loopbackIndex + ", sender=" + sender + '}';
         }
     }
     private static CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
     private static List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
-    public static void registerClusterSender(String tableName, MobClusterSender sender, Integer loopbackIndex) {
-        clusterSenderRaw.add(new NameSenderPair(tableName, loopbackIndex, sender));
+    public static void registerClusterSender(String fullName, MobClusterSender sender, Integer loopbackIndex) {
+        clusterSenderRaw.add(new NameSenderPair(fullName, loopbackIndex, sender));
     }
 
     private static volatile boolean registrationDone = false;
@@ -224,10 +228,13 @@ public class MobClusterRegistry {
         int parallelism = sEnv.getParallelism();
         // On attend que tous les senders soient là
         // FIXME idéalement on fait que react à quand c'est prêt
-        while ((clusterSenderRaw.size() != parallelism * configuration.inSchemas.size())
+
+        long inSchemaCount = configuration.apps.stream().flatMap(it -> it.inSchemas.stream()).count();
+
+        while ((clusterSenderRaw.size() != parallelism * inSchemaCount)
                 || !JsTableEngine.isReady()
         ) {
-            logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * configuration.inSchemas.size() + " and JsTableEngines");
+            logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * inSchemaCount + " and JsTableEngines");
             logger.info("" + clusterSenderRaw);
             //logger.info("Plan is: \n" + sEnv.getExecutionPlan());
             Thread.sleep(POLL_INTERVAL);
@@ -241,7 +248,7 @@ public class MobClusterRegistry {
             .sorted(Comparator.comparing(NameSenderPair::getLoopbackIndex))
             .collect(
             Collectors.groupingBy(
-                it -> it.name,
+                it -> it.fullName,
                 Collectors.toList()
             )
         );
@@ -250,10 +257,13 @@ public class MobClusterRegistry {
         
         for (int i = 0; i < parallelism; i++) {
             HashMap<String, MobClusterSender> localMap = new HashMap<>();
-            for(MobTableConfiguration ci: configuration.inSchemas) {
-                localMap.put(ci.name, byName.get(ci.name).get(i).sender);
+
+            for(MobAppConfiguration app : configuration.apps) {
+                for(MobTableConfiguration ci: app.inSchemas) {
+                    localMap.put(ci.fullyQualifiedName(), byName.get(ci.fullyQualifiedName()).get(i).sender);
+                }
+                clusterSenders.add(localMap);
             }
-            clusterSenders.add(localMap);
         }
                 
         registrationDone = true;

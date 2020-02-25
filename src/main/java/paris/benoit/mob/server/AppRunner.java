@@ -6,6 +6,8 @@ import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.table.loopback.ActorMessageRouter;
 import paris.benoit.mob.front.UndertowFront;
 
+import java.util.List;
+
 public class AppRunner {
 
 
@@ -16,9 +18,9 @@ public class AppRunner {
     public final static int DEFAULT_FRONT_PORT = 8090;
     public final static int DEFAULT_FLINK_WEB_UI_PORT = 8082;
 
-    public static void run(String name) throws Exception {
+    public static void run(List<String> apps) throws Exception {
         MobClusterConfiguration configuration = new MobClusterConfiguration(
-                name,
+                apps,
                 new UndertowFront(DEFAULT_FRONT_PORT),
                 new ActorMessageRouter(),
                 TimeCharacteristic.IngestionTime,

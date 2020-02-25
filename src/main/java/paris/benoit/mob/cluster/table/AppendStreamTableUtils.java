@@ -26,7 +26,7 @@ public class AppendStreamTableUtils {
     private static final String APPEND_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO APPEND STREAM(.*)";
     private static final Pattern APPEND_TABLE_PATTERN = Pattern.compile(APPEND_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void convertAndRegister(String appName, StreamTableEnvironment tEnv, MobTableConfiguration state) {
+    public static void convertAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = APPEND_TABLE_PATTERN.matcher(state.content);
 
         if (m.matches()) {
@@ -40,7 +40,7 @@ public class AppendStreamTableUtils {
                     .map(it -> it.f1);
             Table retractTable = tEnv.fromDataStream(filteredRetractStream, StringUtils.join(fromTable.getSchema().getFieldNames(), ", ") +
                     ", proctime_append_stream.proctime");
-            tEnv.createTemporaryView(appName + "." + toName, retractTable);
+            tEnv.createTemporaryView(state.fullyQualifiedName(), retractTable);
 
         } else {
             throw new RuntimeException("Failed to convert to retract stream. Expression must conform to: " + APPEND_TABLE_PATTERN_REGEX + "\nSQL was: \n" + state);

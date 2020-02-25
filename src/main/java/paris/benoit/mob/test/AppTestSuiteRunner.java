@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
 
+import java.util.ArrayList;
+
 public class AppTestSuiteRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
@@ -31,7 +33,7 @@ public class AppTestSuiteRunner {
 
         front = new AppTestFront();
         configuration = new MobClusterConfiguration(
-                name,
+                new ArrayList<String>(){{add(name);}},
                 front,
                 new AppTestMessageRouter(),
                 TimeCharacteristic.IngestionTime,
@@ -41,7 +43,7 @@ public class AppTestSuiteRunner {
                 MobClusterConfiguration.ENV_MODE.LOCAL
         );
 
-        front.setConfiguration(configuration);
+        front.setConfiguration(configuration.apps.get(0));
 
         MobClusterRegistry registry = new MobClusterRegistry(configuration);
 

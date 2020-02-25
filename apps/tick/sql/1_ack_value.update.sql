@@ -5,5 +5,5 @@ SELECT
   ROW(
     CAST(ts.tick_number AS VARCHAR)
   )
-FROM write_value  AS wv
-JOIN tick_service AS ts ON true
+FROM write_value AS wv
+JOIN services.tick AS ts ON true
