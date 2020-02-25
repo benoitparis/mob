@@ -8,7 +8,7 @@ SELECT
 FROM (
   SELECT
     LAST_VALUE(tick_number) tick_number
-  FROM tick_service
+  FROM services.tick
 ) ts
 JOIN (
   SELECT

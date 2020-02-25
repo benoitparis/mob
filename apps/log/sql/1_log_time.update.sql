@@ -1,4 +1,4 @@
-INSERT INTO debug_sink
+INSERT INTO services.debug
 SELECT
   CAST(tick_number AS VARCHAR)
-FROM tick_service
+FROM services.tick

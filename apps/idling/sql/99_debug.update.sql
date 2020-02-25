@@ -1,4 +1,4 @@
-INSERT INTO debug_sink
+INSERT INTO services.debug
 SELECT
   COALESCE(CAST('acti and inact: ' AS VARCHAR), '')                                                          || ' - ' ||
   COALESCE(CAST(tsActivity AS VARCHAR), '')                                                                  || ' - ' ||

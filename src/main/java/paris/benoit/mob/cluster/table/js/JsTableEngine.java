@@ -1,5 +1,10 @@
 package paris.benoit.mob.cluster.table.js;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.table.catalog.ConnectorCatalogTable;
+import org.apache.flink.table.catalog.ObjectPath;
+import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
+import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
@@ -29,7 +34,7 @@ public class JsTableEngine {
             "INVOKE '([^\\s]+)'[\\s]*";
     private static final Pattern JS_TABLE_PATTERN = Pattern.compile(JS_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration tableConf, MobClusterConfiguration clusterConf) throws IOException, ScriptException {
+    public static void createAndRegister(Catalog catalog, StreamTableEnvironment tEnv, MobTableConfiguration tableConf, MobClusterConfiguration clusterConf) throws IOException, ScriptException, TableAlreadyExistException, DatabaseNotExistException {
         Matcher m = JS_TABLE_PATTERN.matcher(tableConf.content);
 
         if (m.matches()) {
@@ -47,8 +52,17 @@ public class JsTableEngine {
             JsTableSink sink = new JsTableSink(tableConf, new MobTableConfiguration(tableConf.name + "_in", inSchema, null), invokeFunction, sourceCode);
             JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.name + "_out", outSchema, null));
 
-            tEnv.registerTableSink(sink.getName(), sink);
-            tEnv.registerTableSource(source.getName(), source);
+
+            catalog.createTable(
+                    new ObjectPath(clusterConf.name, source.getName()),
+                    ConnectorCatalogTable.source(source, false),
+                    false
+            );
+            catalog.createTable(
+                    new ObjectPath(clusterConf.name, sink.getName()),
+                    ConnectorCatalogTable.sink(sink, false),
+                    false
+            );
             //AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, source, source.getName());
 
         } else {

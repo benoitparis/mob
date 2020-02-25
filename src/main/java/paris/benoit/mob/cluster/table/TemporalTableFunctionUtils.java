@@ -19,7 +19,7 @@ public class TemporalTableFunctionUtils {
         if (m.matches()) {
             Table historyTable;
             if (null != m.group(4) && m.group(4).trim().startsWith("TABLE_SCAN")) {
-                historyTable = tEnv.scan(m.group(5).trim());
+                historyTable = tEnv.from(m.group(5).trim());
             } else {
                 historyTable = tEnv.sqlQuery(m.group(6));
             }

@@ -5,6 +5,6 @@ SELECT
   ROW(
     v
   )
-FROM query_state                           AS qs
-   , LATERAL TABLE (kv_state(qs.proctime)) AS kvs
+FROM query_state AS qs
+   , LATERAL TABLE (kv_state(qs.proctime_append_stream)) AS kvs
 WHERE qs.k = kvs.k

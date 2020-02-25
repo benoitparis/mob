@@ -6,6 +6,10 @@ import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.*;
+import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
+import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
+import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.table.AppendStreamTableUtils;
@@ -27,7 +31,8 @@ public class MobClusterRegistry {
     private MobClusterConfiguration configuration;
     private StreamExecutionEnvironment sEnv;
     private StreamTableEnvironment tEnv;
-    
+    private Catalog catalog;
+
     public MobClusterRegistry(MobClusterConfiguration clusterConfiguration) {
         this.configuration = clusterConfiguration;
     }
@@ -52,13 +57,13 @@ public class MobClusterRegistry {
         logger.info(ANSI_YELLOW + "Plan is: \n" + ANSI_RESET + plan);
         logger.info("Front: " + ANSI_YELLOW + configuration.clusterFront.accessString() + ANSI_RESET);
         logger.info("Web UI: " + ANSI_YELLOW + "http://localhost:" + configuration.flinkWebUiPort + ANSI_RESET);
-        String[] tables = tEnv.listTables();
+        String[] tables = tEnv.listTables();  // TODO lister tous les catalogs
         logger.info("Tables: " + ANSI_YELLOW + Arrays.asList(tables) + ANSI_RESET);
         logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
 
     }
 
-    private void setupEnvironment() {
+    private void setupEnvironment() throws DatabaseAlreadyExistException {
 
         if (MobClusterConfiguration.ENV_MODE.LOCAL_UI.equals(configuration.mode)) {
             Configuration conf = new Configuration();
@@ -84,32 +89,59 @@ public class MobClusterRegistry {
                 .inStreamingMode()
             .build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
-        
+
+        catalog = new GenericInMemoryCatalog("mobcatalog");
+        tEnv.registerCatalog("mobcatalog", catalog);
+        tEnv.useCatalog("mobcatalog");
+
+        catalog.createDatabase("services", new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
+        catalog.createDatabase(configuration.name, new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
+
     }
 
 
-    private void registerServiceTables() {
-        tEnv.registerTableSource("tick_service", new TickTableSource(20));
-        tEnv.registerTableSink("debug_sink", new DebugTableSink());
+    private void registerServiceTables() throws TableAlreadyExistException, DatabaseNotExistException {
+
+        catalog.createTable(
+                new ObjectPath("services", "tick"),
+                ConnectorCatalogTable.source(new TickTableSource(20), false),
+                false
+        );
+        catalog.createTable(
+                new ObjectPath("services", "debug"),
+                ConnectorCatalogTable.sink(new DebugTableSink(), false),
+                false
+        );
+
     }
 
-    private void registerInputOutputTables() {
+    private void registerInputOutputTables() throws TableAlreadyExistException, DatabaseNotExistException {
 
         for (MobTableConfiguration inSchema: configuration.inSchemas) {
             // wait for bug fix / understanding TableSource duplication
 //            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
 
-            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, new JsonTableSource(inSchema), inSchema.name);
+            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(configuration.name, tEnv, catalog, new JsonTableSource(inSchema), inSchema.name);
         }
 
         for (MobTableConfiguration outSchema: configuration.outSchemas) {
-            tEnv.registerTableSink(outSchema.name, new JsonTableSink(outSchema, configuration.router));
+
+            catalog.createTable(
+                    new ObjectPath(configuration.name, outSchema.name),
+                    ConnectorCatalogTable.sink(new JsonTableSink(outSchema, configuration.router), false),
+                    false
+            );
+
             logger.debug("Registered Table Sink: " + outSchema);
         }
         
     }
 
-    private void registerDataFlow() {
+    private void registerDataFlow() throws DatabaseNotExistException {
+
+        tEnv.useDatabase(configuration.name);
+        List<String> tables = catalog.listTables(configuration.name);
+        logger.info("Tables are: " + tables);
 
         for (MobTableConfiguration sqlConf: configuration.sql) {
             logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
@@ -119,19 +151,19 @@ public class MobClusterRegistry {
                 }
                 switch (sqlConf.confType) {
                     case TABLE:
-                        tEnv.registerTable(sqlConf.name, tEnv.sqlQuery(sqlConf.content));
+                        tEnv.createTemporaryView(configuration.name + "." + sqlConf.name, tEnv.sqlQuery(sqlConf.content));
                         break;
                     case STATE:
                         TemporalTableFunctionUtils.createAndRegister(tEnv, sqlConf);
                         break;
                     case RETRACT:
-                        RetractStreamTableUtils.convertAndRegister(tEnv, sqlConf);
+                        RetractStreamTableUtils.convertAndRegister(configuration.name, tEnv, sqlConf);
                         break;
                     case APPEND:
-                        AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
+                        AppendStreamTableUtils.convertAndRegister(configuration.name, tEnv, sqlConf);
                         break;
                     case JS_ENGINE:
-                        JsTableEngine.createAndRegister(tEnv, sqlConf, configuration);
+                        JsTableEngine.createAndRegister(catalog, tEnv, sqlConf, configuration);
                         break;
                     case UPDATE:
                         // TODO wait for detailed Row schema printing

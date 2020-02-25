@@ -1,4 +1,4 @@
-INSERT INTO debug_sink
+INSERT INTO services.debug
 SELECT
   CAST(loopback_index AS VARCHAR)
 FROM query_global_position AS gqp

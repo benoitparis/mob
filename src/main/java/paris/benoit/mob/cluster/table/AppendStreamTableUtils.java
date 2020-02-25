@@ -4,11 +4,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.catalog.Catalog;
+import org.apache.flink.table.catalog.ConnectorCatalogTable;
+import org.apache.flink.table.catalog.ObjectPath;
+import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
+import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.table.tick.TickTableSource;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +26,7 @@ public class AppendStreamTableUtils {
     private static final String APPEND_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO APPEND STREAM(.*)";
     private static final Pattern APPEND_TABLE_PATTERN = Pattern.compile(APPEND_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void convertAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
+    public static void convertAndRegister(String appName, StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = APPEND_TABLE_PATTERN.matcher(state.content);
 
         if (m.matches()) {
@@ -34,7 +40,7 @@ public class AppendStreamTableUtils {
                     .map(it -> it.f1);
             Table retractTable = tEnv.fromDataStream(filteredRetractStream, StringUtils.join(fromTable.getSchema().getFieldNames(), ", ") +
                     ", proctime_append_stream.proctime");
-            tEnv.registerTable(toName, retractTable);
+            tEnv.createTemporaryView(appName + "." + toName, retractTable);
 
         } else {
             throw new RuntimeException("Failed to convert to retract stream. Expression must conform to: " + APPEND_TABLE_PATTERN_REGEX + "\nSQL was: \n" + state);
@@ -46,17 +52,21 @@ public class AppendStreamTableUtils {
     }
 
     // FIXME https://issues.apache.org/jira/browse/FLINK-15775
-    public static void createAndRegisterTableSourceDoMaterializeAsAppendStream(StreamTableEnvironment tEnv, StreamTableSource tableSource, String name) {
+    public static void createAndRegisterTableSourceDoMaterializeAsAppendStream(String appName, StreamTableEnvironment tEnv, Catalog catalog, StreamTableSource tableSource, String name) throws TableAlreadyExistException, DatabaseNotExistException {
 
-        tEnv.registerTableSource(name + "_raw", tableSource);
+        catalog.createTable(
+                new ObjectPath(appName, name + "_raw"),
+                ConnectorCatalogTable.source(new TickTableSource(20), false),
+                false
+        );
 
         Table rawTable = tEnv.fromTableSource(tableSource);
 
         DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, rawTable.getSchema().toRowType());
 
-        logger.info("Registering as Table: " + name);
-        tEnv.registerTable(name, tEnv.fromDataStream(appendStream,
-                StringUtils.join(tableSource.getTableSchema().getFieldNames(), ", ") +
+        logger.info("Registering as Table: " + appName + "." + name);
+        tEnv.createTemporaryView(appName + "." + name, tEnv.fromDataStream(appendStream,
+                StringUtils.join(rawTable.getSchema().getFieldNames(), ", ") +
                 ", proctime_append_stream.proctime"
             )
         );

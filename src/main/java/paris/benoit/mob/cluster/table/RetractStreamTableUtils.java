@@ -15,7 +15,7 @@ public class RetractStreamTableUtils {
     private static final String RETRACT_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO RETRACT STREAM(.*)";
     private static final Pattern RETRACT_TABLE_PATTERN = Pattern.compile(RETRACT_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void convertAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
+    public static void convertAndRegister(String appName, StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = RETRACT_TABLE_PATTERN.matcher(state.content);
 
         if (m.matches()) {
@@ -25,7 +25,7 @@ public class RetractStreamTableUtils {
             Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);
             DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, fromTable.getSchema().toRowType());
             Table retractTable = tEnv.fromDataStream(retractStream, "accumulate_flag, content");
-            tEnv.registerTable(toName, retractTable);
+            tEnv.createTemporaryView(appName + "." + toName, retractTable);
 
         } else {
             throw new RuntimeException("Failed to convert to retract stream. Expression must conform to: " + RETRACT_TABLE_PATTERN_REGEX + "\nSQL was: \n" + state);
