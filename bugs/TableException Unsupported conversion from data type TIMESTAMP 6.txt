@@ -10,7 +10,7 @@ Caused by: org.apache.flink.table.api.TableException: Unsupported conversion fro
 Exception in thread "main" org.apache.flink.table.api.ValidationException: Processing time field 'tick_proctime' has invalid type TIME(0). Processing time attributes must be of type SQL_TIMESTAMP.
 
 
-Caused by: org.apache.flink.table.api.TableException: TableSource of type paris.benoit.mob.cluster.table.services.TickTableSource returned a DataStream of data type ROW<`tick_number` INT, `tick_proctime` TIMESTAMP(3), `constant_dummy_source` STRING> that does not match with the data type
+Caused by: org.apache.flink.table.api.TableException: TableSource of type TickTableSource returned a DataStream of data type ROW<`tick_number` INT, `tick_proctime` TIMESTAMP(3), `constant_dummy_source` STRING> that does not match with the data type
 ROW<`tick_number` INT, `tick_proctime` TIMESTAMP(3), `constant_dummy_source` STRING> declared by the TableSource.getProducedDataType() method. Please validate the implementation of the TableSource.
 
 
