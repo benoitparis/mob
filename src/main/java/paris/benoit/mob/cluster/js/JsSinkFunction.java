@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.js;
+package paris.benoit.mob.cluster.js;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;

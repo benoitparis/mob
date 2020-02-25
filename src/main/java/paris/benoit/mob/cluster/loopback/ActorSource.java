@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.loopback;
+package paris.benoit.mob.cluster.loopback;
 
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import org.apache.flink.configuration.Configuration;

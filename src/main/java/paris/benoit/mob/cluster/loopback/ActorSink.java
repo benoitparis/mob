@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.loopback;
+package paris.benoit.mob.cluster.loopback;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;

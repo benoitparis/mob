@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.loopback;
+package paris.benoit.mob.cluster.loopback;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.ActorRegistry;

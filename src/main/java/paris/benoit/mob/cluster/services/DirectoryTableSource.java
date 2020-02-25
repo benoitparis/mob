@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.services;
+package paris.benoit.mob.cluster.services;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -10,36 +10,33 @@ import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.MobAppConfiguration;
 
-public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
+import java.util.List;
+import java.util.stream.Collectors;
 
-    private static final Logger logger = LoggerFactory.getLogger(TickTableSource.class);
+public class DirectoryTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
 
     private static final String[] fieldNames = new String[] {
-            "tick_number",
-            "constant_dummy_source", //TODO remove?
+            "app_name",
+            "constant_dummy_source",
             "proctime_append_stream"
     };
     private DataType[] fieldTypes = new DataType[] {
-            DataTypes.BIGINT(),
+            DataTypes.STRING(),
             DataTypes.STRING(),
             DataTypes.TIMESTAMP(3)
     };
-    private long offset = 0, interval;
 
-    public TickTableSource(long offset, long interval) {
-        this.offset = offset;
-        this.interval = interval;
-    }
-    public TickTableSource(long interval) {
-        this.interval = interval;
+    private List<MobAppConfiguration> apps;
+
+    public DirectoryTableSource(List<MobAppConfiguration> apps) {
+        this.apps = apps;
     }
 
     @Override
     public String explainSource() {
-        return "Tick Source";
+        return "App Directory";
     }
 
     @Override
@@ -51,7 +48,6 @@ public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeA
     @Override
     public TypeInformation<Row> getReturnType() {
         return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(getProducedDataType());
-
     }
 
     @Override
@@ -61,10 +57,17 @@ public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeA
 
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
-        return sEnv
-            .addSource(new TickSourceFunction(offset, interval), getReturnType())
-            .forceNonParallel()
-            .name("Tick Source (" + interval + " ms)");
+        return sEnv.fromCollection(
+                apps.stream().map(it -> {
+                        Row row = new Row(3);
+                        row.setField(0, it.name);
+                        row.setField(1, "1");
+                        return row;
+                    }).collect(Collectors.toList()),
+                    getReturnType()
+                )
+                .forceNonParallel()
+                .name("App Directory");
     }
 
     @Override

@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.json;
+package paris.benoit.mob.cluster.json;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
@@ -16,8 +16,8 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.LegacyDataTypeTransitionUtils;
-import paris.benoit.mob.cluster.table.loopback.ActorSource;
+import paris.benoit.mob.cluster.loopback.ActorSource;
+import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
 import java.util.Map;
 import java.util.stream.Collectors;

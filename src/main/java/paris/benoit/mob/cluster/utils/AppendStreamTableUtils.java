@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table;
+package paris.benoit.mob.cluster.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -14,7 +14,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.services.TickTableSource;
+import paris.benoit.mob.cluster.services.TickTableSource;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

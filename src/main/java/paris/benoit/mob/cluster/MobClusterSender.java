@@ -7,7 +7,7 @@ import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.types.Row;
-import paris.benoit.mob.cluster.table.json.JsonTableSource;
+import paris.benoit.mob.cluster.json.JsonTableSource;
 
 import java.io.IOException;
 

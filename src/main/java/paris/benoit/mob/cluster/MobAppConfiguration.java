@@ -18,10 +18,10 @@ public class MobAppConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobAppConfiguration.class);
 
     public String name;
-    protected List<MobTableConfiguration> inSchemas;
-    protected List<MobTableConfiguration> outSchemas;
-    protected List<MobTableConfiguration> sql;
-    protected List<MobTableConfiguration> tests;
+    public List<MobTableConfiguration> inSchemas;
+    public List<MobTableConfiguration> outSchemas;
+    public List<MobTableConfiguration> sql;
+    public List<MobTableConfiguration> tests;
     private String basePath;
 
 

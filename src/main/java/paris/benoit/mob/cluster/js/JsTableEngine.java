@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.table.js;
+package paris.benoit.mob.cluster.js;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.ConnectorCatalogTable;

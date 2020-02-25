@@ -1,14 +1,11 @@
-package paris.benoit.mob.cluster.table.json;
+package paris.benoit.mob.cluster.js;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.api.java.functions.IdPartitioner;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
-import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
-import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
@@ -18,37 +15,25 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.table.loopback.ActorSink;
-import paris.benoit.mob.server.MessageRouter;
 
-public class JsonTableSink implements RetractStreamTableSink<Row> {
-    private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
+public class JsTableSink implements RetractStreamTableSink<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(JsTableSink.class);
 
     private DataType jsonDataType;
-    private static final String[] fieldNames = new String[] {
-            "loopback_index",
-            "actor_identity",
-            "payload"
-    };
+    private static final String[] fieldNames = new String[] { "payload" };
     private DataType[] fieldTypes;
 
-    private RichSinkFunction<Tuple2<Boolean, Row>> actorFunction;
-    private JsonRowSerializationSchema jrs;
+    private RichSinkFunction<Tuple2<Boolean, Row>> function;
     private MobTableConfiguration configuration;
 
-    public JsonTableSink(MobTableConfiguration configuration, MessageRouter router) {
-        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
-        fieldTypes = new DataType[] {
-            DataTypes.INT(),
-            DataTypes.STRING(),
-                jsonDataType,
-//            LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(jsonDataType)
-        };
-        logger.info("Created Sink with json schema: " + jsonDataType.toString());
+    public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
 
-        jrs = new JsonRowSerializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
-        actorFunction = new ActorSink(configuration, jrs, router);
+        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+        fieldTypes = new DataType[] { jsonDataType };
+
+        function = new JsSinkFunction(parentConfiguration, configuration, invokeFunction, code);
         this.configuration = configuration;
+        logger.info("Instanciated JsTableSink with json schema: " + jsonDataType.toString());
     }
 
     @Override
@@ -69,10 +54,8 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         return ds
-            .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
-            .addSink(actorFunction)
-            .setParallelism(ds.getExecutionConfig().getMaxParallelism())
-//                .getTransformation().setCoLocationGroupKey(configuration.name) // needed ?
+            .addSink(function)
+            .setParallelism(1)
             .name(configuration.fullyQualifiedName());
     }
 
@@ -80,6 +63,10 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
     @Override
     public TypeInformation<Row> getRecordType() {
         return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(this.getTableSchema().toRowDataType());
+    }
+
+    public String getName() {
+        return configuration.name;
     }
 
 }

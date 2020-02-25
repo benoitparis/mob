@@ -3,7 +3,7 @@ package paris.benoit.mob.server;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
-import paris.benoit.mob.cluster.table.loopback.ActorMessageRouter;
+import paris.benoit.mob.cluster.loopback.ActorMessageRouter;
 import paris.benoit.mob.front.UndertowFront;
 
 import java.util.List;
