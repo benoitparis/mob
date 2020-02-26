@@ -24,6 +24,8 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -34,6 +36,7 @@ public class UndertowFront implements ClusterFront {
     private final int port;
     private final String baseUrl;
     private String mainApp;
+    private CompletableFuture<Void> upFuture;
 
     public UndertowFront(int port) {
         super();
@@ -81,30 +84,23 @@ public class UndertowFront implements ClusterFront {
         server.start();
         logger.info("Undertow is up at: " + baseUrl);
         
-        pokeActorService();
+        upFuture = pokeActorService();
 
     }
 
-    private volatile boolean isUp = false;
-    private void pokeActorService() {
-        new Thread(() -> {
+    private CompletableFuture<Void> pokeActorService() {
+        return CompletableFuture.runAsync(() -> {
             try {
-                if (HttpClients.createDefault().execute(new HttpGet(baseUrl + "/service")).getStatusLine().getStatusCode() > -100) {
-                    isUp = true;
-                } else {
-                    logger.error("Unable to call Actor service");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+                HttpClients.createDefault().execute(new HttpGet(baseUrl + "/service")).getStatusLine().getStatusCode();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-        }).start();
+        });
     }
 
     @Override
-    public void waitReady() throws InterruptedException {
-        while (!isUp) {
-            Thread.sleep(10);
-        }
+    public void waitReady() throws ExecutionException, InterruptedException {
+        upFuture.get();
     }
 
     @Override

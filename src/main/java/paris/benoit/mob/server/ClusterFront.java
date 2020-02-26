@@ -4,7 +4,7 @@ public interface ClusterFront {
 
     void start();
 
-    void waitReady() throws InterruptedException;
+    void waitReady() throws Exception;
 
     String accessString();
 
