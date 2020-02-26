@@ -1,67 +1,43 @@
 package paris.benoit.mob.cluster.services;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sources.DefinedProctimeAttribute;
-import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
-import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
+import paris.benoit.mob.cluster.RowStreamTableSource;
 
-public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
+public class TickTableSource extends RowStreamTableSource implements DefinedProctimeAttribute {
 
-    private static final String[] fieldNames = new String[] {
+    private static final String[] FIELD_NAMES = new String[] {
             "tick_number",
             "constant_dummy_source", //TODO remove?
             "proctime_append_stream"
     };
-    private final DataType[] fieldTypes = new DataType[] {
+    private final DataType[] FIELD_TYPES = new DataType[] {
             DataTypes.BIGINT(),
             DataTypes.STRING(),
             DataTypes.TIMESTAMP(3)
     };
-    private long offset = 0;
-    private final long interval;
 
     public TickTableSource(long offset, long interval) {
-        this.offset = offset;
-        this.interval = interval;
+        fieldNames = FIELD_NAMES;
+        fieldTypes = FIELD_TYPES;
+        function = new TickSourceFunction(offset, interval);
+        name = "Tick Source (" + interval + " ms)";
     }
+
     public TickTableSource(long interval) {
-        this.interval = interval;
-    }
-
-    @Override
-    public String explainSource() {
-        return "Tick Source";
-    }
-
-    @Override
-    public DataType getProducedDataType() {
-        return getTableSchema().toRowDataType();
-    }
-
-    // TODO faudra virer ça quand ils seront prêt pour les types
-    @Override
-    public TypeInformation<Row> getReturnType() {
-        return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(getProducedDataType());
-
-    }
-
-    @Override
-    public TableSchema getTableSchema() {
-        return TableSchema.builder().fields(fieldNames, fieldTypes).build();
+        this(0, interval);
     }
 
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-            .addSource(new TickSourceFunction(offset, interval), getReturnType())
+            .addSource(function, getReturnType())
             .forceNonParallel()
-            .name("Tick Source (" + interval + " ms)");
+            .name(explainSource());
     }
 
     @Override

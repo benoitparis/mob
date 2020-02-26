@@ -1,7 +1,6 @@
 package paris.benoit.mob.cluster.js;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.ConnectorCatalogTable;
-import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
@@ -51,12 +50,12 @@ public class JsTableEngine {
             JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_out", outSchema, null));
 
             catalog.createTable(
-                    new ObjectPath(tableConf.dbName, source.getName()),
+                    source.configuration.getObjectPath(), // TODO change
                     ConnectorCatalogTable.source(source, false),
                     false
             );
             catalog.createTable(
-                    new ObjectPath(tableConf.dbName, sink.getName()),
+                    sink.configuration.getObjectPath(),
                     ConnectorCatalogTable.sink(sink, false),
                     false
             );

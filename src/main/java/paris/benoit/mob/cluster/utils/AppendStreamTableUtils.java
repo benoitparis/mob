@@ -30,7 +30,6 @@ public class AppendStreamTableUtils {
         Matcher m = APPEND_TABLE_PATTERN.matcher(state.content);
 
         if (m.matches()) {
-            String toName = m.group(1);
             String fromTableName = m.group(2);
 
             Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);

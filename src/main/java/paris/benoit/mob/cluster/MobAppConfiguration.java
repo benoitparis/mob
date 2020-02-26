@@ -24,7 +24,6 @@ public class MobAppConfiguration {
     public final List<MobTableConfiguration> tests;
     private final String basePath;
 
-
     public MobAppConfiguration(String name) {
         this.name = name;
         this.basePath = System.getProperty("user.dir") + "/apps/" + name + "/";
@@ -74,7 +73,6 @@ public class MobAppConfiguration {
                 })
                 .collect(Collectors.toList());
     }
-
 
     private MobTableConfiguration.CONF_TYPE getConfType(String filePart) {
         try {

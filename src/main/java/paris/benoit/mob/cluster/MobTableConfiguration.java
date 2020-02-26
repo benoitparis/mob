@@ -1,5 +1,7 @@
 package paris.benoit.mob.cluster;
 
+import org.apache.flink.table.catalog.ObjectPath;
+
 import java.io.Serializable;
 
 public class MobTableConfiguration implements Serializable {
@@ -34,6 +36,10 @@ public class MobTableConfiguration implements Serializable {
     }
 
     public String fullyQualifiedName() {
-        return dbName + "." + name;
+        return getObjectPath().getFullName();
+    }
+
+    public ObjectPath getObjectPath() {
+        return new ObjectPath(dbName, name);
     }
 }

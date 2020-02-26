@@ -24,7 +24,7 @@ public class RetractStreamTableUtils {
             Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);
             DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, fromTable.getSchema().toRowType());
             Table retractTable = tEnv.fromDataStream(retractStream, "accumulate_flag, content");
-            tEnv.createTemporaryView(state.fullyQualifiedName(), retractTable);
+            tEnv.createTemporaryView(state.getObjectPath().getFullName(), retractTable);
 
         } else {
             throw new RuntimeException("Failed to convert to retract stream. Expression must conform to: " + RETRACT_TABLE_PATTERN_REGEX + "\nSQL was: \n" + state);

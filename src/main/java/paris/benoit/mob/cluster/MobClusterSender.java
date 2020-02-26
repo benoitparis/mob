@@ -19,7 +19,6 @@ public class MobClusterSender {
     private final JsonRowDeserializationSchema jrds;
     private final Channel<Row> channel;
     private final ThreadReceivePort<Row> receiveport;
-    private static final int fieldCount = JsonTableSource.getFieldCount();
     
     public MobClusterSender(JsonRowDeserializationSchema jrds) {
         super();
@@ -31,7 +30,7 @@ public class MobClusterSender {
     public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
         
         try {
-            Row root = new Row(fieldCount);
+            Row root = new Row(JsonTableSource.FIELD_COUNT);
             // 0 is loopbackIndex, by convention; to be set by the function
             root.setField(1, identity);
             root.setField(2, jrds.deserialize(payload.getBytes()));

@@ -23,7 +23,7 @@ class JsTableSink implements RetractStreamTableSink<Row> {
     private final DataType[] fieldTypes;
 
     private final RichSinkFunction<Tuple2<Boolean, Row>> function;
-    private final MobTableConfiguration configuration;
+    public final MobTableConfiguration configuration;
 
     public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
 

@@ -1,28 +1,25 @@
 package paris.benoit.mob.cluster.services;
 
-import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sources.DefinedProctimeAttribute;
-import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
-import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import paris.benoit.mob.cluster.MobAppConfiguration;
+import paris.benoit.mob.cluster.RowStreamTableSource;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DirectoryTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
+public class DirectoryTableSource extends RowStreamTableSource implements DefinedProctimeAttribute {
 
-    private static final String[] fieldNames = new String[] {
+    private static final String[] FIELD_NAMES = new String[] {
             "app_name",
             "constant_dummy_source",
             "proctime_append_stream"
     };
-    private final DataType[] fieldTypes = new DataType[] {
+    private final DataType[] FIELD_TYPES = new DataType[] {
             DataTypes.STRING(),
             DataTypes.STRING(),
             DataTypes.TIMESTAMP(3)
@@ -31,28 +28,10 @@ public class DirectoryTableSource implements StreamTableSource<Row>, DefinedProc
     private final List<MobAppConfiguration> apps;
 
     public DirectoryTableSource(List<MobAppConfiguration> apps) {
+        fieldNames = FIELD_NAMES;
+        fieldTypes = FIELD_TYPES;
+        name = "App Directory";
         this.apps = apps;
-    }
-
-    @Override
-    public String explainSource() {
-        return "App Directory";
-    }
-
-    @Override
-    public DataType getProducedDataType() {
-        return getTableSchema().toRowDataType();
-    }
-
-    // TODO faudra virer ça quand ils seront prêt pour les types
-    @Override
-    public TypeInformation<Row> getReturnType() {
-        return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(getProducedDataType());
-    }
-
-    @Override
-    public TableSchema getTableSchema() {
-        return TableSchema.builder().fields(fieldNames, fieldTypes).build();
     }
 
     @Override
@@ -67,7 +46,7 @@ public class DirectoryTableSource implements StreamTableSource<Row>, DefinedProc
                     getReturnType()
                 )
                 .forceNonParallel()
-                .name("App Directory");
+                .name(explainSource());
     }
 
     @Override
