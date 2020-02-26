@@ -13,12 +13,14 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletableFuture;
 
 class JsSourceFunction extends RichParallelSourceFunction<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsSourceFunction.class);
 
     private final MobTableConfiguration parentConfiguration;
     private BlockingQueue<Map> queue;
+    private CompletableFuture<BlockingQueue<Map>> future;
     private volatile boolean isRunning = true;
 
     private final JsonRowDeserializationSchema jrds;
@@ -36,13 +38,14 @@ class JsSourceFunction extends RichParallelSourceFunction<Row> {
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         logger.info("Parallelism of jsEngine source " + parentConfiguration.name + " : " + getRuntimeContext().getNumberOfParallelSubtasks());
-        queue = JsTableEngine.registerSource(parentConfiguration.name);
+        future = JsTableEngine.registerSource(parentConfiguration.name);
         mapper = new ObjectMapper();
         logger.info("Opened JsSourceFunction");
     }
 
     @Override
     public void run(SourceContext<Row> ctx) throws Exception {
+        queue = future.get();
 
         while (isRunning) {
             Map item = queue.take();

@@ -229,7 +229,7 @@ public class MobClusterRegistry {
         long inSchemaCount = configuration.apps.stream().mapToLong(it -> it.inSchemas.size()).sum();
 
         while ((clusterSenderRaw.size() != parallelism * inSchemaCount)
-                || !JsTableEngine.isReady()
+//                || !JsTableEngine.isReady()
         ) {
             logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * inSchemaCount + " and JsTableEngines");
             logger.info("" + clusterSenderRaw);

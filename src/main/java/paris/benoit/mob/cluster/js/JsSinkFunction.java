@@ -17,6 +17,7 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
@@ -30,6 +31,7 @@ class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private final String invokeFunction;
     private final String code;
     private Invocable inv;
+    public static final int JS_QUEUE_CAPACITY = 100;
 
     public JsSinkFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
         this.parentConfiguration = parentConfiguration;
@@ -46,7 +48,8 @@ class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
         logger.info("Parallelism of jsEngine sink " + parentConfiguration.name + " : " + getRuntimeContext().getNumberOfParallelSubtasks());
-        queue = JsTableEngine.registerSink(parentConfiguration.name);
+        queue = new ArrayBlockingQueue<>(JS_QUEUE_CAPACITY);
+        JsTableEngine.registerSink(parentConfiguration.name, queue);
 
         ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
         graaljsEngine.eval(code);

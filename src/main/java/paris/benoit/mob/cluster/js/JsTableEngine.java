@@ -1,4 +1,5 @@
 package paris.benoit.mob.cluster.js;
+
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.ConnectorCatalogTable;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
@@ -12,9 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,8 +44,6 @@ public class JsTableEngine {
             String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + tableConf.dbName + "/" + m.group(4))));
             String invokeFunction = m.group(5);
 
-            setupQueue(tableConf.name);
-
             MobTableConfiguration sinkConf = new MobTableConfiguration(tableConf.dbName, tableConf.name + "_in", inSchema, null);
             JsTableSink sink = new JsTableSink(tableConf, sinkConf, invokeFunction, sourceCode);
 
@@ -68,51 +66,54 @@ public class JsTableEngine {
         }
     }
 
-    private static final Map<String, BlockingQueue<BlockingQueue<Map>>> queuesSink = new HashMap<>();
-    private static final Map<String, BlockingQueue<BlockingQueue<Map>>> queuesSource = new HashMap<>();
 
-    // TODO remove, useful??
-    private static final AtomicInteger registrationTarget = new AtomicInteger(0);
-    private static final AtomicInteger counter = new AtomicInteger(0);
+    /*
+     * We need to have the sink -> js engine -> source data path, we'll do it through a queue.
+     * A queue cannot be set up through constructors, because of serialization (and remote execution)
+     * Hopefully we have arranged for Co-Location though, and when functions are deserialized,
+     * their will open() and exchange a queue.
+     */
 
-    private static void setupQueue(String name) {
-        BlockingQueue<BlockingQueue<Map>> exchangeQueueSink = new ArrayBlockingQueue<>(1);
-        BlockingQueue<BlockingQueue<Map>> exchangeQueueSource = new ArrayBlockingQueue<>(1);
-        queuesSink.put(name, exchangeQueueSink);
-        queuesSource.put(name, exchangeQueueSource);
+    private static TransferMap<String, BlockingQueue<Map>> transferMap = new TransferMap<>();
 
-        BlockingQueue<Map> queue = new ArrayBlockingQueue<>(100);
-
-        exchangeQueueSink.add(queue);
-        exchangeQueueSource.add(queue);
-
-        registrationTarget.addAndGet(2);
-
+    static CompletableFuture<BlockingQueue<Map>> registerSource(String name) {
+        return CompletableFuture.supplyAsync(() -> transferMap.getAndWait(name));
     }
 
-    static BlockingQueue<Map> registerSink(String name) throws InterruptedException {
-        logger.warn("Registering JS Sink function " + name);
-        while (null == queuesSink.get(name)){
-            logger.warn("Waiting on registerSink, this shouldn't happen");
-            Thread.sleep(100);
+    static void registerSink(String name, BlockingQueue<Map> queue) {
+        transferMap.put(name, queue);
+    }
+
+    // https://stackoverflow.com/questions/6389122/does-a-hashmap-with-a-getandwait-method-exist-e-g-a-blockingconcurrenthashma
+    public static class TransferMap<K, V> extends HashMap<K, V>{
+
+        private final Object lock = new Object();
+
+        V getAndWait(Object key) {
+            V value;
+            synchronized(lock) {
+                do {
+                    value = super.get(key);
+                    if (value == null) {
+                        try {
+                            lock.wait();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                } while(value == null);
+            }
+            return value;
         }
-        counter.incrementAndGet();
-        return queuesSink.get(name).take();
-    }
 
-    static BlockingQueue<Map> registerSource(String name) throws InterruptedException {
-        logger.warn("Registering JS Source function " + name);
-        while (null == queuesSource.get(name)){
-            logger.warn("Waiting on registerSource, this shouldn't happen");
-            Thread.sleep(100);
+        @Override
+        public V put(K key, V value){
+            synchronized(lock) {
+                super.put(key, value);
+                lock.notifyAll();
+            }
+            return value;
         }
-        counter.incrementAndGet();
-        return queuesSource.get(name).take();
-    }
 
-    public static boolean isReady() {
-        logger.info("JsEngine Polled, registrationTarget = " + registrationTarget + ", counter = " + counter);
-        return registrationTarget.get() == counter.get();
     }
-
 }
