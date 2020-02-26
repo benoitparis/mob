@@ -1,6 +1,6 @@
 
-	at paris.benoit.mob.cluster.MobClusterRegistry.registerDataFlow(MobClusterRegistry.java:135)
-	at paris.benoit.mob.cluster.MobClusterRegistry.start(MobClusterRegistry.java:38)
+	at paris.benoit.mob.cluster.MobCluster.registerDataFlow(MobClusterRegistry.java:135)
+	at paris.benoit.mob.cluster.MobCluster.start(MobClusterRegistry.java:38)
 	at paris.benoit.mob.server.MobServer.setupCluster(MobServer.java:40)
 	at paris.benoit.mob.server.MobServer.main(MobServer.java:15)
 Caused by: org.apache.flink.table.api.ValidationException: Non processing timeAttribute [TIMESTAMP(3)] passed as the argument to TemporalTableFunction

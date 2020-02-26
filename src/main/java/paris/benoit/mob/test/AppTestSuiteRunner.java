@@ -3,8 +3,8 @@ package paris.benoit.mob.test;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.server.AppRunner;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class AppTestSuiteRunner implements AppRunner {
 
         front.setConfiguration(configuration.apps.get(0));
 
-        MobClusterRegistry registry = new MobClusterRegistry(configuration);
+        MobCluster registry = new MobCluster(configuration);
 
         registry.start();
 

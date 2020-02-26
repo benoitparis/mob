@@ -1,8 +1,8 @@
 package paris.benoit.mob.server;
 
 import org.apache.flink.streaming.api.TimeCharacteristic;
+import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.MobClusterRegistry;
 import paris.benoit.mob.cluster.loopback.ActorMessageRouter;
 import paris.benoit.mob.front.UndertowFront;
 
@@ -30,7 +30,7 @@ public class ServerRunner implements AppRunner {
                 DEFAULT_FLINK_WEB_UI_PORT,
                 MobClusterConfiguration.ENV_MODE.LOCAL_UI
         );
-        MobClusterRegistry registry = new MobClusterRegistry(configuration);
+        MobCluster registry = new MobCluster(configuration);
 
         registry.start();
 

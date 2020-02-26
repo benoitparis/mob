@@ -8,8 +8,8 @@ FROM tick_service AS ts
    , LATERAL TABLE (global_position_temporal(ts.tick_proctime)) AS gpt
 WHERE ts.constant_dummy_source = gpt.dummy_key
 ', confType=UPDATE}
-	at paris.benoit.mob.cluster.MobClusterRegistry.registerDataFlow(MobClusterRegistry.java:128)
-	at paris.benoit.mob.cluster.MobClusterRegistry.start(MobClusterRegistry.java:40)
+	at paris.benoit.mob.cluster.MobCluster.registerDataFlow(MobClusterRegistry.java:128)
+	at paris.benoit.mob.cluster.MobCluster.start(MobClusterRegistry.java:40)
 	at paris.benoit.mob.server.MobServer.setupCluster(MobServer.java:39)
 	at paris.benoit.mob.server.MobServer.main(MobServer.java:15)
 Caused by: java.lang.AssertionError: Cannot add expression of different type to set:

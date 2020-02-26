@@ -5,7 +5,7 @@ java.lang.IllegalStateException: No operators defined in streaming topology. Can
 	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.getStreamGraph(StreamExecutionEnvironment.java:1540)            
 	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.execute(StreamExecutionEnvironment.java:1507)                   
 	at org.apache.flink.streaming.api.environment.StreamExecutionEnvironment.execute(StreamExecutionEnvironment.java:1489)                   
-	at paris.benoit.mob.cluster.MobClusterRegistry.lambda$startFlink$0(MobClusterRegistry.java:141)                                          
+	at paris.benoit.mob.cluster.MobCluster.lambda$startFlink$0(MobClusterRegistry.java:141)
   
   
 ???/

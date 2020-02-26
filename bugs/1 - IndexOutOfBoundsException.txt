@@ -248,8 +248,8 @@ Exception in thread "main" java.lang.IndexOutOfBoundsException: index (1) must b
 	at org.apache.flink.table.calcite.FlinkPlannerImpl.rel(FlinkPlannerImpl.scala:125)
 	at org.apache.flink.table.api.TableEnvironment.sqlUpdate(TableEnvironment.scala:811)
 	at org.apache.flink.table.api.TableEnvironment.sqlUpdate(TableEnvironment.scala:777)
-	at paris.benoit.mob.cluster.MobClusterRegistry.registerIntermediateTables(MobClusterRegistry.java:89)
-	at paris.benoit.mob.cluster.MobClusterRegistry.start(MobClusterRegistry.java:42)
+	at paris.benoit.mob.cluster.MobCluster.registerIntermediateTables(MobClusterRegistry.java:89)
+	at paris.benoit.mob.cluster.MobCluster.start(MobClusterRegistry.java:42)
 	at paris.benoit.mob.server.MobServer.setupCluster(MobServer.java:34)
 	at paris.benoit.mob.server.MobServer.main(MobServer.java:13)
 15:46:19.093 [XNIO-1 I/O-7] INFO  i.u.r.dump - 

@@ -10,8 +10,6 @@ import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobClusterRegistry;
-import paris.benoit.mob.cluster.MobClusterSender;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 @SuppressWarnings("serial")
@@ -35,9 +33,9 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        MobClusterSender sender = new MobClusterSender(jrds);
+        ClusterSender sender = new ClusterSender(jrds);
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
-        MobClusterRegistry.registerClusterSender(configuration.fullyQualifiedName(), sender, loopbackIndex);
+        ClusterRegistry.registerClusterSender(configuration.fullyQualifiedName(), sender, loopbackIndex);
         receivePort = sender.getReceiveport();
         logger.info("Opening source #" + loopbackIndex + " (" + configuration.name + ")");
     }

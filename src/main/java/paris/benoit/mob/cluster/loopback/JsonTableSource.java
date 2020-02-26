@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.json;
+package paris.benoit.mob.cluster.loopback;
 
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.TypedStreamTableSource;
-import paris.benoit.mob.cluster.loopback.ActorSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
 public class JsonTableSource extends TypedStreamTableSource<Row> {
@@ -20,7 +19,7 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
             "loopback_index",
             "actor_identity",
             "payload",
-            "constant_dummy_source", //TODO remove?
+            "constant_dummy_source",
             "unix_time_insert"
     };
     public static final int FIELD_COUNT = FIELD_NAMES.length;

@@ -7,8 +7,8 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobClusterRegistry;
-import paris.benoit.mob.cluster.MobClusterSender;
+import paris.benoit.mob.cluster.loopback.ClusterRegistry;
+import paris.benoit.mob.cluster.loopback.ClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
@@ -26,7 +26,7 @@ class ClientSimulator {
     private Value toServer;
     private Value fromServer;
     private Value validate;
-    private Map<String, MobClusterSender> clusterSenders;
+    private Map<String, ClusterSender> clusterSenders;
     private long lastClusterInteraction = System.currentTimeMillis();
 
     public String getName() {
@@ -59,7 +59,7 @@ class ClientSimulator {
 
         new Thread(() -> {
             try {
-                clusterSenders = MobClusterRegistry.getClusterSender(name);
+                clusterSenders = ClusterRegistry.getClusterSender(name);
                 isReady = true;
             } catch (InterruptedException e) {
                 logger.debug("Problem getting a ClusterSender", e);
@@ -100,9 +100,9 @@ class ClientSimulator {
             logger.info("Got message: " + cMsg);
             switch (cMsg.intent) {
                 case WRITE: {
-                        MobClusterSender specificSender = clusterSenders.get(cMsg.table);
+                        ClusterSender specificSender = clusterSenders.get(cMsg.table);
                         if (null == specificSender) {
-                            logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.table);
+                            logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
                             specificSender.send(name, cMsg.payload.toString());
                         }

@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.json;
+package paris.benoit.mob.cluster.loopback;
 
 import org.apache.flink.api.java.functions.IdPartitioner;
 import org.apache.flink.api.java.tuple.Tuple2;
@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.loopback.ActorSink;
 import paris.benoit.mob.server.MessageRouter;
 
 public class JsonTableSink extends TypedRetractStreamTableSink<Row> {

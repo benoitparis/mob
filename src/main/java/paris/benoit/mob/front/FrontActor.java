@@ -11,8 +11,8 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.SendPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobClusterRegistry;
-import paris.benoit.mob.cluster.MobClusterSender;
+import paris.benoit.mob.cluster.loopback.ClusterRegistry;
+import paris.benoit.mob.cluster.loopback.ClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
@@ -26,7 +26,7 @@ public class FrontActor extends BasicActor<Object, Void> {
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
-    private Map<String, MobClusterSender> clusterSenders;
+    private Map<String, ClusterSender> clusterSenders;
     
     public FrontActor() throws InterruptedException {
         // guids? 
@@ -34,7 +34,7 @@ public class FrontActor extends BasicActor<Object, Void> {
         //   des NumberedChannels? oui, et on fait le send+setfield+deseri là?
         // du coup on donnerait pas que channel?
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        clusterSenders = MobClusterRegistry.getClusterSender(getName());
+        clusterSenders = ClusterRegistry.getClusterSender(getName());
     }
 
     @Override
@@ -67,9 +67,9 @@ public class FrontActor extends BasicActor<Object, Void> {
                 switch (cMsg.intent) {
                 case WRITE: 
                     {
-                        MobClusterSender specificSender = clusterSenders.get(cMsg.table);
+                        ClusterSender specificSender = clusterSenders.get(cMsg.table);
                         if (null == specificSender) {
-                            logger.warn("A MobClusterSender (table destination) was not found: " + cMsg.table);
+                            logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
                             specificSender.send(getName(), cMsg.payload.toString());
                         }
