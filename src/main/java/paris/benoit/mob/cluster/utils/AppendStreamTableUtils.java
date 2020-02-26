@@ -5,8 +5,6 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.ConnectorCatalogTable;
-import org.apache.flink.table.catalog.ObjectPath;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.apache.flink.table.sources.StreamTableSource;
@@ -14,7 +12,6 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.services.TickTableSource;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,12 +49,6 @@ public class AppendStreamTableUtils {
 
     // FIXME https://issues.apache.org/jira/browse/FLINK-15775
     public static void createAndRegisterTableSourceDoMaterializeAsAppendStream(String appName, StreamTableEnvironment tEnv, Catalog catalog, StreamTableSource tableSource, String name) throws TableAlreadyExistException, DatabaseNotExistException {
-
-        catalog.createTable(
-                new ObjectPath(appName, name + "_raw"),
-                ConnectorCatalogTable.source(new TickTableSource(20), false),
-                false
-        );
 
         Table rawTable = tEnv.fromTableSource(tableSource);
 

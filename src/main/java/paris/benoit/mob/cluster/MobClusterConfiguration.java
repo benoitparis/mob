@@ -2,7 +2,7 @@ package paris.benoit.mob.cluster;
 
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.server.ClusterFront;
-import paris.benoit.mob.server.MessageRouter;
+import paris.benoit.mob.server.ClusterReceiver;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +12,7 @@ public class MobClusterConfiguration {
     public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE}
 
     final ClusterFront clusterFront;
-    final MessageRouter router;
+    final ClusterReceiver router;
 
     final TimeCharacteristic processingtime;
     final int streamParallelism;
@@ -25,7 +25,7 @@ public class MobClusterConfiguration {
     public MobClusterConfiguration(
             List<String> names,
             ClusterFront clusterFront,
-            MessageRouter router,
+            ClusterReceiver router,
             TimeCharacteristic processingtime,
             int streamParallelism,
             int maxBufferTimeMillis,

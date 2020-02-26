@@ -6,13 +6,13 @@ import co.paralleluniverse.fibers.SuspendExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.message.ToClientMessage;
-import paris.benoit.mob.server.MessageRouter;
+import paris.benoit.mob.server.ClusterReceiver;
 
-public class ActorMessageRouter implements MessageRouter {
+public class ActorClusterReceiver implements ClusterReceiver {
     private static final Logger logger = LoggerFactory.getLogger(ActorSource.class);
 
     @Override
-    public void routeMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
+    public void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
         ActorRef<ToClientMessage> actor = null;
         try {
             actor = (ActorRef<ToClientMessage>) ActorRegistry.tryGetActor(identity);
@@ -20,7 +20,7 @@ public class ActorMessageRouter implements MessageRouter {
             logger.error("Exception while getting the actor ", suspendExecution);
         }
         if (null != actor) {
-            // call to send: not blocking or dropping the message, as his mailbox is unbounded
+            // call to sendMessage: not blocking or dropping the message, as his mailbox is unbounded
             try {
                 actor.send(message);
             } catch (SuspendExecution suspendExecution) {

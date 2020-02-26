@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.message.ToClientMessage;
-import paris.benoit.mob.server.MessageRouter;
+import paris.benoit.mob.server.ClusterReceiver;
 
 @SuppressWarnings("serial")
 public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
@@ -21,9 +21,9 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private Integer loopbackIndex = -1;
     private final JsonRowSerializationSchema jrs;
     private final MobTableConfiguration configuration;
-    private final MessageRouter router;
+    private final ClusterReceiver router;
     
-    public ActorSink(MobTableConfiguration configuration, DataType jsonDataType, MessageRouter router) {
+    public ActorSink(MobTableConfiguration configuration, DataType jsonDataType, ClusterReceiver router) {
         super();
         this.jrs = JsonRowSerializationSchema.builder().withTypeInfo((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         this.configuration = configuration;
@@ -59,7 +59,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
             
             ToClientMessage message = new ToClientMessage(configuration.name, payloadString);
 
-            router.routeMessage(loopbackIndex, identity, message);
+            router.receiveMessage(loopbackIndex, identity, message);
 
             //logger.debug("new msg in sink: " + row);
             

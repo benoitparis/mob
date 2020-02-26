@@ -31,7 +31,7 @@ public class FrontActor extends BasicActor<Object, Void> {
     public FrontActor() throws InterruptedException {
         // guids? 
         // index-atomicIncrements? index pour debug niveau client? atomicIncrements dans les sources, au getChannels? 
-        //   des NumberedChannels? oui, et on fait le send+setfield+deseri là?
+        //   des NumberedChannels? oui, et on fait le sendMessage+setfield+deseri là?
         // du coup on donnerait pas que channel?
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
         clusterSenders = ClusterRegistry.getClusterSender(getName());
@@ -71,7 +71,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                         if (null == specificSender) {
                             logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
-                            specificSender.send(getName(), cMsg.payload.toString());
+                            specificSender.sendMessage(getName(), cMsg.payload.toString());
                         }
                     }
                 break;
@@ -86,7 +86,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 if (null != clientWSPort) {
                     clientWSPort.send(new WebDataMessage(self(), msg.toString()));
                 } else {
-                    logger.warn("Received a message from the cluster without having a WS Port to send it back to");
+                    logger.warn("Received a message from the cluster without having a WS Port to sendMessage it back to");
                 }
             }
             else if (null == message) {

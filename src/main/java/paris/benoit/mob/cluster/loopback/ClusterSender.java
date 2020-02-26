@@ -26,7 +26,7 @@ public class ClusterSender {
         this.receiveport = new ThreadReceivePort<>(channel);
     }
     
-    public void send(String identity, String payload) throws SuspendExecution, InterruptedException {
+    public void sendMessage(String identity, String payload) throws SuspendExecution, InterruptedException {
         
         try {
             Row root = new Row(JsonTableSource.FIELD_COUNT);

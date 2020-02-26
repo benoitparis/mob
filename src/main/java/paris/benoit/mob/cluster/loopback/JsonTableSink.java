@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.server.MessageRouter;
+import paris.benoit.mob.server.ClusterReceiver;
 
 public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
@@ -24,7 +24,7 @@ public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
             "payload"
     };
 
-    public JsonTableSink(MobTableConfiguration configuration, MessageRouter router) {
+    public JsonTableSink(MobTableConfiguration configuration, ClusterReceiver router) {
         fieldNames = FIELD_NAMES;
         DataType jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
         fieldTypes = new DataType[] {

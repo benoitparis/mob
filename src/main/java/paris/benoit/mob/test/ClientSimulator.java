@@ -104,7 +104,7 @@ class ClientSimulator {
                         if (null == specificSender) {
                             logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
-                            specificSender.send(name, cMsg.payload.toString());
+                            specificSender.sendMessage(name, cMsg.payload.toString());
                         }
                     }
                     break;
