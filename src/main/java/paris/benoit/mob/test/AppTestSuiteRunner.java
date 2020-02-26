@@ -5,28 +5,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobClusterRegistry;
+import paris.benoit.mob.server.AppRunner;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class AppTestSuiteRunner {
+public class AppTestSuiteRunner implements AppRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
     private static AppTestFront front = new AppTestFront();
     private static MobClusterConfiguration configuration;
 
-    public static void run(String name) throws Exception {
-        runRegistry(name);
+    @Override
+    public void run(List<String> apps) throws Exception {
 
-        Boolean result = front.collectResult();
-        if (result) {
-            logger.info("All tests in the test suite passed");
-            // TODO PoisonPillException in soruce function to properly terminate? or poison message?
-            System.exit(0);
-        } else {
-            // FIXME ça s'affiche pas
-            logger.info("A test in the test suite failed");
-            System.exit(-99);
+        for (String name : apps) {
+            runRegistry(name);
+
+            Boolean result = front.collectResult();
+            if (result) {
+                logger.info("All tests in the test suite passed");
+                // TODO PoisonPillException in soruce function to properly terminate? or poison message?
+                // TODO rassembler les résultats et pas exit
+                System.exit(0);
+            } else {
+                // FIXME ça s'affiche pas
+                logger.info("A test in the test suite failed");
+                System.exit(-99);
+            }
         }
+
     }
 
 

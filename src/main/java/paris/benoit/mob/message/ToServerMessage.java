@@ -13,8 +13,6 @@ public class ToServerMessage {
     // on va s'orienter vers QUERY, SUBSCRIBE, WRITE, avec potentiellement les mêmes conventions que graphql sur 
     //   les write / les mutation (qui ne seront que des append immutables ici) qui peuvent yield un résultat qui
     //   ressemblerait à une QUERY
-    // et le routage vers les divers types?
-    // faudrait une nomenclature
     // TODO transformer en INSERT, DELETE, UPDATE?
     //   ou bien en APPEND, RETRACT(, UPSERT)?
     public enum INTENT {WRITE, QUERY, SUBSCRIBE};

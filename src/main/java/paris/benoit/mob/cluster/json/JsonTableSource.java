@@ -72,7 +72,7 @@ public class JsonTableSource implements StreamTableSource<Row>
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(
-                            it -> it.getKey(),
+                            Map.Entry::getKey,
                             it -> convertDataTypeRemoveLegacy(it.getValue())
                     ));;
 
@@ -121,9 +121,4 @@ public class JsonTableSource implements StreamTableSource<Row>
         return fieldNames.length;
     }
 
-//    @Nullable
-//    @Override
-//    public String getProctimeAttribute() {
-//        return "proctime_append_stream";
-//    }
 }

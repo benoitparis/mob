@@ -1,8 +1,6 @@
 package paris.benoit.mob.cluster;
 
 import org.apache.flink.streaming.api.TimeCharacteristic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import paris.benoit.mob.server.ClusterFront;
 import paris.benoit.mob.server.MessageRouter;
 
@@ -10,7 +8,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class MobClusterConfiguration {
-    private static final Logger logger = LoggerFactory.getLogger(MobClusterConfiguration.class);
 
     public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE};
 

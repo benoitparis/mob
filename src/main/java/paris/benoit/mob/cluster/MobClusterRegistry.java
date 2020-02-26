@@ -125,9 +125,6 @@ public class MobClusterRegistry {
     private void registerInputOutputTables(MobAppConfiguration app) throws TableAlreadyExistException, DatabaseNotExistException {
 
         for (MobTableConfiguration inSchema: app.inSchemas) {
-            // wait for bug fix / understanding TableSource duplication
-//            tEnv.registerTableSource(inSchema.name, new JsonTableSource(inSchema));
-
             AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(app.name, tEnv, catalog, new JsonTableSource(inSchema), inSchema.name);
         }
 

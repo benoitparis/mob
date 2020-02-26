@@ -35,7 +35,7 @@ public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
         this.parentConfiguration = parentConfiguration;
 
         TypeInformation<Row> jsonTypeInfo = JsonRowSchemaConverter.convert(configuration.content);
-        jrs = new JsonRowSerializationSchema.Builder(jsonTypeInfo).build();
+        jrs = JsonRowSerializationSchema.builder().withTypeInfo(jsonTypeInfo).build();
 
         this.invokeFunction = invokeFunction;
         this.code = code;

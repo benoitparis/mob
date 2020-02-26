@@ -46,7 +46,7 @@ public class JsonTableSink implements RetractStreamTableSink<Row> {
         };
         logger.info("Created Sink with json schema: " + jsonDataType.toString());
 
-        jrs = new JsonRowSerializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
+        jrs = JsonRowSerializationSchema.builder().withTypeInfo((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         actorFunction = new ActorSink(configuration, jrs, router);
         this.configuration = configuration;
     }

@@ -44,14 +44,18 @@ public class MobServer {
             new HelpFormatter().printHelp("MobLib", cliOptions(), true);
             System.exit(-1);
         }
-        String name = cmdLine.getOptionValue("app-name").trim();
+        String names = cmdLine.getOptionValue("app-name").trim();
+
+        AppRunner runner;
 
         if (cmdLine.hasOption("test-suite")) {
-            AppTestSuiteRunner.run(name);
+            runner = new AppTestSuiteRunner();
         } else {
-            logger.info(ANSI_GREEN + "Launching " + name + ANSI_RESET);
-            AppRunner.run(Arrays.asList(name.split(",")));
+            runner = new ServerRunner();
         }
+
+        logger.info(ANSI_GREEN + "Launching " + names + ANSI_RESET);
+        runner.run(Arrays.asList(names.split(",")));
     }
 
 

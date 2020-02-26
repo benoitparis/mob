@@ -1,9 +1,7 @@
 package paris.benoit.mob.message;
 
 /**
- * Message provenant au client.
- * @author ben
- *
+ * Message to be sent to the client.
  */
 public class ToClientMessage {
     

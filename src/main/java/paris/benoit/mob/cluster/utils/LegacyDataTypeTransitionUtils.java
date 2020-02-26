@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-//https://issues.apache.org/jira/browse/FLINK-16277
+// FIXME https://issues.apache.org/jira/browse/FLINK-16277
 public class LegacyDataTypeTransitionUtils {
 
     public static DataType convertDataTypeRemoveLegacy(DataType currentType) {
