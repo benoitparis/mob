@@ -29,7 +29,7 @@ class JsTableSource extends TypedStreamTableSource<Row> implements DefinedProcti
                 LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(jsonDataType),
                 DataTypes.TIMESTAMP(3),
         };
-        function = new JsSourceFunction(parentConfiguration, configuration);
+        sourceFunction = new JsSourceFunction(parentConfiguration, configuration);
         name = "JS Engine Source: " + configuration.fullyQualifiedName();
 
         logger.info("Instanciated JsTableSink with json schema: " + jsonDataType.toString());
@@ -38,7 +38,7 @@ class JsTableSource extends TypedStreamTableSource<Row> implements DefinedProcti
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-                .addSource(function, getReturnType())
+                .addSource(sourceFunction, getReturnType())
                 .forceNonParallel()
                 .name(explainSource());
     }

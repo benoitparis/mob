@@ -24,7 +24,7 @@ public class TickTableSource extends TypedStreamTableSource<Row> implements Defi
     public TickTableSource(long offset, long interval) {
         fieldNames = FIELD_NAMES;
         fieldTypes = FIELD_TYPES;
-        function = new TickSourceFunction(offset, interval);
+        sourceFunction = new TickSourceFunction(offset, interval);
         name = "Tick Source (" + interval + " ms)";
     }
 
@@ -35,7 +35,7 @@ public class TickTableSource extends TypedStreamTableSource<Row> implements Defi
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-            .addSource(function, getReturnType())
+            .addSource(sourceFunction, getReturnType())
             .forceNonParallel()
             .name(explainSource());
     }

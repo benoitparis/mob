@@ -37,7 +37,7 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
             DataTypes.STRING(),
             DataTypes.BIGINT()
         };
-        function = new ActorSource(configuration, jsonDataType);
+        sourceFunction = new ActorSource(configuration, jsonDataType);
         name = configuration.fullyQualifiedName();
         this.configuration = configuration;
         logger.info("Created Source with json schema: " + jsonDataType.toString());
@@ -47,7 +47,7 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
-            .addSource(function, configuration.name, getReturnType())
+            .addSource(sourceFunction, configuration.name, getReturnType())
             .name(explainSource());
     }
 

@@ -8,7 +8,7 @@ import org.apache.flink.table.types.DataType;
 
 public abstract class TypedStreamTableSource<T> extends TypedTable<T> implements StreamTableSource<T> {
 
-    protected RichParallelSourceFunction<T> function;
+    protected RichParallelSourceFunction<T> sourceFunction;
 
     @Override
     public TableSchema getTableSchema() {

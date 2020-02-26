@@ -5,12 +5,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.server.AppRunner;
+import paris.benoit.mob.server.ClusterRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AppTestSuiteRunner implements AppRunner {
+public class AppTestSuiteRunner implements ClusterRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
     private static AppTestFront front = new AppTestFront();

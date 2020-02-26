@@ -8,7 +8,7 @@ import paris.benoit.mob.front.UndertowFront;
 
 import java.util.List;
 
-public class ServerRunner implements AppRunner {
+public class ServerRunner implements ClusterRunner {
 
 
     private final static int DEFAULT_STREAM_PARALLELISM = 2;

@@ -46,7 +46,7 @@ public class MobServer {
         }
         String names = cmdLine.getOptionValue("app-name").trim();
 
-        AppRunner runner;
+        ClusterRunner runner;
 
         if (cmdLine.hasOption("test-suite")) {
             runner = new AppTestSuiteRunner();
