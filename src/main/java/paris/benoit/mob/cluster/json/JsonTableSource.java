@@ -74,7 +74,7 @@ public class JsonTableSource implements StreamTableSource<Row>
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
                             it -> convertDataTypeRemoveLegacy(it.getValue())
-                    ));;
+                    ));
 
             return new FieldsDataType(casted.getLogicalType(), fieldDataTypes);
 

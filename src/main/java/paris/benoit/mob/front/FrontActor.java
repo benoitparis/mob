@@ -73,8 +73,8 @@ public class FrontActor extends BasicActor<Object, Void> {
                         } else {
                             specificSender.send(getName(), cMsg.payload.toString());
                         }
-                    } ;
-                    break;
+                    }
+                break;
                 case QUERY: logger.debug(cMsg.payload.toString()); 
                     break;
                 case SUBSCRIBE: logger.debug(cMsg.payload.toString());

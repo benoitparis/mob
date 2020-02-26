@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 public class MobClusterConfiguration {
 
-    public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE};
+    public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE}
 
     protected ClusterFront clusterFront;
     protected MessageRouter router;

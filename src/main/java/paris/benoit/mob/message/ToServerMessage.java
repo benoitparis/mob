@@ -15,7 +15,7 @@ public class ToServerMessage {
     //   ressemblerait à une QUERY
     // TODO transformer en INSERT, DELETE, UPDATE?
     //   ou bien en APPEND, RETRACT(, UPSERT)?
-    public enum INTENT {WRITE, QUERY, SUBSCRIBE};
+    public enum INTENT {WRITE, QUERY, SUBSCRIBE}
 
     public INTENT intent;
     public String table;
