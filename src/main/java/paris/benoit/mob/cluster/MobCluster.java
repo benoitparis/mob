@@ -89,9 +89,7 @@ public class MobCluster {
         logger.info("Front: " + ANSI_YELLOW + configuration.clusterFront.accessString() + ANSI_RESET);
         logger.info("Web UI: " + ANSI_YELLOW + "http://localhost:" + configuration.flinkWebUiPort + ANSI_RESET);
         logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
-
     }
-
 
     private void setupEnvironment() {
 
@@ -152,13 +150,11 @@ public class MobCluster {
         }
 
         for (MobTableConfiguration outSchema: app.outSchemas) {
-
             catalog.createTable(
                     new ObjectPath(app.name, outSchema.name),
                     ConnectorCatalogTable.sink(new JsonTableSink(outSchema, configuration.router), false),
                     false
             );
-
             logger.debug("Registered Table Sink: " + outSchema);
         }
         
@@ -198,7 +194,6 @@ public class MobCluster {
                             throw new RuntimeException("No SQL type was specified");
                 }
                 logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
-
             }
             catch (Throwable t) {
                 throw new RuntimeException("" + sqlConf, t);
@@ -206,19 +201,4 @@ public class MobCluster {
         }
 
     }
-    
-    private void executeEnvironment() {
-        new Thread(() -> {
-            try {
-                // Blocking until cancellation
-                sEnv.execute();
-                logger.info("Stream END");
-            } catch (Exception e) {
-                logger.error("Stream execution failure", e);
-            }
-        }).start();
-    }
-
-
-
 }
