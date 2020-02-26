@@ -20,6 +20,7 @@ public abstract class TypedStreamTableSource<T> extends TypedTable<T> implements
         return super.getProducedDataType();
     }
 
+    // TODO remove when they are ready with types
     @Override
     public TypeInformation<T> getReturnType() {
         return super.getReturnType();
