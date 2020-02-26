@@ -171,7 +171,6 @@ public class MobCluster {
                         JsTableEngine.createAndRegister(catalog, sqlConf);
                         break;
                     case UPDATE:
-                        // TODO wait for detailed Row schema printing
                         tEnv.sqlUpdate(sqlConf.content);
                         break;
                         default:

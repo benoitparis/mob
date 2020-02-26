@@ -12,7 +12,7 @@ public class TickTableSource extends TypedStreamTableSource<Row> implements Defi
 
     private static final String[] FIELD_NAMES = new String[] {
             "tick_number",
-            "constant_dummy_source", //TODO remove?
+            "constant_dummy_source",
             "proctime_append_stream"
     };
     private final DataType[] FIELD_TYPES = new DataType[] {
