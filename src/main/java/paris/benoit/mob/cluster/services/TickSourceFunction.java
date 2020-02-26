@@ -17,7 +17,6 @@ class TickSourceFunction extends RichParallelSourceFunction<Row> implements List
 
     private Long counter;
 
-
     public TickSourceFunction(long interval) {
         this(0L, interval);
     }
@@ -44,9 +43,7 @@ class TickSourceFunction extends RichParallelSourceFunction<Row> implements List
                 sc.collect(row);
                 counter ++;
             }
-
         }
-
     }
 
     public void cancel() {

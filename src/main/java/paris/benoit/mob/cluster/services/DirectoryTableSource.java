@@ -7,12 +7,12 @@ import org.apache.flink.table.sources.DefinedProctimeAttribute;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 import paris.benoit.mob.cluster.MobAppConfiguration;
-import paris.benoit.mob.cluster.RowStreamTableSource;
+import paris.benoit.mob.cluster.TypedStreamTableSource;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class DirectoryTableSource extends RowStreamTableSource implements DefinedProctimeAttribute {
+public class DirectoryTableSource extends TypedStreamTableSource<Row> implements DefinedProctimeAttribute {
 
     private static final String[] FIELD_NAMES = new String[] {
             "app_name",

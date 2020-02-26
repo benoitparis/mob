@@ -11,15 +11,13 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.RowStreamTableSource;
+import paris.benoit.mob.cluster.TypedStreamTableSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
 import javax.annotation.Nullable;
 
-class JsTableSource extends RowStreamTableSource implements DefinedProctimeAttribute {
+class JsTableSource extends TypedStreamTableSource<Row> implements DefinedProctimeAttribute {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSource.class);
-
-    protected MobTableConfiguration configuration;
 
     public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
         fieldNames = new String[]{
@@ -31,12 +29,10 @@ class JsTableSource extends RowStreamTableSource implements DefinedProctimeAttri
                 LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(jsonDataType),
                 DataTypes.TIMESTAMP(3),
         };
-        this.configuration = configuration;
         function = new JsSourceFunction(parentConfiguration, configuration);
         name = "JS Engine Source: " + configuration.fullyQualifiedName();
 
         logger.info("Instanciated JsTableSink with json schema: " + jsonDataType.toString());
-
     }
 
     @Override

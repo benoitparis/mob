@@ -10,11 +10,11 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.RowStreamTableSource;
+import paris.benoit.mob.cluster.TypedStreamTableSource;
 import paris.benoit.mob.cluster.loopback.ActorSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
-public class JsonTableSource extends RowStreamTableSource {
+public class JsonTableSource extends TypedStreamTableSource<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
     private static final String[] FIELD_NAMES = new String[] {
             "loopback_index",

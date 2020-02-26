@@ -46,16 +46,19 @@ public class JsTableEngine {
 
             setupQueue(tableConf.name);
 
-            JsTableSink sink = new JsTableSink(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_in", inSchema, null), invokeFunction, sourceCode);
-            JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_out", outSchema, null));
+            MobTableConfiguration sinkConf = new MobTableConfiguration(tableConf.dbName, tableConf.name + "_in", inSchema, null);
+            JsTableSink sink = new JsTableSink(tableConf, sinkConf, invokeFunction, sourceCode);
+
+            MobTableConfiguration sourceConf = new MobTableConfiguration(tableConf.dbName, tableConf.name + "_out", outSchema, null);
+            JsTableSource source = new JsTableSource(tableConf, sourceConf);
 
             catalog.createTable(
-                    source.configuration.getObjectPath(), // TODO change
+                    sourceConf.getObjectPath(),
                     ConnectorCatalogTable.source(source, false),
                     false
             );
             catalog.createTable(
-                    sink.configuration.getObjectPath(),
+                    sinkConf.getObjectPath(),
                     ConnectorCatalogTable.sink(sink, false),
                     false
             );
