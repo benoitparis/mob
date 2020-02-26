@@ -1,7 +1,9 @@
 package paris.benoit.mob.cluster;
 
+import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
+import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.EnvironmentSettings;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
@@ -25,6 +27,7 @@ import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class MobCluster {
     private static final Logger logger = LoggerFactory.getLogger(MobCluster.class);
@@ -41,6 +44,7 @@ public class MobCluster {
     public static final String ANSI_RESET = "\u001B[0m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_BRIGHT_BLACK = "\u001B[90m";
 
     public void start() throws Exception {
         configuration.clusterFront.setMain(configuration.apps.get(0).name);
@@ -55,22 +59,39 @@ public class MobCluster {
             registerDataFlow(app);
         }
 
-        executeEnvironment();
+        String plan = sEnv.getExecutionPlan();
+        JobClient jobClient = sEnv.executeAsync();
+
         configuration.clusterFront.waitReady();
         ClusterRegistry.waitRegistrationsReady(
                 sEnv.getParallelism(),
                 configuration
         );
 
-        String plan = sEnv.getExecutionPlan();
-        logger.info(ANSI_YELLOW + "Plan is: \n" + ANSI_RESET + plan);
+        JobStatus status = jobClient.getJobStatus().get();
+
+        logger.info("\n" + ANSI_BRIGHT_BLACK + plan + ANSI_RESET);
+        logger.info("Plan ↑");
+
+        String tables = Arrays.stream(tEnv.listCatalogs())
+                .flatMap(it -> {
+                    tEnv.useCatalog(it);
+                    return Arrays.stream(tEnv.listDatabases());
+                })
+                .flatMap(it -> {
+                    tEnv.useDatabase(it);
+                    return Arrays.stream(tEnv.listTables()).map(at -> it + "." + at);
+                })
+                .collect(Collectors.joining(",\n ", "\n[\n ", "\n]"));;
+
+        logger.info("Tables: " + ANSI_YELLOW + tables + ANSI_RESET);
+        logger.info("Job is: " + ANSI_YELLOW + status + ANSI_RESET);
         logger.info("Front: " + ANSI_YELLOW + configuration.clusterFront.accessString() + ANSI_RESET);
         logger.info("Web UI: " + ANSI_YELLOW + "http://localhost:" + configuration.flinkWebUiPort + ANSI_RESET);
-        String[] tables = tEnv.listTables();  // TODO lister tous les catalogs.db.tables
-        logger.info("Tables: " + ANSI_YELLOW + Arrays.asList(tables) + ANSI_RESET);
         logger.info(ANSI_CYAN + "Mob Cluster is up" + ANSI_RESET);
 
     }
+
 
     private void setupEnvironment() {
 
