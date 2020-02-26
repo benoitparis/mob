@@ -19,19 +19,17 @@ import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
 import javax.annotation.Nullable;
 
-public class JsTableSource implements StreamTableSource<Row>
-        , DefinedProctimeAttribute
-{
+class JsTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSource.class);
 
     private static final String[] fieldNames = new String[] {
             "payload",
             "proctime_append_stream"
     };
-    private DataType[] fieldTypes;
+    private final DataType[] fieldTypes;
 
-    private RichParallelSourceFunction<Row> function;
-    private MobTableConfiguration configuration;
+    private final RichParallelSourceFunction<Row> function;
+    private final MobTableConfiguration configuration;
 
     public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {
 

@@ -3,14 +3,11 @@ package paris.benoit.mob.cluster.services;
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 import org.apache.flink.types.Row;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.List;
 
-public class TickSourceFunction extends RichParallelSourceFunction<Row> implements ListCheckpointed<Long>  {
-    private static final Logger logger = LoggerFactory.getLogger(TickSourceFunction.class);
+class TickSourceFunction extends RichParallelSourceFunction<Row> implements ListCheckpointed<Long>  {
 
     private volatile boolean isRunning = true;
 

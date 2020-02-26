@@ -60,7 +60,7 @@ public class AppTestFront implements ClusterFront {
 
 
     @Override
-    public void waitReady() throws InterruptedException {}
+    public void waitReady() {}
 
     @Override
     public String accessString() {

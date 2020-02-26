@@ -10,10 +10,10 @@ public class MobTableConfiguration implements Serializable {
         IN_JSONSCHEMA, OUT_JSONSCHEMA
     }
 
-    public String dbName;
-    public String name;
-    CONF_TYPE confType;
-    public String content;
+    public final String dbName;
+    public final String name;
+    final CONF_TYPE confType;
+    public final String content;
 
     public MobTableConfiguration(String dbName, String name, String content, CONF_TYPE confType) {
         super();

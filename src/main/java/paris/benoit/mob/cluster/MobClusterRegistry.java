@@ -1,6 +1,5 @@
 package paris.benoit.mob.cluster;
 
-import org.apache.flink.configuration.ConfigConstants;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -12,15 +11,15 @@ import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.utils.AppendStreamTableUtils;
-import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
-import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
-import paris.benoit.mob.cluster.services.DebugTableSink;
 import paris.benoit.mob.cluster.js.JsTableEngine;
 import paris.benoit.mob.cluster.json.JsonTableSink;
 import paris.benoit.mob.cluster.json.JsonTableSource;
+import paris.benoit.mob.cluster.services.DebugTableSink;
 import paris.benoit.mob.cluster.services.DirectoryTableSource;
 import paris.benoit.mob.cluster.services.TickTableSource;
+import paris.benoit.mob.cluster.utils.AppendStreamTableUtils;
+import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
+import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 public class MobClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(MobClusterRegistry.class);
 
-    private MobClusterConfiguration configuration;
+    private final MobClusterConfiguration configuration;
     private StreamExecutionEnvironment sEnv;
     private StreamTableEnvironment tEnv;
     private Catalog catalog;
@@ -49,7 +48,7 @@ public class MobClusterRegistry {
         registerServiceTables();
 
         for(MobAppConfiguration app : configuration.apps) {
-            catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
+            catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<>(), null), false);
             tEnv.useDatabase(app.name);
             registerInputOutputTables(app);
             registerDataFlow(app);
@@ -74,7 +73,6 @@ public class MobClusterRegistry {
         if (MobClusterConfiguration.ENV_MODE.LOCAL_UI.equals(configuration.mode)) {
             Configuration conf = new Configuration();
             conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
-            conf.setBoolean(ConfigConstants.LOCAL_START_WEBSERVER, true);
             sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
             sEnv = StreamExecutionEnvironment.createLocalEnvironment();
@@ -102,7 +100,7 @@ public class MobClusterRegistry {
     }
 
     private void registerServiceTables() throws TableAlreadyExistException, DatabaseNotExistException, DatabaseAlreadyExistException {
-        catalog.createDatabase("services", new CatalogDatabaseImpl(new HashMap<String, String>(), null), false);
+        catalog.createDatabase("services", new CatalogDatabaseImpl(new HashMap<>(), null), false);
 
         catalog.createTable(
                 new ObjectPath("services", "tick"),
@@ -166,7 +164,7 @@ public class MobClusterRegistry {
                         AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
                     case JS_ENGINE:
-                        JsTableEngine.createAndRegister(catalog, tEnv, sqlConf);
+                        JsTableEngine.createAndRegister(catalog, sqlConf);
                         break;
                     case UPDATE:
                         // TODO wait for detailed Row schema printing
@@ -198,16 +196,16 @@ public class MobClusterRegistry {
     }
 
 
-    public static class NameSenderPair {
-        String fullName;
-        Integer loopbackIndex;
-        MobClusterSender sender;
+    static class NameSenderPair {
+        final String fullName;
+        final Integer loopbackIndex;
+        final MobClusterSender sender;
         NameSenderPair(String fullName, Integer loopbackIndex, MobClusterSender sender) {
             this.fullName = fullName;
             this.loopbackIndex = loopbackIndex;
             this.sender = sender;
         }
-        public Integer getLoopbackIndex() {
+        Integer getLoopbackIndex() {
             return loopbackIndex;
         }
         @Override
@@ -215,8 +213,8 @@ public class MobClusterRegistry {
             return "NameSenderPair{" + "fullName='" + fullName + '\'' + ", loopbackIndex=" + loopbackIndex + ", sender=" + sender + '}';
         }
     }
-    private static CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
-    private static List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
+    private static final CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
+    private static final List<Map<String, MobClusterSender>> clusterSenders = new ArrayList<>();
     public static void registerClusterSender(String fullName, MobClusterSender sender, Integer loopbackIndex) {
         clusterSenderRaw.add(new NameSenderPair(fullName, loopbackIndex, sender));
     }
@@ -228,7 +226,7 @@ public class MobClusterRegistry {
         // On attend que tous les senders soient là
         // FIXME idéalement on fait que react à quand c'est prêt
 
-        long inSchemaCount = configuration.apps.stream().flatMap(it -> it.inSchemas.stream()).count();
+        long inSchemaCount = configuration.apps.stream().mapToLong(it -> it.inSchemas.size()).sum();
 
         while ((clusterSenderRaw.size() != parallelism * inSchemaCount)
                 || !JsTableEngine.isReady()

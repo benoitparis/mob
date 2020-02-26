@@ -1,9 +1,12 @@
 package paris.benoit.mob.cluster.loopback;
 
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +19,13 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private static final Logger logger = LoggerFactory.getLogger(ActorSink.class);
     
     private Integer loopbackIndex = -1;
-    private JsonRowSerializationSchema jrs;
-    private MobTableConfiguration configuration;
-    private MessageRouter router;
+    private final JsonRowSerializationSchema jrs;
+    private final MobTableConfiguration configuration;
+    private final MessageRouter router;
     
-    public ActorSink(MobTableConfiguration configuration, JsonRowSerializationSchema jrs, MessageRouter router) {
+    public ActorSink(MobTableConfiguration configuration, DataType jsonDataType, MessageRouter router) {
         super();
-        this.jrs = jrs;
+        this.jrs = JsonRowSerializationSchema.builder().withTypeInfo((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         this.configuration = configuration;
         this.router = router;
     }
@@ -36,7 +39,7 @@ public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     }
     
     @Override
-    public void invoke(Tuple2<Boolean, Row> value, Context context) throws Exception {
+    public void invoke(Tuple2<Boolean, Row> value, Context context) {
 
         //noinspection StatementWithEmptyBody
         if (value.f0) { // Add

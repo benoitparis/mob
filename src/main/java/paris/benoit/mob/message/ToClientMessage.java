@@ -5,8 +5,8 @@ package paris.benoit.mob.message;
  */
 public class ToClientMessage {
     
-    public String table;
-    public String jsonPayload;
+    private final String table;
+    private final String jsonPayload;
     
     public ToClientMessage(String table, String jsonPayload) {
         super();

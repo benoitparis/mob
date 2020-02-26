@@ -1,6 +1,6 @@
 package paris.benoit.mob;
 
-public class EndToEnd {
+class EndToEnd {
 
     public static void main(String[] args) {
         

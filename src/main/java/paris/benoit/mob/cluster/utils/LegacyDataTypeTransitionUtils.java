@@ -27,7 +27,7 @@ public class LegacyDataTypeTransitionUtils {
                     .entrySet()
                     .stream()
                     .collect(Collectors.toMap(
-                            it -> it.getKey(),
+                            Map.Entry::getKey,
                             it -> convertDataTypeRemoveLegacy(it.getValue())
                     ));
 
@@ -46,7 +46,7 @@ public class LegacyDataTypeTransitionUtils {
 
     }
 
-    public static LogicalType convertLogicalTypeRemoveLegacy(LogicalType currentType) {
+    private static LogicalType convertLogicalTypeRemoveLegacy(LogicalType currentType) {
 
         LogicalType result = currentType;
         if (currentType instanceof RowType) {

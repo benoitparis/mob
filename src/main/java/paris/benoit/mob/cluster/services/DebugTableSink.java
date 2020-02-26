@@ -11,21 +11,18 @@ import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.utils.TypeConversions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class DebugTableSink implements RetractStreamTableSink<String> {
-    private static final Logger logger = LoggerFactory.getLogger(DebugTableSink.class);
 
     private static final String[] fieldNames = new String[] { "debug_info" };
-    private DataType[] fieldTypes = new DataType[] { DataTypes.STRING() };
+    private final DataType[] fieldTypes = new DataType[] { DataTypes.STRING() };
 
-    private RichSinkFunction<Tuple2<Boolean, String>> function;
+    private final RichSinkFunction<Tuple2<Boolean, String>> function;
 
     public DebugTableSink() {
         function = new RichSinkFunction<Tuple2<Boolean, String>>() {
             @Override
-            public void invoke(Tuple2<Boolean, String> value, Context context) throws Exception {
+            public void invoke(Tuple2<Boolean, String> value, Context context) {
                 System.out.println(value);
             }
         };
@@ -57,10 +54,6 @@ public class DebugTableSink implements RetractStreamTableSink<String> {
     @Override
     public TypeInformation<String> getRecordType() {
         return (TypeInformation<String>) TypeConversions.fromDataTypeToLegacyInfo(this.getTableSchema().toRowDataType());
-    }
-
-    public String getName() {
-        return "Debug TableSink";
     }
 
 }

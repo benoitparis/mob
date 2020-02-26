@@ -14,7 +14,6 @@ public class AppTestSuiteRunner implements AppRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
     private static AppTestFront front = new AppTestFront();
-    private static MobClusterConfiguration configuration;
 
     @Override
     public void run(List<String> apps) throws Exception {
@@ -41,8 +40,10 @@ public class AppTestSuiteRunner implements AppRunner {
     private static void runRegistry(String name) throws Exception {
 
         front = new AppTestFront();
-        configuration = new MobClusterConfiguration(
-                new ArrayList<String>(){{add(name);}},
+        MobClusterConfiguration configuration = new MobClusterConfiguration(
+                new ArrayList<String>() {{
+                    add(name);
+                }},
                 front,
                 new AppTestMessageRouter(),
                 TimeCharacteristic.IngestionTime,

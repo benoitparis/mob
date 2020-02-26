@@ -17,12 +17,12 @@ import java.util.stream.StreamSupport;
 public class MobAppConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobAppConfiguration.class);
 
-    public String name;
-    public List<MobTableConfiguration> inSchemas;
-    public List<MobTableConfiguration> outSchemas;
-    public List<MobTableConfiguration> sql;
-    public List<MobTableConfiguration> tests;
-    private String basePath;
+    public final String name;
+    public final List<MobTableConfiguration> inSchemas;
+    public final List<MobTableConfiguration> outSchemas;
+    public final List<MobTableConfiguration> sql;
+    public final List<MobTableConfiguration> tests;
+    private final String basePath;
 
 
     public MobAppConfiguration(String name) {

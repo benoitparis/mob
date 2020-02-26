@@ -14,14 +14,14 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-public class JsSourceFunction extends RichParallelSourceFunction<Row> {
+class JsSourceFunction extends RichParallelSourceFunction<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsSourceFunction.class);
 
-    private MobTableConfiguration parentConfiguration;
+    private final MobTableConfiguration parentConfiguration;
     private BlockingQueue<Map> queue;
     private volatile boolean isRunning = true;
 
-    private JsonRowDeserializationSchema jrds;
+    private final JsonRowDeserializationSchema jrds;
     private ObjectMapper mapper;
 
     public JsSourceFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {

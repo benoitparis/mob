@@ -31,7 +31,6 @@ import java.util.stream.StreamSupport;
 public class UndertowFront implements ClusterFront {
     private static final Logger logger = LoggerFactory.getLogger(UndertowFront.class);
 
-    private Undertow server;
     private final int port;
     private final String baseUrl;
     private String mainApp;
@@ -74,10 +73,10 @@ public class UndertowFront implements ClusterFront {
         final RequestDumpingHandler actorHandler = new RequestDumpingHandler(sessionAttachmentHandler.setNext(new AutoWebActorHandler()));
         PathHandler handlers = Handlers.path().addPrefixPath("/service", actorHandler);
 
-        fileHandlersMap.entrySet().stream().forEach(it -> handlers.addPrefixPath("/app/" + it.getKey(), it.getValue()));
+        fileHandlersMap.forEach((key, value) -> handlers.addPrefixPath("/app/" + key, value));
         handlers.addPrefixPath("/", fileHandlersMap.get(mainApp));
 
-        server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(handlers).build();
+        Undertow server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(handlers).build();
 
         server.start();
         logger.info("Undertow is up at: " + baseUrl);

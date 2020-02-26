@@ -12,17 +12,16 @@ import paris.benoit.mob.cluster.MobClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
-import javax.script.*;
 import java.io.IOException;
 import java.util.Map;
 
-public class ClientSimulator {
+class ClientSimulator {
     private static final Logger logger = LoggerFactory.getLogger(ClientSimulator.class);
 
     private boolean isReady = false;
     private int progressCounter = 0;
-    private String name;
-    private String script;
+    private final String name;
+    private final String script;
     private Value progress;
     private Value toServer;
     private Value fromServer;
@@ -39,7 +38,7 @@ public class ClientSimulator {
         this.script = script;
     }
 
-    public void start() throws ScriptException, IOException {
+    public void start() throws IOException {
 
         logger.debug("Starting ClientSimulator " + name);
 
@@ -78,7 +77,7 @@ public class ClientSimulator {
         return isReady;
     }
 
-    public boolean progress() throws ScriptException, NoSuchMethodException, SuspendExecution, InterruptedException {
+    public boolean progress() throws SuspendExecution, InterruptedException {
         boolean doContinue = progress.execute(progressCounter).asBoolean();
         progressCounter++;
         logger.info("Client Simulator can continue progress: " + doContinue);

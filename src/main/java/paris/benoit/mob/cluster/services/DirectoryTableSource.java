@@ -22,13 +22,13 @@ public class DirectoryTableSource implements StreamTableSource<Row>, DefinedProc
             "constant_dummy_source",
             "proctime_append_stream"
     };
-    private DataType[] fieldTypes = new DataType[] {
+    private final DataType[] fieldTypes = new DataType[] {
             DataTypes.STRING(),
             DataTypes.STRING(),
             DataTypes.TIMESTAMP(3)
     };
 
-    private List<MobAppConfiguration> apps;
+    private final List<MobAppConfiguration> apps;
 
     public DirectoryTableSource(List<MobAppConfiguration> apps) {
         this.apps = apps;

@@ -11,7 +11,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class AppTestMessageRouter implements MessageRouter {
     private static final Logger logger = LoggerFactory.getLogger(AppTestMessageRouter.class);
 
-    static List<ClientSimulator> simulators = new CopyOnWriteArrayList<>();
+    private static final List<ClientSimulator> simulators = new CopyOnWriteArrayList<>();
 
     public static void registerClientSimulator(ClientSimulator clientSimulator) {
         logger.debug("Registering ClientSimulator: " + clientSimulator.getName());
@@ -21,7 +21,7 @@ public class AppTestMessageRouter implements MessageRouter {
     @Override
     public void routeMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
 
-        simulators.stream().forEach(it -> it.offerMessage(loopbackIndex, identity, message));
+        simulators.forEach(it -> it.offerMessage(loopbackIndex, identity, message));
 
     }
 }

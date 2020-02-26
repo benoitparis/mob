@@ -1,7 +1,6 @@
 package paris.benoit.mob.cluster.json;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
-import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -10,7 +9,6 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
-import org.apache.flink.table.types.FieldsDataType;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
@@ -19,69 +17,37 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.loopback.ActorSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
-import java.util.Map;
-import java.util.stream.Collectors;
-
-public class JsonTableSource implements StreamTableSource<Row>
-//        , DefinedProctimeAttribute
-{
+public class JsonTableSource implements StreamTableSource<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
 
-    private DataType jsonDataType;
     private static final String[] fieldNames = new String[] {
             "loopback_index",
             "actor_identity",
             "payload",
             "constant_dummy_source", //TODO remove?
-            "unix_time_insert",
-//            "proctime_append_stream"
+            "unix_time_insert"
     };
-    private DataType[] fieldTypes;
+    private final DataType[] fieldTypes;
     
-    private RichParallelSourceFunction actorFunction;
-    private JsonRowDeserializationSchema jrds;
-    private MobTableConfiguration configuration;
+    private final RichParallelSourceFunction<Row> actorFunction;
+    private final MobTableConfiguration configuration;
     
     public JsonTableSource(MobTableConfiguration configuration) {
         DataType tempType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
 
-        jsonDataType = LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(tempType);
+        DataType jsonDataType = LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(tempType);
 
         fieldTypes = new DataType[] {
             DataTypes.INT(),
             DataTypes.STRING(),
             jsonDataType,
             DataTypes.STRING(),
-            DataTypes.BIGINT(),
-//            DataTypes.TIMESTAMP(3),
+            DataTypes.BIGINT()
         };
         logger.info("Created Source with json schema: " + jsonDataType.toString());
 
-        jrds = new JsonRowDeserializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
-        actorFunction = new ActorSource(configuration, jrds);
+        actorFunction = new ActorSource(configuration, jsonDataType);
         this.configuration = configuration;
-    }
-
-    private DataType convertDataTypeRemoveLegacy(DataType currentType) {
-
-
-        if (currentType instanceof FieldsDataType) {
-            FieldsDataType casted = (FieldsDataType) currentType;
-
-            Map<String, DataType> fieldDataTypes = casted.getFieldDataTypes()
-                    .entrySet()
-                    .stream()
-                    .collect(Collectors.toMap(
-                            Map.Entry::getKey,
-                            it -> convertDataTypeRemoveLegacy(it.getValue())
-                    ));
-
-            return new FieldsDataType(casted.getLogicalType(), fieldDataTypes);
-
-        }
-        else {
-            return currentType;
-        }
     }
 
     @Override
@@ -109,12 +75,7 @@ public class JsonTableSource implements StreamTableSource<Row>
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
         return sEnv
             .addSource(actorFunction, configuration.name, getReturnType())
-            //.forceNonParallel()
             .name(configuration.fullyQualifiedName());
-    }
-    
-    public JsonRowDeserializationSchema getJsonRowDeserializationSchema() {
-        return jrds;
     }
 
     public static int getFieldCount() {

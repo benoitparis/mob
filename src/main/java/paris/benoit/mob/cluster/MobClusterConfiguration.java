@@ -11,16 +11,16 @@ public class MobClusterConfiguration {
 
     public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE}
 
-    protected ClusterFront clusterFront;
-    protected MessageRouter router;
+    final ClusterFront clusterFront;
+    final MessageRouter router;
 
-    protected TimeCharacteristic processingtime;
-    protected int streamParallelism;
-    protected int maxBufferTimeMillis;
-    protected Integer flinkWebUiPort;
-    protected ENV_MODE mode;
+    final TimeCharacteristic processingtime;
+    final int streamParallelism;
+    final int maxBufferTimeMillis;
+    final Integer flinkWebUiPort;
+    final ENV_MODE mode;
 
-    public List<MobAppConfiguration> apps;
+    public final List<MobAppConfiguration> apps;
 
     public MobClusterConfiguration(
             List<String> names,

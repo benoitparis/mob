@@ -10,24 +10,21 @@ import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class TickTableSource implements StreamTableSource<Row>, DefinedProctimeAttribute {
-
-    private static final Logger logger = LoggerFactory.getLogger(TickTableSource.class);
 
     private static final String[] fieldNames = new String[] {
             "tick_number",
             "constant_dummy_source", //TODO remove?
             "proctime_append_stream"
     };
-    private DataType[] fieldTypes = new DataType[] {
+    private final DataType[] fieldTypes = new DataType[] {
             DataTypes.BIGINT(),
             DataTypes.STRING(),
             DataTypes.TIMESTAMP(3)
     };
-    private long offset = 0, interval;
+    private long offset = 0;
+    private final long interval;
 
     public TickTableSource(long offset, long interval) {
         this.offset = offset;

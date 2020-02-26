@@ -16,9 +16,9 @@ import java.io.IOException;
 //   quand multi-sources
 public class MobClusterSender {
     
-    private JsonRowDeserializationSchema jrds;
-    private Channel<Row> channel;
-    private ThreadReceivePort<Row> receiveport;
+    private final JsonRowDeserializationSchema jrds;
+    private final Channel<Row> channel;
+    private final ThreadReceivePort<Row> receiveport;
     private static final int fieldCount = JsonTableSource.getFieldCount();
     
     public MobClusterSender(JsonRowDeserializationSchema jrds) {

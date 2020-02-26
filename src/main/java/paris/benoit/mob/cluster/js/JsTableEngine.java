@@ -1,5 +1,4 @@
 package paris.benoit.mob.cluster.js;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.Catalog;
 import org.apache.flink.table.catalog.ConnectorCatalogTable;
 import org.apache.flink.table.catalog.ObjectPath;
@@ -9,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
-import javax.script.ScriptException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -33,7 +31,7 @@ public class JsTableEngine {
             "INVOKE '([^\\s]+)'[\\s]*";
     private static final Pattern JS_TABLE_PATTERN = Pattern.compile(JS_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
-    public static void createAndRegister(Catalog catalog, StreamTableEnvironment tEnv, MobTableConfiguration tableConf) throws IOException, ScriptException, TableAlreadyExistException, DatabaseNotExistException {
+    public static void createAndRegister(Catalog catalog, MobTableConfiguration tableConf) throws IOException, TableAlreadyExistException, DatabaseNotExistException {
         Matcher m = JS_TABLE_PATTERN.matcher(tableConf.content);
 
         if (m.matches()) {
@@ -52,7 +50,6 @@ public class JsTableEngine {
             JsTableSink sink = new JsTableSink(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_in", inSchema, null), invokeFunction, sourceCode);
             JsTableSource source = new JsTableSource(tableConf, new MobTableConfiguration(tableConf.dbName,tableConf.name + "_out", outSchema, null));
 
-
             catalog.createTable(
                     new ObjectPath(tableConf.dbName, source.getName()),
                     ConnectorCatalogTable.source(source, false),
@@ -63,19 +60,18 @@ public class JsTableEngine {
                     ConnectorCatalogTable.sink(sink, false),
                     false
             );
-            //AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(tEnv, source, source.getName());
 
         } else {
             throw new RuntimeException("Failed to create js table. They must conform to: " + JS_TABLE_PATTERN_REGEX + "\nSQL was: \n" + tableConf);
         }
     }
 
-    private static Map<String, BlockingQueue<BlockingQueue<Map>>> queuesSink = new HashMap<>();
-    private static Map<String, BlockingQueue<BlockingQueue<Map>>> queuesSource = new HashMap<>();
+    private static final Map<String, BlockingQueue<BlockingQueue<Map>>> queuesSink = new HashMap<>();
+    private static final Map<String, BlockingQueue<BlockingQueue<Map>>> queuesSource = new HashMap<>();
 
     // TODO remove, useful??
-    private static AtomicInteger registrationTarget = new AtomicInteger(0);
-    private static AtomicInteger counter = new AtomicInteger(0);
+    private static final AtomicInteger registrationTarget = new AtomicInteger(0);
+    private static final AtomicInteger counter = new AtomicInteger(0);
 
     private static void setupQueue(String name) {
         BlockingQueue<BlockingQueue<Map>> exchangeQueueSink = new ArrayBlockingQueue<>(1);

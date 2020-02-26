@@ -19,16 +19,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
+class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private static final Logger logger = LoggerFactory.getLogger(JsSinkFunction.class);
 
-    private MobTableConfiguration parentConfiguration;
+    private final MobTableConfiguration parentConfiguration;
     private BlockingQueue<Map> queue;
 
-    private JsonRowSerializationSchema jrs;
+    private final JsonRowSerializationSchema jrs;
 
-    private String invokeFunction;
-    private String code;
+    private final String invokeFunction;
+    private final String code;
     private Invocable inv;
 
     public JsSinkFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
@@ -64,7 +64,7 @@ public class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
 
             try {
                 Map out = (Map) inv.invokeFunction(invokeFunction, convertRowToMap(payload));
-                HashMap copy = new HashMap<>(out); // prevent multithreaded access
+                @SuppressWarnings("unchecked") HashMap copy = new HashMap(out); // prevent multithreaded access
                 queue.add(copy);
             } catch (NoSuchMethodException | ScriptException e) {
                 throw new RuntimeException("Js invocation failed", e);

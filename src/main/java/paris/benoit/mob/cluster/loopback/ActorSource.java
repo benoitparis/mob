@@ -1,9 +1,12 @@
 package paris.benoit.mob.cluster.loopback;
 
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
+import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
+import org.apache.flink.table.types.DataType;
+import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +23,12 @@ public class ActorSource extends RichParallelSourceFunction<Row> {
 
     private ThreadReceivePort<Row> receivePort = null;
     private Integer loopbackIndex = -1;
-    private JsonRowDeserializationSchema jrds;
-    private MobTableConfiguration configuration;
+    private final JsonRowDeserializationSchema jrds;
+    private final MobTableConfiguration configuration;
     
-    public ActorSource(MobTableConfiguration configuration, JsonRowDeserializationSchema jrds) {
+    public ActorSource(MobTableConfiguration configuration, DataType jsonDataType) {
         super();
-        this.jrds = jrds;
+        this.jrds = new JsonRowDeserializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         this.configuration = configuration;
     }
 

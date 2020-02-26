@@ -17,9 +17,9 @@ public class ToServerMessage {
     //   ou bien en APPEND, RETRACT(, UPSERT)?
     public enum INTENT {WRITE, QUERY, SUBSCRIBE}
 
-    public INTENT intent;
-    public String table;
-    public JSONObject payload;
+    public final INTENT intent;
+    public final String table;
+    public final JSONObject payload;
     
     public ToServerMessage(String fromClient) {
         JSONObject json = new JSONObject(fromClient);

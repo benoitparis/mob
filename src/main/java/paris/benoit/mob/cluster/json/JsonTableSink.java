@@ -4,7 +4,6 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.functions.IdPartitioner;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
-import org.apache.flink.formats.json.JsonRowSerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
@@ -24,30 +23,26 @@ import paris.benoit.mob.server.MessageRouter;
 public class JsonTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
 
-    private DataType jsonDataType;
     private static final String[] fieldNames = new String[] {
             "loopback_index",
             "actor_identity",
             "payload"
     };
-    private DataType[] fieldTypes;
+    private final DataType[] fieldTypes;
 
-    private RichSinkFunction<Tuple2<Boolean, Row>> actorFunction;
-    private JsonRowSerializationSchema jrs;
-    private MobTableConfiguration configuration;
+    private final RichSinkFunction<Tuple2<Boolean, Row>> actorFunction;
+    private final MobTableConfiguration configuration;
 
     public JsonTableSink(MobTableConfiguration configuration, MessageRouter router) {
-        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+        DataType jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
         fieldTypes = new DataType[] {
             DataTypes.INT(),
             DataTypes.STRING(),
-                jsonDataType,
-//            LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(jsonDataType)
+            jsonDataType
         };
         logger.info("Created Sink with json schema: " + jsonDataType.toString());
 
-        jrs = JsonRowSerializationSchema.builder().withTypeInfo((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
-        actorFunction = new ActorSink(configuration, jrs, router);
+        actorFunction = new ActorSink(configuration, jsonDataType, router);
         this.configuration = configuration;
     }
 

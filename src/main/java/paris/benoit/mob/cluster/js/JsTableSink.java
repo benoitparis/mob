@@ -16,20 +16,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
-public class JsTableSink implements RetractStreamTableSink<Row> {
+class JsTableSink implements RetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSink.class);
 
-    private DataType jsonDataType;
     private static final String[] fieldNames = new String[] { "payload" };
-    private DataType[] fieldTypes;
+    private final DataType[] fieldTypes;
 
-    private RichSinkFunction<Tuple2<Boolean, Row>> function;
-    private MobTableConfiguration configuration;
+    private final RichSinkFunction<Tuple2<Boolean, Row>> function;
+    private final MobTableConfiguration configuration;
 
     public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
 
-        jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
-        fieldTypes = new DataType[] { jsonDataType };
+        DataType jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
+        fieldTypes = new DataType[] {jsonDataType};
 
         function = new JsSinkFunction(parentConfiguration, configuration, invokeFunction, code);
         this.configuration = configuration;
