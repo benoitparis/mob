@@ -41,10 +41,10 @@ public class MobCluster {
         this.configuration = clusterConfiguration;
     }
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_CYAN = "\u001B[36m";
-    public static final String ANSI_YELLOW = "\u001B[33m";
-    public static final String ANSI_BRIGHT_BLACK = "\u001B[90m";
+    private static final String ANSI_RESET = "\u001B[0m";
+    private static final String ANSI_CYAN = "\u001B[36m";
+    private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_BRIGHT_BLACK = "\u001B[90m";
 
     public void start() throws Exception {
         configuration.clusterFront.setMain(configuration.apps.get(0).name);
@@ -82,7 +82,7 @@ public class MobCluster {
                     tEnv.useDatabase(it);
                     return Arrays.stream(tEnv.listTables()).map(at -> it + "." + at);
                 })
-                .collect(Collectors.joining(",\n ", "\n[\n ", "\n]"));;
+                .collect(Collectors.joining(",\n ", "\n[\n ", "\n]"));
 
         logger.info("Tables: " + ANSI_YELLOW + tables + ANSI_RESET);
         logger.info("Job is: " + ANSI_YELLOW + status + ANSI_RESET);
