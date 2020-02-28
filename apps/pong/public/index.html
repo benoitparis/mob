@@ -1,6 +1,8 @@
 <html>
 <head>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
+<!-- plein de collisions de globales, TODO faudra nettoyer -->
+<script src="/app/pong/game.js"></script>
 <script>
 
   // UI
@@ -19,15 +21,34 @@
   var ballRadius = ballDiameter/2;
   var leftDistance  = racketBorderDistance         - racketWidth/2;
   var rightDistance = width - racketBorderDistance - racketWidth/2;
+  var idealTickIntervalMs = 20.0;
+  var MAX_INTERPOLATION_MS = 300;
   
+  var side;
   var leftY = 300;
   var rightY = 300;
-  var side;
   var ballX = 300;
   var ballY = 300;
+  var speedX = 5;
+  var speedY = 2;
   
-
+  var lastAccurateDataTime;
+  var lastInterpolationTime = 0;
   function draw() {
+    
+    var now = new Date().getTime();
+    var deltatime;
+    if (0 !== lastInterpolationTime) {
+      deltatime = now - lastInterpolationTime;
+    } else {
+      deltatime = 0;
+    }
+    lastInterpolationTime = now;
+    // client interpolation
+    if (0 !== deltatime && lastAccurateDataTime && (now - lastAccurateDataTime < MAX_INTERPOLATION_MS)) {
+      updateGame(deltatime);
+    }
+    
     background(255, 247, 240);
     fill(0, 0, 0);
     rect(leftDistance , leftY  - racketHeight/2, racketWidth, racketHeight);
@@ -65,10 +86,14 @@
       //console.log('query latency: ' + (Date.now() - parseInt(msg.payload.now, 10)) + ' ms')
       ballX = msg.payload.ballX;
       ballY = msg.payload.ballY;
+      speedX = msg.payload.speedX;
+      speedY = msg.payload.speedY;
       leftY  = msg.payload.leftY;
       rightY = msg.payload.rightY;
-      var scoreLeft  = msg.payload.scoreLeft;
-      var scoreRight  = msg.payload.scoreRight;
+      var scoreLeft = msg.payload.scoreLeft;
+      var scoreRight = msg.payload.scoreRight;
+      lastAccurateDataTime = new Date().getTime();
+      
       document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' : ' + scoreRight;
     } else if (msg.table === 'user_count') {
       var countLeft = msg.payload.countLeft;

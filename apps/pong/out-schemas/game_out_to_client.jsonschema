@@ -14,6 +14,12 @@
     "ballY": {
       "type": "number"
     },
+    "speedX": {
+      "type": "number"
+    },
+    "speedY": {
+      "type": "number"
+    },
     "leftY": {
       "type": "number"
     },

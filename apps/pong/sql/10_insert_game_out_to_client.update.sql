@@ -7,6 +7,8 @@ SELECT
     CAST(got.game_out_time AS VARCHAR),
     ballX,
     ballY,
+    speedX,
+    speedY,
     leftY,
     rightY,
     scoreLeft,

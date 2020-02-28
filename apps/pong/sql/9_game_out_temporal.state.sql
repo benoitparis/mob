@@ -4,6 +4,8 @@ SELECT
   proctime_append_stream game_out_time,
   ballX,
   ballY,
+  speedX,
+  speedY,
   leftY,
   rightY,
   scoreLeft,
