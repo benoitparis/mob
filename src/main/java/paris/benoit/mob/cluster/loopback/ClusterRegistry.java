@@ -5,34 +5,44 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobAppConfiguration;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.utils.TransferMap;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
 public class ClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ClusterRegistry.class);
 
     private static final CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
-    private static final List<Map<String, ClusterSender>> clusterSenders = new ArrayList<>();
-    private static volatile boolean registrationDone = false;
-    private static final int POLL_INTERVAL = 1000;
+
+    // TODO fix: local parallelism is not cluster parallelism
+    static int parallelism;
+    static int inSchemaCount;
+    static MobClusterConfiguration configuration;
+    static CountDownLatch latch;
+
+    private static TransferMap<Integer, Map<String, ClusterSender>> transferMap = new TransferMap<>();
 
     public static void registerClusterSender(String fullName, ClusterSender sender, Integer loopbackIndex) {
         clusterSenderRaw.add(new NameSenderPair(fullName, loopbackIndex, sender));
+        latch.countDown();
     }
 
-    public static void waitRegistrationsReady(int parallelism, MobClusterConfiguration configuration) throws InterruptedException {
+    public static void setConf(int parallelism, MobClusterConfiguration configuration) {
+        ClusterRegistry.parallelism = parallelism;
+        ClusterRegistry.configuration = configuration;
+        ClusterRegistry.inSchemaCount = configuration.apps.stream().mapToInt(it -> it.inSchemas.size()).sum();
+        ClusterRegistry.latch = new CountDownLatch(parallelism * inSchemaCount);
+    }
 
-        int inSchemaCount = configuration.apps.stream().mapToInt(it -> it.inSchemas.size()).sum();
-        // On attend que tous les senders soient là
-        // FIXME idéalement on fait que react à quand c'est prêt
-        while ((clusterSenderRaw.size() != parallelism * inSchemaCount)) {
-            logger.info("Waiting to receive all senders: " + clusterSenderRaw.size() + " != " + parallelism * inSchemaCount + " and JsTableEngines");
-            logger.info("" + clusterSenderRaw);
-            //logger.info("Plan is: \n" + sEnv.getExecutionPlan());
-            Thread.sleep(POLL_INTERVAL);
-        }
+    public static void waitRegistrationsReady() throws InterruptedException {
+        latch.await();
         doClusterSendersMatching(parallelism, configuration);
     }
 
@@ -56,21 +66,22 @@ public class ClusterRegistry {
                 for(MobTableConfiguration ci: app.inSchemas) {
                     localMap.put(ci.fullyQualifiedName(), byName.get(ci.fullyQualifiedName()).get(i).sender);
                 }
-                clusterSenders.add(localMap);
+                transferMap.put(i, localMap);
             }
         }
 
-        registrationDone = true;
         logger.info("Registration Done");
     }
 
-    public static Map<String, ClusterSender> getClusterSender(String random) throws InterruptedException {
-        while (!registrationDone) {
-            logger.info("Waiting on registration");
-            Thread.sleep(POLL_INTERVAL);
-        }
 
-        return clusterSenders.get(Math.abs(random.hashCode()) % clusterSenders.size());
+    public static CompletableFuture<Map<String, ClusterSender>> getClusterSender(String random) {
+        return CompletableFuture.supplyAsync(() -> {
+                logger.debug(transferMap.toString());
+                logger.debug(random);
+                logger.debug(""+parallelism);
+                return transferMap.getAndWait(Math.abs(random.hashCode()) % parallelism);
+            }
+        );
     }
 
     static class NameSenderPair {

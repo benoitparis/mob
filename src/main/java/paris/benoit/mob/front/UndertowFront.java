@@ -5,7 +5,6 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.server.handlers.RequestDumpingHandler;
 import io.undertow.server.handlers.resource.PathResourceManager;
 import io.undertow.server.session.InMemorySessionManager;
 import io.undertow.server.session.SessionAttachmentHandler;
@@ -73,7 +72,7 @@ public class UndertowFront implements ClusterFront {
                 ))
         ;
 
-        final RequestDumpingHandler actorHandler = new RequestDumpingHandler(sessionAttachmentHandler.setNext(new AutoWebActorHandler()));
+        SessionAttachmentHandler actorHandler = sessionAttachmentHandler.setNext(new AutoWebActorHandler());
         PathHandler handlers = Handlers.path().addPrefixPath("/service", actorHandler);
 
         fileHandlersMap.forEach((key, value) -> handlers.addPrefixPath("/app/" + key, value));
@@ -91,6 +90,7 @@ public class UndertowFront implements ClusterFront {
     private CompletableFuture<Void> pokeActorService() {
         return CompletableFuture.runAsync(() -> {
             try {
+                // the first one always fails for some reason
                 HttpClients.createDefault().execute(new HttpGet(baseUrl + "/service")).getStatusLine().getStatusCode();
             } catch (IOException e) {
                 throw new RuntimeException(e);

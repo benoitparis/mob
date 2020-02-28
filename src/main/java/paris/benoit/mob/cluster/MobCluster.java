@@ -47,9 +47,19 @@ public class MobCluster {
     private static final String ANSI_BRIGHT_BLACK = "\u001B[90m";
 
     public void start() throws Exception {
-        configuration.clusterFront.setMain(configuration.apps.get(0).name);
-        configuration.clusterFront.start();
+        // TODO: have a better startup sequence dependencies understanding / story
+        //   not obvious:
+        //   - ClusterRegistry.setConf before configuration.clusterFront.start, because ClientSimulators will fail otherwise
+        //   - sEnv executed before configuration.clusterFront.waitReady, otherwise actors fail?
+        //   - sEnv.getExecutionPlan() before sEnv.executeAsync(), because execution will clear the internal StreamGraph
         setupEnvironment();
+        ClusterRegistry.setConf(
+                sEnv.getParallelism(),
+                configuration
+        );
+        configuration.clusterFront.setMain(configuration.apps.get(0).name);
+
+        configuration.clusterFront.start();
         registerServiceTables();
 
         for(MobAppConfiguration app : configuration.apps) {
@@ -63,10 +73,7 @@ public class MobCluster {
         JobClient jobClient = sEnv.executeAsync();
 
         configuration.clusterFront.waitReady();
-        ClusterRegistry.waitRegistrationsReady(
-                sEnv.getParallelism(),
-                configuration
-        );
+        ClusterRegistry.waitRegistrationsReady();
 
         JobStatus status = jobClient.getJobStatus().get();
 

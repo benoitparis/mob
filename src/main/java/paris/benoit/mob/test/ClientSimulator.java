@@ -14,6 +14,7 @@ import paris.benoit.mob.message.ToServerMessage;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 class ClientSimulator {
     private static final Logger logger = LoggerFactory.getLogger(ClientSimulator.class);
@@ -59,9 +60,9 @@ class ClientSimulator {
 
         new Thread(() -> {
             try {
-                clusterSenders = ClusterRegistry.getClusterSender(name);
+                clusterSenders = ClusterRegistry.getClusterSender(name).get();
                 isReady = true;
-            } catch (InterruptedException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 logger.debug("Problem getting a ClusterSender", e);
             }
         }).start();

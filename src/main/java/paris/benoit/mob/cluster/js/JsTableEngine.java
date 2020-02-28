@@ -7,11 +7,11 @@ import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.utils.TransferMap;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
@@ -66,14 +66,12 @@ public class JsTableEngine {
         }
     }
 
-
     /*
      * We need to have the sink -> js engine -> source data path, we'll do it through a queue.
      * A queue cannot be set up through constructors, because of serialization (and remote execution)
      * Hopefully we have arranged for Co-Location though, and when functions are deserialized,
      * their will open() and exchange a queue.
      */
-
     private static TransferMap<String, BlockingQueue<Map>> transferMap = new TransferMap<>();
 
     static CompletableFuture<BlockingQueue<Map>> registerSource(String name) {
@@ -84,36 +82,4 @@ public class JsTableEngine {
         transferMap.put(name, queue);
     }
 
-    // https://stackoverflow.com/questions/6389122/does-a-hashmap-with-a-getandwait-method-exist-e-g-a-blockingconcurrenthashma
-    public static class TransferMap<K, V> extends HashMap<K, V>{
-
-        private final Object lock = new Object();
-
-        V getAndWait(Object key) {
-            V value;
-            synchronized(lock) {
-                do {
-                    value = super.get(key);
-                    if (value == null) {
-                        try {
-                            lock.wait();
-                        } catch (InterruptedException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                } while(value == null);
-            }
-            return value;
-        }
-
-        @Override
-        public V put(K key, V value){
-            synchronized(lock) {
-                super.put(key, value);
-                lock.notifyAll();
-            }
-            return value;
-        }
-
-    }
 }

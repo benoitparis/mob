@@ -17,6 +17,8 @@ import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("serial")
@@ -26,7 +28,7 @@ public class FrontActor extends BasicActor<Object, Void> {
 
     private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
-    private Map<String, ClusterSender> clusterSenders;
+    private CompletableFuture<Map<String, ClusterSender>> clusterSendersFuture;
     
     public FrontActor() throws InterruptedException {
         // guids? 
@@ -34,7 +36,7 @@ public class FrontActor extends BasicActor<Object, Void> {
         //   des NumberedChannels? oui, et on fait le sendMessage+setfield+deseri là?
         // du coup on donnerait pas que channel?
         super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
-        clusterSenders = ClusterRegistry.getClusterSender(getName());
+        clusterSendersFuture = ClusterRegistry.getClusterSender(getName());
     }
 
     @Override
@@ -43,7 +45,13 @@ public class FrontActor extends BasicActor<Object, Void> {
             this.initialized = true;
         }
         register();
-        
+        Map<String, ClusterSender> clusterSenders;
+        try {
+            clusterSenders = clusterSendersFuture.get();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+
         for (;;) {
             Object message = receive();
             if (message instanceof WebSocketOpened) {

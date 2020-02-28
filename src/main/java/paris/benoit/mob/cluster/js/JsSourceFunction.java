@@ -19,7 +19,6 @@ class JsSourceFunction extends RichParallelSourceFunction<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsSourceFunction.class);
 
     private final MobTableConfiguration parentConfiguration;
-    private BlockingQueue<Map> queue;
     private CompletableFuture<BlockingQueue<Map>> future;
     private volatile boolean isRunning = true;
 
@@ -45,7 +44,7 @@ class JsSourceFunction extends RichParallelSourceFunction<Row> {
 
     @Override
     public void run(SourceContext<Row> ctx) throws Exception {
-        queue = future.get();
+        BlockingQueue<Map> queue = future.get();
 
         while (isRunning) {
             Map item = queue.take();
