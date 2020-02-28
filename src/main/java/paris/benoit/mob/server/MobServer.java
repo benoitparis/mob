@@ -7,7 +7,7 @@ import paris.benoit.mob.test.AppTestSuiteRunner;
 
 import java.util.Arrays;
 
-public class MobServer {
+class MobServer {
     // Do not move further down
     static {
         if(getVersion() != 8) {

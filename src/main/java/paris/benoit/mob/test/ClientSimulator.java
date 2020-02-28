@@ -127,7 +127,7 @@ class ClientSimulator {
         }
     }
 
-    public static final long QUIET_MILLIS = 5_000;
+    private static final long QUIET_MILLIS = 5_000;
     public boolean isQuiet() {
         try {
             Thread.sleep(100);

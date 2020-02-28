@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 @SuppressWarnings("serial")
-public class ActorSource extends RichParallelSourceFunction<Row> {
+class ActorSource extends RichParallelSourceFunction<Row> {
     
     private static final Logger logger = LoggerFactory.getLogger(ActorSource.class);
     

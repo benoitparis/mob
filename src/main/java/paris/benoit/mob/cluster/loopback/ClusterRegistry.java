@@ -22,10 +22,10 @@ public class ClusterRegistry {
     private static final CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
 
     // TODO fix: local parallelism is not cluster parallelism
-    static int parallelism;
-    static int inSchemaCount;
-    static MobClusterConfiguration configuration;
-    static CountDownLatch latch;
+    private static int parallelism;
+    private static int inSchemaCount;
+    private static MobClusterConfiguration configuration;
+    private static CountDownLatch latch;
 
     private static TransferMap<Integer, Map<String, ClusterSender>> transferMap = new TransferMap<>();
 

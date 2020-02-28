@@ -15,7 +15,7 @@ import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.server.ClusterReceiver;
 
 @SuppressWarnings("serial")
-public class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
+class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private static final Logger logger = LoggerFactory.getLogger(ActorSink.class);
     
     private Integer loopbackIndex = -1;

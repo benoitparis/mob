@@ -24,7 +24,7 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
     };
     public static final int FIELD_COUNT = FIELD_NAMES.length;
 
-    protected MobTableConfiguration configuration;
+    private MobTableConfiguration configuration;
 
     public JsonTableSource(MobTableConfiguration configuration) {
         fieldNames = FIELD_NAMES;

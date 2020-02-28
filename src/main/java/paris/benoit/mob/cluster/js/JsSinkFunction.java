@@ -31,7 +31,7 @@ class JsSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
     private final String invokeFunction;
     private final String code;
     private Invocable inv;
-    public static final int JS_QUEUE_CAPACITY = 100;
+    private static final int JS_QUEUE_CAPACITY = 100;
 
     public JsSinkFunction(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
         this.parentConfiguration = parentConfiguration;

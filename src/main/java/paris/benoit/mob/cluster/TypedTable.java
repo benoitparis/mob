@@ -11,15 +11,15 @@ public abstract class TypedTable<T> {
     protected DataType[] fieldTypes;
     protected String name;
 
-    public TableSchema getTableSchema() {
+    TableSchema getTableSchema() {
         return TableSchema.builder().fields(fieldNames, fieldTypes).build();
     }
 
-    public DataType getProducedDataType() {
+    DataType getProducedDataType() {
         return getTableSchema().toRowDataType();
     }
 
-    public TypeInformation<T> getReturnType() {
+    TypeInformation<T> getReturnType() {
         return (TypeInformation<T>) TypeConversions.fromDataTypeToLegacyInfo(getProducedDataType());
     }
 
