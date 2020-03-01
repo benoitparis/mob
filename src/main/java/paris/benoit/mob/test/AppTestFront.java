@@ -58,7 +58,6 @@ public class AppTestFront implements ClusterFront {
         return result;
     }
 
-
     @Override
     public void waitReady() {}
 
@@ -66,7 +65,6 @@ public class AppTestFront implements ClusterFront {
     public String accessString() {
         return null;
     }
-
 
     public Boolean collectResult() {
         return results.stream()

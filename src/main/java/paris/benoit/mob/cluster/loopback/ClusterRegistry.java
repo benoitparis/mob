@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class ClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ClusterRegistry.class);
@@ -59,16 +60,15 @@ public class ClusterRegistry {
 
         logger.info("Cluster senders names: " + byName.keySet());
 
-        for (int i = 0; i < parallelism; i++) {
+        IntStream.range(0, parallelism).forEach(i -> {
             HashMap<String, ClusterSender> localMap = new HashMap<>();
-
-            for(MobAppConfiguration app : configuration.apps) {
-                for(MobTableConfiguration ci: app.inSchemas) {
+            for (MobAppConfiguration app : configuration.apps) {
+                for (MobTableConfiguration ci : app.inSchemas) {
                     localMap.put(ci.fullyQualifiedName(), byName.get(ci.fullyQualifiedName()).get(i).sender);
                 }
                 transferMap.put(i, localMap);
             }
-        }
+        });
 
         logger.info("Registration Done");
     }

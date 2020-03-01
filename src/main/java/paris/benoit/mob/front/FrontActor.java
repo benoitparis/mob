@@ -17,33 +17,26 @@ import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
 public class FrontActor extends BasicActor<Object, Void> {
     private static final Logger logger = LoggerFactory.getLogger(FrontActor.class);
 
-    private boolean initialized;
     private SendPort<WebDataMessage> clientWSPort;
     private CompletableFuture<Map<String, ClusterSender>> clusterSendersFuture;
     
     public FrontActor() throws InterruptedException {
-        // guids? 
-        // index-atomicIncrements? index pour debug niveau client? atomicIncrements dans les sources, au getChannels? 
-        //   des NumberedChannels? oui, et on fait le sendMessage+setfield+deseri là?
-        // du coup on donnerait pas que channel?
-        super("fa-" + ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+        super("fa-" + UUID.randomUUID().toString());
         clusterSendersFuture = ClusterRegistry.getClusterSender(getName());
     }
 
     @Override
     protected Void doRun() throws InterruptedException, SuspendExecution {
-        if (!initialized) { // necessary for hot code swapping, as this method might be called again after swap
-            this.initialized = true;
-        }
+
         register();
         Map<String, ClusterSender> clusterSenders;
         try {
@@ -63,13 +56,10 @@ public class FrontActor extends BasicActor<Object, Void> {
             }
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;
-                //logger.debug("Got a WS message: " + msg);
-                
                 ToServerMessage cMsg = new ToServerMessage(msg.getStringBody());
                 
-                // !on seri/déséri deux fois
-                //   y revenir plus tard avec deux niveaux de jsonschema et un resolver perso qui inline
-                //   ref sur schema: https://stackoverflow.com/questions/18376215/jsonschema-split-one-big-schema-file-into-multiple-logical-smaller-files
+                // TODO !on seri/déséri deux fois
+                //   utiliser avro, et s'envoyer des subsets
 
                 // TODO DRY avec ClientSimulator
                 switch (cMsg.intent) {
@@ -102,8 +92,6 @@ public class FrontActor extends BasicActor<Object, Void> {
             } else {
                 logger.warn("Unknown message type :" + message);
             }
-            
-            checkCodeSwap();
         }
     }
 
