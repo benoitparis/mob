@@ -1,27 +1,24 @@
-// begin from index.html
-var height = 600;
-var width = 1200;
-var racketHeight = 100;
-var racketWidth = 20;
-var racketBorderDistance = 100;
-var ballDiameter = 50;
-var ballRadius = ballDiameter/2;
-var leftDistance  = racketBorderDistance         - racketWidth/2;
-var rightDistance = width - racketBorderDistance - racketWidth/2;
-var idealTickIntervalMs = 20.0;
-// end from index.html
+// constants
+const height = 600;
+const width = 1200;
+const racketHeight = 100;
+const racketWidth = 20;
+const racketBorderDistance = 100;
+const ballDiameter = 50;
+const ballRadius = ballDiameter/2;
+const leftDistance  = racketBorderDistance         - racketWidth/2;
+const rightDistance = width - racketBorderDistance - racketWidth/2;
+const idealTickIntervalMs = 20.0;
+const CENTER_X = width/2;
+const CENTER_Y = height/2;
 
-// init constants: could be shared
-var CENTER_X = width/2;
-var CENTER_Y = height/2;
-
+// state
 var leftY = CENTER_Y;
 var rightY = CENTER_Y;
 var ballX = CENTER_X;
 var ballY = CENTER_Y;
 var speedX = 5;
 var speedY = 2;
-
 var scoreLeft = 0;
 var scoreRight = 0;
 
@@ -74,6 +71,7 @@ function updateGame(timeElapsedMs) {
   
   // TODO: detect collision point, then update position at point, then update speed, then update position after remaining ticking
   //   or: use a proper engine that runs on graal
+  
   if (ballY < 0     ) {
     speedY = Math.abs(speedY);
   }
@@ -104,6 +102,11 @@ function updateGame(timeElapsedMs) {
     ballX = CENTER_X;
     scoreLeft ++;
   }
+  
+  ballX = Math.min(ballX, width );
+  ballX = Math.max(ballX, 0     );
+  ballY = Math.min(ballY, height);
+  ballY = Math.max(ballY, 0     );
   
   updateQuantity = timeElapsedMs / idealTickIntervalMs;
   

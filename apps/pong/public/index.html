@@ -5,6 +5,8 @@
 <script src="/app/pong/game.js"></script>
 <script>
 
+  var MAX_INTERPOLATION_MS = 300;
+  
   // UI
   var mouseY;
   function setup() {
@@ -12,25 +14,7 @@
     mouseY = mouseY;
   }
   
-  var height = 600;
-  var width = 1200;
-  var racketHeight = 100;
-  var racketWidth = 20;
-  var racketBorderDistance = 100;
-  var ballDiameter = 50;
-  var ballRadius = ballDiameter/2;
-  var leftDistance  = racketBorderDistance         - racketWidth/2;
-  var rightDistance = width - racketBorderDistance - racketWidth/2;
-  var idealTickIntervalMs = 20.0;
-  var MAX_INTERPOLATION_MS = 300;
-  
   var side;
-  var leftY = 300;
-  var rightY = 300;
-  var ballX = 300;
-  var ballY = 300;
-  var speedX = 5;
-  var speedY = 2;
   
   var lastAccurateDataTime;
   var lastInterpolationTime = 0;
@@ -66,34 +50,25 @@
     // draw se fait requestAnimationFramer? du coup on mettrait de l'interpolation ici?
     
   }
+  
 
   // Network setup
-  var appName = window.location.pathname.replace('/app/', '').replace('/', '');
-  var ws;
-  
-  function greetInit(evt) {
-    console.log('connection established');
-    console.log(evt);
-  };
-
   function processServerMessage(evt) {
-    console.log(JSON.parse(evt.data));
     var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
       side = msg.payload.side;
     } else if (msg.table === 'game_out_to_client') {
-      //console.log('query latency: ' + (Date.now() - parseInt(msg.payload.now, 10)) + ' ms')
       ballX = msg.payload.ballX;
       ballY = msg.payload.ballY;
       speedX = msg.payload.speedX;
       speedY = msg.payload.speedY;
       leftY  = msg.payload.leftY;
       rightY = msg.payload.rightY;
-      var scoreLeft = msg.payload.scoreLeft;
-      var scoreRight = msg.payload.scoreRight;
-      lastAccurateDataTime = new Date().getTime();
+      scoreLeft = msg.payload.scoreLeft;
+      scoreRight = msg.payload.scoreRight;
       
+      lastAccurateDataTime = new Date().getTime();
       document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' : ' + scoreRight;
     } else if (msg.table === 'user_count') {
       var countLeft = msg.payload.countLeft;
@@ -105,6 +80,9 @@
       console.log(msg);
     }
   };
+  
+  var appName = window.location.pathname.replace('/app/', '').replace('/', '');
+  var ws;
   
   function sendToServer(table, msg) {
     // TODO queuing? because si ws était pas prête, on drop
@@ -118,61 +96,49 @@
     }
   }
   
-  function wsOnClose(evt) {
-    console.log("WS CLOSE");
+  function logEvent(evt) {
     console.log(evt);
-  }
+  };
   
   function wsConnect() {
     var mypath = "/service"
     var wsUrl = "ws://" + window.location.host + mypath + "/ws";
     ws = new WebSocket(wsUrl);
-    ws.onopen = greetInit;
+    ws.onopen = logEvent;
+    ws.onclose = logEvent;
     ws.onmessage = processServerMessage;
-    ws.onclose = wsOnClose;
   }
+  wsConnect();
+  
+  
+  
+  
+  
   
   // Network business
   function chooseSide(e) {
-    var msg = {
-        side : e
-    };
-    console.log('Trying to send to choose_side: ');
-    console.log(msg);
-    sendToServer('choose_side', msg);
+    sendToServer('choose_side', {side : e});
   }
   
   var lastSentMouseY;
   function sendPosition() {
     if(lastSentMouseY !== mouseY) {
-      var msg = {
-        y : mouseY
-      };
       lastSentMouseY = mouseY;
-      console.log('Sent position: ' + mouseY);
-      sendToServer('write_y', msg);
+      sendToServer('write_y', {y : mouseY});
     }
-    
   }
-  // Ou bien plus subtil avec du onMouseMove?
-  setInterval(sendPosition, 40);
 
-  var now = Date.now();
-  function getGlobalPosition() { // temp subscription
-    var last_now = now;
-    now = Date.now();
-    //console.log('set interval latency: ' + (now - last_now))
-    var msg = {
-      now: '' + Date.now()
-    };
-    sendToServer('query_global_position', msg);
+  // TODO try the internal subscription mecanism
+  function getGlobalPosition() {
+    sendToServer('query_global_position', {now : '' + Date.now()});
   }
+  
+  setInterval(sendPosition, 40);
   setInterval(getGlobalPosition, 41);
   
 </script>
 </head>
 <body>
-  <button onclick="wsConnect()">1. Connect WS</button>
   <div>
     <div id="side-chooser">
       <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');" style="border:1px black;">
