@@ -32,6 +32,7 @@ public class FrontActor extends BasicActor<Object, Void> {
     public FrontActor() throws InterruptedException {
         super("fa-" + UUID.randomUUID().toString());
         clusterSendersFuture = ClusterRegistry.getClusterSender(getName());
+        logger.debug("new FrontActor: " + getName());
     }
 
     @Override
@@ -52,6 +53,7 @@ public class FrontActor extends BasicActor<Object, Void> {
                 ActorRef<WebDataMessage> from = msg.getFrom();
                 watch(from); // will call handleLifecycleMessage with ExitMessage when the session ends
                 clientWSPort = from;
+                logger.debug("WebSocketOpened: " + msg.toString());
             }
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;

@@ -1,4 +1,4 @@
-INSERT INTO send_client
+INSERT INTO apps
 SELECT
   qs.loopback_index,                                         
   qs.actor_identity,
@@ -11,7 +11,7 @@ FROM (
     LAST_VALUE(loopback_index) loopback_index,                                         
     LAST_VALUE(actor_identity) actor_identity,
     CAST(COUNT(*) AS VARCHAR) times_asked
-  FROM query_state
+  FROM subscribe_apps
 ) AS qs
 JOIN services.app_list al
   ON true

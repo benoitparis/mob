@@ -4,26 +4,28 @@
 
 
 	function doOnOpen(evt) {
-		console.log('doOnOpen');
-		console.log(evt);
-    getApps();
+    initSubscriptions();
     log('Connected\n');
 	};
   function doOnClose(evt) {
-		console.log("doOnClose");
-		console.log(evt);
+		log(evt);
 	};
 	function doOnMessage(evt) {
-		console.log("doOnMessage");
-		console.log(evt);
-    log('Received payload: ' + JSON.stringify(JSON.parse(evt.data).payload) + '\n');
-    displayApp(JSON.parse(evt.data).payload);
+    var msg = JSON.parse(evt.data);
+    log('Received payload: ' + JSON.stringify(msg.payload) + '\n');
+    if (msg.table === 'messages') {
+      displayMessage(msg.payload);
+    }
+    if (msg.table === 'apps') {
+      displayApp(msg.payload);
+    }
 	};
 
 	var ws;
   function wsConnect() {
 		var mypath = "/service"
 		var wsUrl = "ws://" + window.location.host + mypath + "/ws";
+    console.log(wsUrl);
 		ws = new WebSocket(wsUrl);
 		ws.onopen = doOnOpen;
 		ws.onclose = doOnClose;
@@ -45,8 +47,15 @@
 		}
   }
   
-	function getApps() {
-    writeTable('query_state', {});
+	function initSubscriptions() {
+    writeTable('subscribe_apps', {});
+    writeTable('subscribe_messages', {});
+	}
+  function postMessage() {
+    var elt = document.getElementById('text-post');
+    var msg = elt.value;
+    elt.value = '';
+    writeTable('post_message', {message: msg});
 	}
 	
   function getRandomInt(max) {
@@ -57,21 +66,44 @@
     document.getElementById("console").value += str;
   }
   function displayApp(payload) {
-    var node = document.createElement("a");
-    node.setAttribute("href", "/app/" + payload.app_name);
-    node.textContent = payload.app_name;
-    var div = document.createElement("div");
-    div.appendChild(node);
-    document.getElementById("apps").appendChild(div);
+    if ('conversation' !== payload.app_name) {
+      var node = document.createElement("iframe");
+      node.setAttribute("src", "/app/" + payload.app_name);
+      node.style.height = '100%';
+      node.style.width = '100%';
+      node.style.borderWidth = '0px';
+      node.style.borderStyle = 'none';
+      document.getElementById("current-app").appendChild(node);
+    }
+  }
+  function displayMessage(payload) {
+    var node = document.createElement("textarea");
+    node.value = payload.message;
+    node.readOnly = true;
+    node.style.height = 'calc(100% / 16 * 1)';
+    node.style.transition = 'width 2s'; // TODO vérif que ça marche
+    node.style.width = '100%';
+    node.style.resize = 'none';
+    document.getElementById("chat-log").appendChild(node);
+    
   }
   wsConnect();
 </script>
 </head>
 <body>
-  <div>
-  </div>
-  <div>
-    <div id="apps">
+  <div id="top-level" style="display:flex;height:100%;">
+    <div id="current-app" style="width: calc(100% / 4 * 3);"></div>
+    <div id="chat" style="width: calc(100% / 4 * 1);height:100%;">
+      <div id="chat-sections" style="display:flex;flex-direction:column;height:100%;">
+        <div id="chat-log" style="height: calc(100% / 8 * 7);display:flex;flex-direction:column-reverse;height:100%;">
+        </div>
+        <div id="chat-post" style="height: calc(100% / 8 * 1);">
+          <textarea id="text-post" style="width:100%;height:50%;resize: none; background: aliceblue;"></textarea>
+          <button id="" type="button" onclick="postMessage();" style="width:100%;height:50%;">
+            Post
+          </button>
+        </div>
+      </div>
     </div>
     <textarea id="console" cols="100" rows="30" readonly style="display:none;"></textarea>
   </div>
