@@ -52,6 +52,9 @@ public class MobCluster {
         //   - ClusterRegistry.setConf before configuration.clusterFront.start, because ClientSimulators will fail otherwise
         //   - sEnv executed before configuration.clusterFront.waitReady, otherwise actors fail?
         //   - sEnv.getExecutionPlan() before sEnv.executeAsync(), because execution will clear the internal StreamGraph
+        //   obvious:
+        //   - have an env > service > apps > exec > info
+        //   - for each app: IO > DataFlow
         setupEnvironment();
         ClusterRegistry.setConf(
                 sEnv.getParallelism(),

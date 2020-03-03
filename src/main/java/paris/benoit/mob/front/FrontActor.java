@@ -52,7 +52,6 @@ public class FrontActor extends BasicActor<Object, Void> {
                 ActorRef<WebDataMessage> from = msg.getFrom();
                 watch(from); // will call handleLifecycleMessage with ExitMessage when the session ends
                 clientWSPort = from;
-                logger.debug("Registering WS port");
             }
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;
