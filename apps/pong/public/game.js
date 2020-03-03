@@ -12,15 +12,25 @@ const idealTickIntervalMs = 20.0;
 const CENTER_X = width/2;
 const CENTER_Y = height/2;
 
-// state
-var leftY = CENTER_Y;
-var rightY = CENTER_Y;
-var ballX = CENTER_X;
-var ballY = CENTER_Y;
-var speedX = 5;
-var speedY = 2;
-var scoreLeft = 0;
-var scoreRight = 0;
+var state = {
+  side: 'observe',
+  game: {
+    leftY : CENTER_Y,
+    rightY : CENTER_Y,
+    ballX : CENTER_X,
+    ballY : CENTER_Y,
+    speedX : 5,
+    speedY : 2,
+    scoreLeft : 0,
+    scoreRight : 0
+  },
+  user_count: {
+    countLeft : 0,
+    countObserve : 0,
+    countRight : 0,
+    countGlobal : 0
+  }
+}
 
 
 // Specific server code: just have state, parse things, update state, produce output
@@ -40,8 +50,8 @@ function gameTick(inString) {
   }
   lastInsertTime = insertTime;
   
-  leftY = parseFloat(inObj.leftY);
-  rightY = parseFloat(inObj.rightY);
+  state.game.leftY = parseFloat(inObj.leftY);
+  state.game.rightY = parseFloat(inObj.rightY);
   
   if (0 > deltatime) {
     console.log('Didnt receive updates in order with delta:' + deltatime);
@@ -52,14 +62,14 @@ function gameTick(inString) {
   
   var out = {
     "position_timestamp" : insertTime.toString(),
-    "ballX" : ballX, 
-    "ballY" : ballY, 
-    "speedX" : speedX,
-    "speedY" : speedY,
-    "leftY" : Math.round(leftY),  // works better with ints
-    "rightY" : Math.round(rightY), 
-    "scoreLeft" : scoreLeft,
-    "scoreRight" : scoreRight 
+    "ballX" : state.game.ballX, 
+    "ballY" : state.game.ballY, 
+    "speedX" : state.game.speedX,
+    "speedY" : state.game.speedY,
+    "leftY" : Math.round(state.game.leftY),  // works better with ints
+    "rightY" : Math.round(state.game.rightY), 
+    "scoreLeft" : state.game.scoreLeft,
+    "scoreRight" : state.game.scoreRight 
   };
     
   //console.log(JSON.stringify(out));
@@ -72,45 +82,45 @@ function updateGame(timeElapsedMs) {
   // TODO: detect collision point, then update position at point, then update speed, then update position after remaining ticking
   //   or: use a proper engine that runs on graal
   
-  if (ballY < 0     ) {
-    speedY = Math.abs(speedY);
+  if (state.game.ballY - ballRadius < 0     ) {
+    state.game.speedY = Math.abs(state.game.speedY);
   }
-  if (ballY > height) {
-    speedY = -Math.abs(speedY);
+  if (state.game.ballY + ballRadius > height) {
+    state.game.speedY = -Math.abs(state.game.speedY);
   }
   if ( true // left  side
-    && (ballX - ballRadius < racketBorderDistance         + racketWidth /2) // right
-    && (ballX + ballRadius > racketBorderDistance         - racketWidth /2) // left
-    && (ballY - ballRadius < leftY                        + racketHeight/2) // top
-    && (ballY + ballRadius > leftY                        - racketHeight/2) // bottom
+    && (state.game.ballX - ballRadius < racketBorderDistance         + racketWidth /2) // right
+    && (state.game.ballX + ballRadius > racketBorderDistance         - racketWidth /2) // left
+    && (state.game.ballY - ballRadius < state.game.leftY             + racketHeight/2) // top
+    && (state.game.ballY + ballRadius > state.game.leftY             - racketHeight/2) // bottom
   ) {
-    speedX = Math.abs(speedX);
+    state.game.speedX = Math.abs(state.game.speedX);
   }
   if ( true // right side
-    && (ballX - ballRadius < width - racketBorderDistance + racketWidth /2) // right
-    && (ballX + ballRadius > width - racketBorderDistance - racketWidth /2) // left
-    && (ballY - ballRadius < rightY                       + racketHeight/2) // top
-    && (ballY + ballRadius > rightY                       - racketHeight/2) // bottom
+    && (state.game.ballX - ballRadius < width - racketBorderDistance + racketWidth /2) // right
+    && (state.game.ballX + ballRadius > width - racketBorderDistance - racketWidth /2) // left
+    && (state.game.ballY - ballRadius < state.game.rightY            + racketHeight/2) // top
+    && (state.game.ballY + ballRadius > state.game.rightY            - racketHeight/2) // bottom
   ) {
-    speedX = -Math.abs(speedX);
+    state.game.speedX = -Math.abs(state.game.speedX);
   }
-  if (ballX < 0) {
-    ballX = CENTER_X;
-    scoreRight ++;
+  if (state.game.ballX < 0) {
+    state.game.ballX = CENTER_X;
+    state.game.scoreRight ++;
   }
-  if (ballX > width) {
-    ballX = CENTER_X;
-    scoreLeft ++;
+  if (state.game.ballX > width) {
+    state.game.ballX = CENTER_X;
+    state.game.scoreLeft ++;
   }
   
-  ballX = Math.min(ballX, width );
-  ballX = Math.max(ballX, 0     );
-  ballY = Math.min(ballY, height);
-  ballY = Math.max(ballY, 0     );
+  state.game.ballX = Math.min(state.game.ballX, width );
+  state.game.ballX = Math.max(state.game.ballX, 0     );
+  state.game.ballY = Math.min(state.game.ballY, height);
+  state.game.ballY = Math.max(state.game.ballY, 0     );
   
   updateQuantity = timeElapsedMs / idealTickIntervalMs;
   
-  ballX += speedX * updateQuantity;
-  ballY += speedY * updateQuantity;
+  state.game.ballX += state.game.speedX * updateQuantity;
+  state.game.ballY += state.game.speedY * updateQuantity;
   
 }

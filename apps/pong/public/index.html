@@ -3,21 +3,46 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.js"></script>
 <!-- plein de collisions de globales, TODO faudra nettoyer -->
 <script src="/app/pong/game.js"></script>
-<script>
+<script type="text/javascript">
 
-  var MAX_INTERPOLATION_MS = 300;
+  var buttonHeight = 30;
+  var scalingWidth = 1.0;
+  var scalingHeight = 1.0;
   
-  // UI
+  // UI game
   var mouseY;
   function setup() {
-    createCanvas(1200, 600);
+    var canvas = createCanvas(windowWidth, windowHeight - buttonHeight);
+    scalingWidth = windowWidth/width;
+    scalingHeight = (windowHeight - buttonHeight)/height;
+    canvas.parent('sketch-holder');
     mouseY = mouseY;
+  }
+  function windowResized() {
+    resizeCanvas(windowWidth, windowHeight - buttonHeight);
+    scalingWidth = windowWidth/width;
+    scalingHeight = (windowHeight - buttonHeight)/height;
+  }
+  
+
+  function scaleRect(x, y, xl, yl) {
+    rect(
+      x  * scalingWidth, y  * scalingHeight,
+      xl * scalingWidth, yl * scalingHeight
+    );
+  }
+  function unScaleHeight(y) {
+    return y / scalingHeight;
+  }
+  function boxY(y) {
+    return Math.min(windowHeight - buttonHeight, y)
   }
   
   var side;
   
   var lastAccurateDataTime;
   var lastInterpolationTime = 0;
+  const MAX_INTERPOLATION_MS = 300;
   function draw() {
     
     var now = new Date().getTime();
@@ -35,20 +60,33 @@
     
     background(255, 247, 240);
     fill(0, 0, 0);
-    rect(leftDistance , leftY  - racketHeight/2, racketWidth, racketHeight);
-    rect(rightDistance, rightY - racketHeight/2, racketWidth, racketHeight);
+    scaleRect(leftDistance , state.game.leftY  - racketHeight/2, racketWidth, racketHeight);
+    scaleRect(rightDistance, state.game.rightY - racketHeight/2, racketWidth, racketHeight);
     fill(0, 0, 255);
-    if (side) {
-      if (side === 'left') {
-        rect(leftDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
-      } else if (side === 'right') {
-        rect(rightDistance, mouseY - racketHeight/2, racketWidth, racketHeight);
+    if (state.side) {
+      if (state.side === 'left') {
+        scaleRect(leftDistance, unScaleHeight(boxY(mouseY)) - racketHeight/2, racketWidth, racketHeight);
+      } else if (state.side === 'right') {
+        scaleRect(rightDistance, unScaleHeight(boxY(mouseY)) - racketHeight/2, racketWidth, racketHeight);
       }
     }
     fill(0, 0, 0);
-    rect(ballX - ballRadius, ballY - ballRadius, ballDiameter, ballDiameter);
+    scaleRect(state.game.ballX - ballRadius, state.game.ballY - ballRadius, ballDiameter, ballDiameter);
     // draw se fait requestAnimationFramer? du coup on mettrait de l'interpolation ici?
-    
+        
+  }
+  
+  // UI buttons
+  function updateSide() {
+    document.getElementById('side-chosen-left').style.borderStyle = null;
+    document.getElementById('side-chosen-observe').style.borderStyle = null;
+    document.getElementById('side-chosen-right').style.borderStyle = null;
+    document.getElementById('side-chosen-' + state.side + '').style.borderStyle = 'inset';
+  }
+  function updateScoresAndCounts() {
+    document.getElementById('side-chosen-left-text').innerHTML = 'Play as Left (score: ' + state.game.scoreLeft + ', users #: ' + state.user_count.countLeft + ')';
+    document.getElementById('side-chosen-observe-text').innerHTML = 'Observe (users #: ' + state.user_count.countObserve + ')';
+    document.getElementById('side-chosen-right-text').innerHTML = 'Play as Right (score: ' + state.game.scoreRight + ', users #: ' + state.user_count.countRight + ')';
   }
   
 
@@ -56,25 +94,15 @@
   function processServerMessage(evt) {
     var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
-      document.getElementById('side-' + msg.payload.side + '-chosen').checked = true;
-      side = msg.payload.side;
+      state.side = msg.payload.side;
+      updateSide();
     } else if (msg.table === 'game_out_to_client') {
-      ballX = msg.payload.ballX;
-      ballY = msg.payload.ballY;
-      speedX = msg.payload.speedX;
-      speedY = msg.payload.speedY;
-      leftY  = msg.payload.leftY;
-      rightY = msg.payload.rightY;
-      scoreLeft = msg.payload.scoreLeft;
-      scoreRight = msg.payload.scoreRight;
-      
+      state.game = msg.payload;
       lastAccurateDataTime = new Date().getTime();
-      document.getElementById('score').innerHTML = 'Score: ' + scoreLeft + ' : ' + scoreRight;
+      updateScoresAndCounts();
     } else if (msg.table === 'user_count') {
-      var countLeft = msg.payload.countLeft;
-      var countRight = msg.payload.countRight;
-      var countGlobal  = msg.payload.countGlobal;
-      document.getElementById('user-count').innerHTML = 'User count: ' + countLeft + ' + ' + countRight + ' = ' + countGlobal;
+      state.user_count = msg.payload;
+      updateScoresAndCounts();
     } else {
       console.log('received msg of unknown table:');
       console.log(msg);
@@ -113,18 +141,18 @@
   
   
   
-  
-  
   // Network business
   function chooseSide(e) {
+    console.log(e);
     sendToServer('choose_side', {side : e});
   }
   
   var lastSentMouseY;
   function sendPosition() {
-    if(lastSentMouseY !== mouseY) {
-      lastSentMouseY = mouseY;
-      sendToServer('write_y', {y : mouseY});
+    var trueY = unScaleHeight(boxY(mouseY));
+    if(lastSentMouseY !== trueY) {
+      lastSentMouseY = trueY;
+      sendToServer('write_y', {y : trueY});
     }
   }
 
@@ -136,34 +164,24 @@
   setInterval(sendPosition, 40);
   setInterval(getGlobalPosition, 41);
   
+
 </script>
 </head>
-<body>
-  <div>
-    <div id="side-chooser">
-      <input type="radio" id="side-left"  name="side" value="left"  onclick="chooseSide('left');" style="border:1px black;">
-      <label for="side-left">Left</label>
-      <input type="radio" id="side-right" name="side" value="right" onclick="chooseSide('right');">
-      <label for="side-right">Right</label>
-      (2. Choose side)
-    </div>
+<body style="margin: 0;">
+  <div id="game">
+    <div id="sketch-holder"></div>
+    <div id="button-sides" style="display: flex;height: 30px;">
     
-    <div id="side-chosen">
-      <input type="radio" id="side-left-chosen"  name="side-chosen" value="left" disabled>
-      <label for="side-left">Left</label>
-      <input type="radio" id="side-right-chosen" name="side-chosen" value="right" disabled>
-      <label for="side-right">Right</label>
-      (3. Server ack)
+      <button id="side-chosen-left"    type="button" onclick="chooseSide('left');"    style="outline: none; flex-basis: 100%; width:100%;">
+        <span id="side-chosen-left-text"   >Observe</span>
+      </button>
+      <button id="side-chosen-observe" type="button" onclick="chooseSide('observe');" style="outline: none; flex-basis: 100%; width:100%;border-style:inset;">
+        <span id="side-chosen-observe-text">Observe</span>
+      </button>
+      <button id="side-chosen-right"   type="button" onclick="chooseSide('right');"   style="outline: none; flex-basis: 100%; width:100%;">
+        <span id="side-chosen-right-text"  >Play as Right</span>
+      </button>
     </div>
-    
-    <div id="user-count">
-      User count: 0 + 0 = 0
-    </div>
-    
-    <div id="score">
-      Score: 0 : 0
-    </div>
-    
   </div>
 </body>
 </html>
