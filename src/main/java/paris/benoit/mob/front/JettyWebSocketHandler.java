@@ -63,7 +63,6 @@ public class JettyWebSocketHandler {
 
     @OnWebSocketMessage
     public void onMessage(String msg) {
-        System.out.println("Message  uuuuiiiiii: " + msg);
 
         ToServerMessage cMsg = new ToServerMessage(msg);
 
