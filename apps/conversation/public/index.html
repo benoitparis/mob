@@ -81,12 +81,19 @@
     var node = document.createElement("textarea");
     node.value = payload.message;
     node.readOnly = true;
-    node.style.height = 'calc(100% / 16 * 1)';
+    node.style.height = 'calc(100% / 14 * 1)';
     node.style.transition = 'width 2s'; // TODO vérif que ça marche
     node.style.width = '100%';
     node.style.resize = 'none';
-    document.getElementById("chat-log").appendChild(node);
-    
+    var chatLog = document.getElementById("chat-log")
+    var wasScrolled = chatLog.scrollTop === (chatLog.scrollHeight - chatLog.offsetHeight);
+    chatLog.appendChild(node);
+    if (chatLog.children.length > 100) {
+      chatLog.removeChild(chatLog.children[0]);  
+    }
+    if(wasScrolled) {
+      chatLog.scrollTo({ top: chatLog.scrollHeight, behavior: 'smooth' });
+    }
   }
   wsConnect();
 </script>
@@ -110,10 +117,10 @@ if ('localhost' !== window.location.hostname) {
     <div id="current-app" style="width: calc(100% / 4 * 3);"></div>
     <div id="chat" style="width: calc(100% / 4 * 1);height:100%;">
       <div id="chat-sections" style="display:flex;flex-direction:column;height:100%;">
-        <div id="chat-log" style="height: calc(100% / 8 * 7);display:flex;flex-direction:column-reverse;height:100%;">
+        <div id="chat-log" style="height: calc(100% / 8 * 7);overflow: overlay;">
         </div>
         <div id="chat-post" style="height: calc(100% / 8 * 1);">
-          <textarea id="text-post" style="width:100%;height:50%;resize: none; background: aliceblue;"></textarea>
+          <textarea id="text-post" maxlength="180" style="width:100%;height:50%;resize: none; background: aliceblue;"></textarea>
           <button id="" type="button" onclick="postMessage();" style="width:100%;height:50%;">
             Post
           </button>
