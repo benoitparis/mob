@@ -11,7 +11,6 @@ import paris.benoit.mob.cluster.loopback.ClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -53,12 +52,6 @@ public class JettyWebSocketHandler {
         }
         JettyClusterReceiver.register(this);
 
-        System.out.println("Connect: " + session.getRemoteAddress().getAddress());
-        try {
-            session.getRemote().sendString("Hello Webbrowser");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @OnWebSocketMessage
