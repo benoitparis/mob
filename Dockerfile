@@ -5,4 +5,4 @@ RUN chmod +x mvnw
 RUN ./mvnw clean install
 EXPOSE 8090
 EXPOSE 8082
-ENTRYPOINT ["sh", "mvnw", "exec:exec", "-Dapp-name=pong"]
+ENTRYPOINT ["sh", "mvnw", "exec:exec", "-Dapp-name=conversation,pong"]
