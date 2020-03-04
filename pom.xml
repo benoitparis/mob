@@ -68,7 +68,8 @@
                 <configuration>
                     <executable>${java.executable}</executable>
                     <arguments>
-                        <argument>-javaagent:libs/quasar-core-0.8.0-SNAPSHOT-jdk8.jar</argument>
+<!--                        uncomment this with UndertowFront -->
+<!--                        <argument>-javaagent:libs/quasar-core-0.8.0-SNAPSHOT-jdk8.jar</argument>-->
                         <argument>-classpath</argument>
                         <classpath />
                         <argument>paris.benoit.mob.server.MobServer</argument>
@@ -225,15 +226,6 @@
             <version>1.4</version>
         </dependency>
 
-       <!-- netty --><!-- https://mvnrepository.com/artifact/io.netty/netty-all --><!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
-<!--        <dependency>-->
-<!--            <groupId>io.netty</groupId>-->
-<!--            <artifactId>netty-all</artifactId>-->
-<!--            <version>4.0.15.Final</version>-->
-<!--        </dependency>-->
-
-        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-server -->
-
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
@@ -249,8 +241,6 @@
             <artifactId>websocket-server</artifactId>
             <version>9.4.25.v20191220</version>
         </dependency>
-
-
 
     </dependencies>
 </project>
