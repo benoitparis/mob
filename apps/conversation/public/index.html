@@ -28,6 +28,7 @@
     console.log(wsUrl);
 		ws = new WebSocket(wsUrl);
 		ws.onopen = doOnOpen;
+		ws.onerror = doOnClose;
 		ws.onclose = doOnClose;
 		ws.onmessage = doOnMessage;
 	}

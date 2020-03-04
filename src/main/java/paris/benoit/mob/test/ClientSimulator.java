@@ -96,7 +96,7 @@ class ClientSimulator {
             return false;
         } else {
 
-            // TODO DRY avec FrontActor
+            // TODO DRY avec UndertowActor
             ToServerMessage cMsg = new ToServerMessage(wsMessage);
             logger.info("Got message: " + cMsg);
             switch (cMsg.intent) {
@@ -105,7 +105,11 @@ class ClientSimulator {
                         if (null == specificSender) {
                             logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
-                            specificSender.sendMessage(name, cMsg.payload.toString());
+                            try {
+                                specificSender.sendMessage(name, cMsg.payload.toString());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
                     break;

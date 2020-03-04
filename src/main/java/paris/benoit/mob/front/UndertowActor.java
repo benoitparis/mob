@@ -23,16 +23,16 @@ import java.util.concurrent.ExecutionException;
 
 @SuppressWarnings("serial")
 @WebActor(webSocketUrlPatterns = {"/service/ws"})
-public class FrontActor extends BasicActor<Object, Void> {
-    private static final Logger logger = LoggerFactory.getLogger(FrontActor.class);
+public class UndertowActor extends BasicActor<Object, Void> {
+    private static final Logger logger = LoggerFactory.getLogger(UndertowActor.class);
 
     private SendPort<WebDataMessage> clientWSPort;
     private CompletableFuture<Map<String, ClusterSender>> clusterSendersFuture;
     
-    public FrontActor() throws InterruptedException {
+    public UndertowActor() throws InterruptedException {
         super("fa-" + UUID.randomUUID().toString());
         clusterSendersFuture = ClusterRegistry.getClusterSender(getName());
-        logger.debug("new FrontActor: " + getName());
+        logger.debug("new UndertowActor: " + getName());
     }
 
     @Override
@@ -70,7 +70,11 @@ public class FrontActor extends BasicActor<Object, Void> {
                         if (null == specificSender) {
                             logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
-                            specificSender.sendMessage(getName(), cMsg.payload.toString());
+                            try {
+                                specificSender.sendMessage(getName(), cMsg.payload.toString());
+                            } catch (Exception e) {
+                                logger.error("error in sending back message", e);
+                            }
                         }
                     }
                 break;

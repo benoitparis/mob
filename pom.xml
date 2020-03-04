@@ -225,5 +225,32 @@
             <version>1.4</version>
         </dependency>
 
+       <!-- netty --><!-- https://mvnrepository.com/artifact/io.netty/netty-all --><!-- https://mvnrepository.com/artifact/io.netty/netty-handler -->
+<!--        <dependency>-->
+<!--            <groupId>io.netty</groupId>-->
+<!--            <artifactId>netty-all</artifactId>-->
+<!--            <version>4.0.15.Final</version>-->
+<!--        </dependency>-->
+
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty.websocket/websocket-server -->
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
+            <version>9.4.25.v20191220</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-api</artifactId>
+            <version>9.4.25.v20191220</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.websocket</groupId>
+            <artifactId>websocket-server</artifactId>
+            <version>9.4.25.v20191220</version>
+        </dependency>
+
+
+
     </dependencies>
 </project>

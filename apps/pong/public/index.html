@@ -145,6 +145,7 @@
     ws = new WebSocket(wsUrl);
     ws.onopen = logEvent;
     ws.onclose = logEvent;
+		ws.onerror = logEvent;
     ws.onmessage = processServerMessage;
   }
   wsConnect();
@@ -184,7 +185,7 @@
     <div id="button-sides" style="display: flex;height: 30px;">
     
       <button id="side-chosen-left"    type="button" onclick="chooseSide('left');"    style="outline: none; flex-basis: 100%; width:100%;">
-        <span id="side-chosen-left-text"   >Observe</span>
+        <span id="side-chosen-left-text"   >Play as Left</span>
       </button>
       <button id="side-chosen-observe" type="button" onclick="chooseSide('observe');" style="outline: none; flex-basis: 100%; width:100%;border-style:inset;">
         <span id="side-chosen-observe-text">Observe</span>

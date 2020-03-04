@@ -1,6 +1,5 @@
 package paris.benoit.mob.cluster.loopback;
 
-import co.paralleluniverse.fibers.SuspendExecution;
 import co.paralleluniverse.strands.channels.Channel;
 import co.paralleluniverse.strands.channels.Channels;
 import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
@@ -26,7 +25,7 @@ public class ClusterSender {
         this.receiveport = new ThreadReceivePort<>(channel);
     }
     
-    public void sendMessage(String identity, String payload) throws SuspendExecution, InterruptedException {
+    public void sendMessage(String identity, String payload) throws Exception {
         
         try {
             Row root = new Row(JsonTableSource.FIELD_COUNT);

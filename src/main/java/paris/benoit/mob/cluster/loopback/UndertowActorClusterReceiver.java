@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.server.ClusterReceiver;
 
-public class ActorClusterReceiver implements ClusterReceiver {
+public class UndertowActorClusterReceiver implements ClusterReceiver {
     private static final Logger logger = LoggerFactory.getLogger(ActorSource.class);
 
     @Override
