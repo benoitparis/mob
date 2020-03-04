@@ -9,4 +9,6 @@ public interface ClusterFront {
     String accessString();
 
     default void setMain(String app) {}
+
+    ClusterReceiver getClusterReceiver();
 }

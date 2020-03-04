@@ -45,7 +45,6 @@ public class AppTestSuiteRunner implements ClusterRunner {
                     add(name);
                 }},
                 front,
-                new AppTestMessageRouter(),
                 TimeCharacteristic.IngestionTime,
                 3,
                 50,

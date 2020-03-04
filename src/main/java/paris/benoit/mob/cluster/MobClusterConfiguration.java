@@ -25,7 +25,6 @@ public class MobClusterConfiguration {
     public MobClusterConfiguration(
             List<String> names,
             ClusterFront clusterFront,
-            ClusterReceiver router,
             TimeCharacteristic processingtime,
             int streamParallelism,
             int maxBufferTimeMillis,
@@ -41,7 +40,7 @@ public class MobClusterConfiguration {
         this.mode = mode;
 
         this.clusterFront = clusterFront;
-        this.router = router;
+        this.router = clusterFront.getClusterReceiver();
 
         apps = names.stream().map(MobAppConfiguration::new).collect(Collectors.toList());
 

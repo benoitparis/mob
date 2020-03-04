@@ -10,6 +10,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.PathResource;
 import paris.benoit.mob.server.ClusterFront;
+import paris.benoit.mob.server.ClusterReceiver;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -108,13 +109,10 @@ public class JettyFront implements ClusterFront {
         this.mainApp = app;
     }
 
-
-
-
-
-
-
-
+    @Override
+    public ClusterReceiver getClusterReceiver() {
+        return new JettyClusterReceiver();
+    }
 
 
 }

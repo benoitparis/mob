@@ -15,6 +15,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.server.ClusterFront;
+import paris.benoit.mob.server.ClusterReceiver;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -111,5 +112,10 @@ public class UndertowFront implements ClusterFront {
     @Override
     public void setMain(String app) {
         this.mainApp = app;
+    }
+
+    @Override
+    public ClusterReceiver getClusterReceiver() {
+        return new UndertowActorClusterReceiver();
     }
 }

@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.front;
 
 import co.paralleluniverse.actors.ActorRef;
 import co.paralleluniverse.actors.ActorRegistry;
@@ -9,7 +9,7 @@ import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.server.ClusterReceiver;
 
 public class UndertowActorClusterReceiver implements ClusterReceiver {
-    private static final Logger logger = LoggerFactory.getLogger(ActorSource.class);
+    private static final Logger logger = LoggerFactory.getLogger(UndertowActorClusterReceiver.class);
 
     @Override
     public void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
