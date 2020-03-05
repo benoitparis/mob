@@ -11,8 +11,10 @@ import paris.benoit.mob.cluster.loopback.ClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -26,11 +28,13 @@ public class JettyWebSocketHandler {
     private CompletableFuture<Map<String, ClusterSender>> clusterSendersFuture;
     private Map<String, ClusterSender> clusterSenders;
     private RemoteEndpoint remote;
+    private volatile boolean isRunning = true;
 
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
         System.out.println("Close: statusCode=" + statusCode + ", reason=" + reason);
         JettyClusterReceiver.unRegister(this);
+        isRunning = false;
     }
 
     @OnWebSocketError
@@ -85,11 +89,26 @@ public class JettyWebSocketHandler {
         }
     }
 
+    ArrayBlockingQueue<ToClientMessage> queue = new ArrayBlockingQueue<>(100);
+    {
+        // FIXME can't wait for actors
+        new Thread(() -> {
+            while(isRunning) {
+                try {
+                    ToClientMessage msg = queue.take();
+                    // one at a time
+                    remote.sendString(msg.toString());
+                } catch (InterruptedException | IOException e) {
+                    logger.error("error in dequeing to send client", e);
+                }
+            }
+        }).start();
+    }
     public void processServerMessage(ToClientMessage message) {
         try {
-            remote.sendString(message.toString());
+            queue.put(message);
         } catch (Exception e) {
-            logger.error("error in sending back message", e);
         }
     }
+
 }
