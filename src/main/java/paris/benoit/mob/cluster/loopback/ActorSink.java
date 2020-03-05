@@ -25,7 +25,7 @@ class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     
     public ActorSink(MobTableConfiguration configuration, DataType jsonDataType, ClusterReceiver router) {
         super();
-        this.jrs = JsonRowSerializationSchema.builder().withTypeInfo((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
+        this.jrs = new JsonRowSerializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         this.configuration = configuration;
         this.router = router;
     }

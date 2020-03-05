@@ -6,3 +6,4 @@
 target/*
 *.iml
 debug.log
+app.log

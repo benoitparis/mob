@@ -8,6 +8,14 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
 		</encoder>
 	</appender>
+
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>app.log</file>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+        </encoder>
+    </appender>
     <appender name="DEBUG_FILE" class="ch.qos.logback.core.FileAppender">
         <file>debug.log</file>
         <append>true</append>
@@ -30,6 +38,8 @@
 	
 	<root level="DEBUG">
         <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
 	</root>
+
 
 </configuration>
