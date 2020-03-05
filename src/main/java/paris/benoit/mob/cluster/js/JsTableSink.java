@@ -9,8 +9,8 @@ import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 
 class JsTableSink extends TypedRetractStreamTableSink<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSink.class);

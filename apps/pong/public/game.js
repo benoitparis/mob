@@ -48,17 +48,20 @@ function gameTick(inString) {
   } else {
     deltatime = 0;
   }
-  lastInsertTime = insertTime;
   
   state.game.leftY = parseFloat(inObj.leftY);
   state.game.rightY = parseFloat(inObj.rightY);
   
   if (0 > deltatime) {
     console.log('Didnt receive updates in order with delta:' + deltatime);
+    console.log('insertTime    :' + insertTime);
+    console.log('lastInsertTime:' + lastInsertTime);
+    console.log('inString:' + JSON.stringify(inObj));
   }
   if (0 !== deltatime) {
     updateGame(deltatime);
   }
+  lastInsertTime = insertTime;
   
   var out = {
     "position_timestamp" : insertTime.toString(),

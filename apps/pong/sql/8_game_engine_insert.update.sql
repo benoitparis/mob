@@ -8,3 +8,4 @@ SELECT
 FROM services.tick AS ts
    , LATERAL TABLE (global_position_temporal(ts.proctime_append_stream)) AS gpt
 WHERE ts.constant_dummy_source = gpt.dummy_key
+ORDER BY ts.proctime_append_stream -- ça marche pas des masses
