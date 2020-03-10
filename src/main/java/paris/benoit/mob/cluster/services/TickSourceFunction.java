@@ -9,6 +9,8 @@ import java.util.List;
 
 class TickSourceFunction extends RichParallelSourceFunction<Row> implements ListCheckpointed<Long>  {
 
+    public static final int MIN_SLEEP_DURATION = 5;
+
     private volatile boolean isRunning = true;
 
     private final long interval;
@@ -36,8 +38,8 @@ class TickSourceFunction extends RichParallelSourceFunction<Row> implements List
             Row row = new Row(3);
             row.setField(0, (offset + counter));
             row.setField(1, "1");
-
-            Thread.sleep(Math.max(0, (initialTs + interval * counter) - System.currentTimeMillis()));
+            long targetSleepTime = (initialTs + interval * counter) - System.currentTimeMillis();
+            Thread.sleep(Math.max(MIN_SLEEP_DURATION, targetSleepTime));
 
             synchronized (lock) {
                 sc.collect(row);

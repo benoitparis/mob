@@ -41,7 +41,7 @@ function gameTick(inString) {
   var inObj = JSON.parse(inString);
   //console.log(inString);
   
-  var insertTime = Date.parse(inObj['insert_time']);
+  var insertTime = Date.parse(inObj['insert_time'].padEnd(23, '0'));
   var deltatime;
   if (0 !== lastInsertTime) {
     deltatime = insertTime - lastInsertTime;
@@ -53,10 +53,10 @@ function gameTick(inString) {
   state.game.rightY = parseFloat(inObj.rightY);
   
   if (0 > deltatime) {
+    console.log('inString:' + JSON.stringify(inObj));
     console.log('Didnt receive updates in order with delta:' + deltatime);
     console.log('insertTime    :' + insertTime);
     console.log('lastInsertTime:' + lastInsertTime);
-    console.log('inString:' + JSON.stringify(inObj));
   }
   if (0 !== deltatime) {
     updateGame(deltatime);

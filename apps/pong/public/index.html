@@ -120,7 +120,6 @@
     }
   };
   
-  var appName = window.location.pathname.replace('/app/', '').replace('/', '');
   var ws;
   
   function sendToServer(table, msg) {
@@ -128,7 +127,7 @@
     if (ws && ws.readyState === WebSocket.OPEN) {
       var serverMsg = {
         intent : 'WRITE',
-        table : appName + '.' + table,
+        table : 'pong.' + table, // TODO+ trouver un moyen d'avoir le nom de l'app dans la lib
         payload : msg
       };
       ws.send(JSON.stringify(serverMsg));

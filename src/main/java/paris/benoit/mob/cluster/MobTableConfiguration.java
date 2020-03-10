@@ -31,7 +31,7 @@ public class MobTableConfiguration implements Serializable {
                 "dbName='" + dbName + '\'' +
                 ", name='" + name + '\'' +
                 ", confType=" + confType +
-                ", content='" + content + '\'' +
+                ", content='\n" + content + '\'' +
                 '}';
     }
 

@@ -1,3 +1,5 @@
+# TODO: https://medium.com/@nieldw/caching-maven-dependencies-in-a-docker-build-dca6ca7ad612
+
 FROM openjdk:8-jdk-alpine
 ADD . /home/
 WORKDIR /home/
