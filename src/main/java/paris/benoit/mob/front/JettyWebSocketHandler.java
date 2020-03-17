@@ -32,27 +32,28 @@ public class JettyWebSocketHandler {
 
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
-        System.out.println("Close: statusCode=" + statusCode + ", reason=" + reason);
+        logger.debug("Close: statusCode=" + statusCode + ", reason=" + reason);
         JettyClusterReceiver.unRegister(this);
         isRunning = false;
     }
 
     @OnWebSocketError
     public void onError(Throwable t) {
-        System.out.println("Error: " + t.getMessage());
+        logger.error("Error: " + t.getMessage());
     }
 
     @OnWebSocketConnect
     public void onConnect(Session session) {
+        logger.debug("onConnect: session=" + session);
         remote = session.getRemote();
         name = "fa-" + UUID.randomUUID().toString();
         clusterSendersFuture = ClusterRegistry.getClusterSender(name);
         try {
             clusterSenders = clusterSendersFuture.get();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            logger.debug("InterruptedException", e);
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            logger.debug("ExecutionException", e);
         }
         JettyClusterReceiver.register(this);
 
@@ -91,7 +92,7 @@ public class JettyWebSocketHandler {
 
     ArrayBlockingQueue<ToClientMessage> queue = new ArrayBlockingQueue<>(100);
     {
-        // FIXME can't wait for actors
+        // FIXME can't wait for virtual threads
         new Thread(() -> {
             while(isRunning) {
                 try {

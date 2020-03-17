@@ -1,11 +1,14 @@
 package paris.benoit.mob.front;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.server.ClusterReceiver;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class JettyClusterReceiver implements ClusterReceiver {
+    private static final Logger logger = LoggerFactory.getLogger(JettyClusterReceiver.class);
 
     private static ConcurrentHashMap<String, JettyWebSocketHandler> clients = new ConcurrentHashMap<>();
 
@@ -18,7 +21,14 @@ public class JettyClusterReceiver implements ClusterReceiver {
 
     @Override
     public void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
-        clients.get(identity).processServerMessage(message);
+        JettyWebSocketHandler client = clients.get(identity);
+
+        if (null != client) {
+            client.processServerMessage(message);
+        } else {
+            logger.warn("Unable to find client: " + identity);
+        }
+
 
     }
 
