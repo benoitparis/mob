@@ -2,7 +2,7 @@ FROM openjdk:8-jdk-alpine
 ADD mvnw pom.xml ./
 ADD .mvn .mvn
 RUN chmod +x mvnw
-RUN ./mvnw dependency:go-offline -Dmaven.artifact.threads=30
+RUN ./mvnw dependency:go-offline -Dmaven.artifact.threads=12
 
 ADD . .
 RUN chmod +x mvnw
