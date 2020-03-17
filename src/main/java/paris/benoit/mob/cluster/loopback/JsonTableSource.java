@@ -2,6 +2,7 @@ package paris.benoit.mob.cluster.loopback;
 
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.types.DataType;
@@ -15,6 +16,9 @@ import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
 public class JsonTableSource extends TypedStreamTableSource<Row> {
     private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
+
+    public static final String COLOCATION_KEY = "CLIENT_LOOPBACK";
+
     private static final String[] FIELD_NAMES = new String[] {
             "loopback_index",
             "actor_identity",
@@ -46,9 +50,12 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
 
     @Override
     public DataStream<Row> getDataStream(StreamExecutionEnvironment sEnv) {
-        return sEnv
-            .addSource(sourceFunction, configuration.name, getReturnType())
-            .name(explainSource());
+        SingleOutputStreamOperator<Row> dataStream = sEnv
+                .addSource(sourceFunction, configuration.name, getReturnType())
+                .setParallelism(sEnv.getMaxParallelism())
+                .name(explainSource());
+        dataStream.getTransformation().setCoLocationGroupKey(COLOCATION_KEY);
+        return dataStream;
     }
 
 }

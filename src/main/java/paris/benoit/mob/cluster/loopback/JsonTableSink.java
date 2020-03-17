@@ -11,8 +11,8 @@ import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 import paris.benoit.mob.server.ClusterReceiver;
 
 public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
@@ -39,13 +39,13 @@ public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
 
     @Override
     public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
-        return ds
-            .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
-            .addSink(sinkFunction)
-            .setParallelism(ds.getExecutionConfig().getMaxParallelism())
-//                .getTransformation().setCoLocationGroupKey(configuration.name) // needed ?
-            .name(name);
+        DataStreamSink<Tuple2<Boolean, Row>> dataStream = ds
+                .partitionCustom(new IdPartitioner(), it -> (Integer) it.f1.getField(0)) // loopback_index by convention
+                .addSink(sinkFunction)
+                .setParallelism(ds.getExecutionConfig().getMaxParallelism())
+                .name(name);
+        dataStream.getTransformation().setCoLocationGroupKey(JsonTableSource.COLOCATION_KEY);
+        return dataStream;
     }
-
 
 }
