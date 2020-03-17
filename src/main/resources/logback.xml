@@ -27,8 +27,7 @@
         </encoder>
     </appender>
 
-	<logger name="org.apache.flink" level="INFO" additivity="false" />
-	<logger name="org.apache.flink.runtime.dispatcher.DispatcherRestEndpoint" level="DEBUG" additivity="false" />
+	<logger name="org.apache.flink.table.runtime.operators.window.internal.MergingWindowSet" level="DEBUG" additivity="false" />
 	<logger name="io.undertow.websockets.core.request" level="WARN" />
 	<logger name="org.eclipse.jetty" level="INFO" additivity="false" />
 
