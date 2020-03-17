@@ -2,7 +2,6 @@ FROM openjdk:8-jdk-alpine
 ADD mvnw pom.xml ./
 ADD .mvn .mvn
 RUN chmod +x mvnw
-RUN ./mvnw dependency:resolve-plugins
 RUN ./mvnw dependency:go-offline
 
 ADD . .
