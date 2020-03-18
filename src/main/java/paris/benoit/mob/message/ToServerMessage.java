@@ -18,20 +18,23 @@ public class ToServerMessage {
     public enum INTENT {WRITE, QUERY, SUBSCRIBE}
 
     public final INTENT intent;
+    public String from;
     public final String table;
     public final JSONObject payload;
     
-    public ToServerMessage(String fromClient) {
+    public ToServerMessage(String from, String fromClient) {
+        this.from = from;
         JSONObject json = new JSONObject(fromClient);
-        intent = INTENT.valueOf(json.getString("intent"));
-        table = json.getString("table");
-        payload = json.getJSONObject("payload");
+        this.intent = INTENT.valueOf(json.getString("intent"));
+        this.table = json.getString("table");
+        this.payload = json.getJSONObject("payload");
     }
 
     @Override
     public String toString() {
         return "ToServerMessage{" +
                 "intent=" + intent +
+                ", from='" + from + '\'' +
                 ", table='" + table + '\'' +
                 ", payload=" + payload +
                 '}';

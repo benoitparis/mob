@@ -1,6 +1,5 @@
 package paris.benoit.mob.cluster.loopback;
 
-import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.formats.json.JsonRowDeserializationSchema;
@@ -11,6 +10,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.message.ToServerMessage;
 
 @SuppressWarnings("serial")
 class ActorSource extends RichParallelSourceFunction<Row> {
@@ -19,10 +19,10 @@ class ActorSource extends RichParallelSourceFunction<Row> {
     
     private volatile boolean isRunning = true;
 
-    private ThreadReceivePort<Row> receivePort = null;
     private Integer loopbackIndex = -1;
     private final JsonRowDeserializationSchema jrds;
     private final MobTableConfiguration configuration;
+    private ClusterSender sender;
     
     public ActorSource(MobTableConfiguration configuration, DataType jsonDataType) {
         super();
@@ -33,22 +33,26 @@ class ActorSource extends RichParallelSourceFunction<Row> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        ClusterSender sender = new ClusterSender(jrds);
+        sender = new ClusterSender();
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
         ClusterRegistry.registerClusterSender(configuration.fullyQualifiedName(), sender, loopbackIndex);
-        receivePort = sender.getReceiveport();
         logger.info("Opening source #" + loopbackIndex + " (" + configuration.fullyQualifiedName() + ")");
     }
-    
+
+    @Override
     public void run(SourceContext<Row> sc) throws Exception {
         
-        while (isRunning && !receivePort.isClosed()) {
-            Row row = receivePort.receive();
-            // By convention
-            row.setField(0, loopbackIndex);
-            row.setField(3, "1"); // temporary, to be removed when Blink can to Tables and not TableSources
-            row.setField(4, System.currentTimeMillis());
-            sc.collect(row);
+        while (isRunning && !sender.isClosed()) {
+
+            ToServerMessage msg = sender.receive();
+
+            Row root = new Row(JsonTableSource.FIELD_COUNT);
+            root.setField(0, loopbackIndex);
+            root.setField(1, msg.from);
+            root.setField(2, jrds.deserialize(msg.payload.toString().getBytes()));
+            root.setField(3, "1"); // temporary, to be removed when Blink can to Tables and not TableSources
+            root.setField(4, System.currentTimeMillis());
+            sc.collect(root);
 
         }
     }

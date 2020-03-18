@@ -62,7 +62,7 @@ public class JettyWebSocketHandler {
     @OnWebSocketMessage
     public void onMessage(String msg) {
 
-        ToServerMessage cMsg = new ToServerMessage(msg);
+        ToServerMessage cMsg = new ToServerMessage(name, msg);
 
         // TODO !on seri/déséri deux fois
         //   utiliser avro, et s'envoyer des subsets
@@ -76,7 +76,7 @@ public class JettyWebSocketHandler {
                     logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                 } else {
                     try {
-                        specificSender.sendMessage(name, cMsg.payload.toString());
+                        specificSender.sendMessage(cMsg);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

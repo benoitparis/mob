@@ -28,8 +28,6 @@ public class JettyClusterReceiver implements ClusterReceiver {
         } else {
             logger.warn("Unable to find client: " + identity);
         }
-
-
     }
 
 }

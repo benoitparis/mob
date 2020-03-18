@@ -57,7 +57,7 @@ public class UndertowActor extends BasicActor<Object, Void> {
             }
             else if (message instanceof WebDataMessage) {
                 WebDataMessage msg = (WebDataMessage) message;
-                ToServerMessage cMsg = new ToServerMessage(msg.getStringBody());
+                ToServerMessage cMsg = new ToServerMessage(getName(), msg.getStringBody());
                 
                 // TODO !on seri/déséri deux fois
                 //   utiliser avro, et s'envoyer des subsets
@@ -71,14 +71,14 @@ public class UndertowActor extends BasicActor<Object, Void> {
                             logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
                         } else {
                             try {
-                                specificSender.sendMessage(getName(), cMsg.payload.toString());
+                                specificSender.sendMessage(cMsg);
                             } catch (Exception e) {
                                 logger.error("error in sending back message", e);
                             }
                         }
                     }
                 break;
-                case QUERY: logger.debug(cMsg.payload.toString()); 
+                case QUERY: logger.debug(cMsg.payload.toString());
                     break;
                 case SUBSCRIBE: logger.debug(cMsg.payload.toString());
                     break;
