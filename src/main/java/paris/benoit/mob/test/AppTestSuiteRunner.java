@@ -10,6 +10,9 @@ import paris.benoit.mob.server.ClusterRunner;
 import java.util.ArrayList;
 import java.util.List;
 
+import static paris.benoit.mob.cluster.utils.Colors.green;
+import static paris.benoit.mob.cluster.utils.Colors.red;
+
 public class AppTestSuiteRunner implements ClusterRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
@@ -23,13 +26,13 @@ public class AppTestSuiteRunner implements ClusterRunner {
 
             Boolean result = front.collectResult();
             if (result) {
-                logger.info("All tests in the test suite passed");
+                logger.info(green("All tests in the test suite passed"));
                 // TODO PoisonPillException in soruce function to properly terminate? or poison message?
                 // TODO rassembler les résultats et pas exit
                 System.exit(0);
             } else {
                 // FIXME ça s'affiche pas
-                logger.info("A test in the test suite failed");
+                logger.info(red("A test in the test suite failed"));
                 System.exit(-99);
             }
         }

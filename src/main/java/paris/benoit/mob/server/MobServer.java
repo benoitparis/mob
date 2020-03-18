@@ -7,8 +7,10 @@ import paris.benoit.mob.test.AppTestSuiteRunner;
 
 import java.util.Arrays;
 
+import static paris.benoit.mob.cluster.utils.Colors.green;
+
 class MobServer {
-    // Do not move further down
+    // Do not move further down, quasar instrumentation can fail depending on class initialization sequence
     static {
         if(getVersion() != 8) {
             System.out.println("Error: A Java 8 runtime must be used");
@@ -19,21 +21,17 @@ class MobServer {
 
     private static final Logger logger = LoggerFactory.getLogger(MobServer.class);
 
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_GREEN = "\u001B[32m";
-
     public static void main(String[] args) throws Exception {
 
-        logger.info("\n" + ANSI_GREEN +
-            "::::    ::::   ::::::::  :::::::::  :::        ::::::::::: :::::::::  \n" +
-            "+:+:+: :+:+:+ :+:    :+: :+:    :+: :+:            :+:     :+:    :+: \n" +
-            "+:+ +:+:+ +:+ +:+    +:+ +:+    +:+ +:+            +:+     +:+    +:+ \n" +
-            "+#+  +:+  +#+ +#+    +:+ +#++:++#+  +#+            +#+     +#++:++#+  \n" +
-            "+#+       +#+ +#+    +#+ +#+    +#+ +#+            +#+     +#+    +#+ \n" +
-            "#+#       #+# #+#    #+# #+#    #+# #+#            #+#     #+#    #+# \n" +
-            "###       ###  ########  #########  ########## ########### #########  "   +
-            ANSI_RESET
-        );
+        logger.info(green(
+            "\n" + " ::::    ::::   ::::::::  :::::::::  :::        ::::::::::: :::::::::  " +
+            "\n" + " +:+:+: :+:+:+ :+:    :+: :+:    :+: :+:            :+:     :+:    :+: " +
+            "\n" + " +:+ +:+:+ +:+ +:+    +:+ +:+    +:+ +:+            +:+     +:+    +:+ " +
+            "\n" + " +#+  +:+  +#+ +#+    +:+ +#++:++#+  +#+            +#+     +#++:++#+  " +
+            "\n" + " +#+       +#+ +#+    +#+ +#+    +#+ +#+            +#+     +#+    +#+ " +
+            "\n" + " #+#       #+# #+#    #+# #+#    #+# #+#            #+#     #+#    #+# " +
+            "\n" + " ###       ###  ########  #########  ########## ########### #########  " +
+        ""));
 
         final CommandLineParser parser = new DefaultParser();
         CommandLine cmdLine = null;
@@ -54,7 +52,7 @@ class MobServer {
             runner = new ServerRunner();
         }
 
-        logger.info(ANSI_GREEN + "Launching " + names + ANSI_RESET);
+        logger.info(green("Launching " + names));
         runner.run(Arrays.asList(names.split(",")));
     }
 
