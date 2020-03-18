@@ -15,19 +15,19 @@ import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.server.ClusterReceiver;
 
 @SuppressWarnings("serial")
-class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
-    private static final Logger logger = LoggerFactory.getLogger(ActorSink.class);
+class LoopbackSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
+    private static final Logger logger = LoggerFactory.getLogger(LoopbackSinkFunction.class);
     
     private Integer loopbackIndex = -1;
     private final JsonRowSerializationSchema jrs;
     private final MobTableConfiguration configuration;
-    private final ClusterReceiver router;
+    private final ClusterReceiver receiver;
     
-    public ActorSink(MobTableConfiguration configuration, DataType jsonDataType, ClusterReceiver router) {
+    public LoopbackSinkFunction(MobTableConfiguration configuration, DataType jsonDataType, ClusterReceiver receiver) {
         super();
         this.jrs = new JsonRowSerializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         this.configuration = configuration;
-        this.router = router;
+        this.receiver = receiver;
     }
 
     @Override
@@ -41,12 +41,9 @@ class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
     @Override
     public void invoke(Tuple2<Boolean, Row> value, Context context) {
 
-        //noinspection StatementWithEmptyBody
-        if (value.f0) { // Add
+        if (value.f0) {
             
             Row row = value.f1;
-            
-            // By convention
             Integer loopbackIndex = (Integer) row.getField(0);
             String identity = (String) row.getField(1);
             Row payload = (Row) row.getField(2);
@@ -54,21 +51,13 @@ class ActorSink extends RichSinkFunction<Tuple2<Boolean, Row>> {
             if (!loopbackIndex.equals(this.loopbackIndex)) {
                 logger.error("Assumption broken on lookbackIndex: " + loopbackIndex + " vs " + this.loopbackIndex);
             }
-            
-            String payloadString = new String(jrs.serialize(payload));
-            
-            ToClientMessage message = new ToClientMessage(configuration.name, payloadString);
 
-            router.receiveMessage(loopbackIndex, identity, message);
-
+            ToClientMessage message = new ToClientMessage(configuration.name, new String(jrs.serialize(payload)));
+            receiver.receiveMessage(loopbackIndex, identity, message);
             //logger.debug("new msg in sink: " + row);
             
-        } else { 
-            // Retract. Do nothing
         }
-
+        // else {} Retract. Do nothing
     }
-
-
 
 }

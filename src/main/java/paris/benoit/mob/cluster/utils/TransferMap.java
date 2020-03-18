@@ -5,7 +5,7 @@ import java.util.HashMap;
 // https://stackoverflow.com/questions/6389122/does-a-hashmap-with-a-getandwait-method-exist-e-g-a-blockingconcurrenthashma
 public class TransferMap<K, V> {
 
-    private HashMap<K, V> backingMap = new HashMap<K, V>();
+    private HashMap<K, V> backingMap = new HashMap<>();
 
     private final Object lock = new Object();
 

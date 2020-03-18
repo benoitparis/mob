@@ -15,8 +15,8 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
 import paris.benoit.mob.server.ClusterReceiver;
 
-public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
-    private static final Logger logger = LoggerFactory.getLogger(JsonTableSink.class);
+public class LoopbackTableSink extends TypedRetractStreamTableSink<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(LoopbackTableSink.class);
 
     private static final String[] FIELD_NAMES = new String[] {
             "loopback_index",
@@ -24,7 +24,7 @@ public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
             "payload"
     };
 
-    public JsonTableSink(MobTableConfiguration configuration, ClusterReceiver router) {
+    public LoopbackTableSink(MobTableConfiguration configuration, ClusterReceiver router) {
         fieldNames = FIELD_NAMES;
         DataType jsonDataType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
         fieldTypes = new DataType[] {
@@ -33,7 +33,7 @@ public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
             jsonDataType
         };
         logger.info("Created Sink with json schema: " + jsonDataType.toString());
-        sinkFunction = new ActorSink(configuration, jsonDataType, router);
+        sinkFunction = new LoopbackSinkFunction(configuration, jsonDataType, router);
         name = configuration.fullyQualifiedName();
     }
 
@@ -44,7 +44,7 @@ public class JsonTableSink extends TypedRetractStreamTableSink<Row> {
                 .addSink(sinkFunction)
                 .setParallelism(ds.getExecutionConfig().getMaxParallelism())
                 .name(name);
-        dataStream.getTransformation().setCoLocationGroupKey(JsonTableSource.COLOCATION_KEY);
+        dataStream.getTransformation().setCoLocationGroupKey(LoopbackTableSource.COLOCATION_KEY);
         return dataStream;
     }
 

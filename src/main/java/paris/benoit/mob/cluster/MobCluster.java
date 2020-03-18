@@ -15,8 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.js.JsTableEngine;
 import paris.benoit.mob.cluster.loopback.ClusterRegistry;
-import paris.benoit.mob.cluster.loopback.JsonTableSink;
-import paris.benoit.mob.cluster.loopback.JsonTableSource;
+import paris.benoit.mob.cluster.loopback.LoopbackTableSink;
+import paris.benoit.mob.cluster.loopback.LoopbackTableSource;
 import paris.benoit.mob.cluster.services.DebugTableSink;
 import paris.benoit.mob.cluster.services.DirectoryTableSource;
 import paris.benoit.mob.cluster.services.TickTableSource;
@@ -156,13 +156,13 @@ public class MobCluster {
     private void registerInputOutputTables(MobAppConfiguration app) throws TableAlreadyExistException, DatabaseNotExistException {
 
         for (MobTableConfiguration inSchema: app.inSchemas) {
-            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(app.name, tEnv, catalog, new JsonTableSource(inSchema), inSchema.name);
+            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(app.name, tEnv, catalog, new LoopbackTableSource(inSchema), inSchema.name);
         }
 
         for (MobTableConfiguration outSchema: app.outSchemas) {
             catalog.createTable(
                     new ObjectPath(app.name, outSchema.name),
-                    ConnectorCatalogTable.sink(new JsonTableSink(outSchema, configuration.router), false),
+                    ConnectorCatalogTable.sink(new LoopbackTableSink(outSchema, configuration.router), false),
                     false
             );
             logger.debug("Registered Table Sink: " + outSchema);

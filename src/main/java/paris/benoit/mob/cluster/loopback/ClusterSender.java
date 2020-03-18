@@ -6,31 +6,31 @@ import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
 import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import paris.benoit.mob.message.ToServerMessage;
 
-// TODO jrds largment partagé, et la construction de row à deux endroits
 public class ClusterSender {
 
     private final Channel<ToServerMessage> channel;
-    private final ThreadReceivePort<ToServerMessage> receiveport;
+    private final ThreadReceivePort<ToServerMessage> receivePort;
     
     public ClusterSender() {
         super();
         this.channel = Channels.newChannel(100_000, OverflowPolicy.BACKOFF, false, false);
-        this.receiveport = new ThreadReceivePort<>(channel);
+        this.receivePort = new ThreadReceivePort<>(channel);
     }
     
     public void sendMessage(ToServerMessage message) throws Exception {
         channel.send(message);
     }
     
-    public ThreadReceivePort<ToServerMessage> getReceiveport() {
-        return receiveport;
+    public ThreadReceivePort<ToServerMessage> getReceivePort() {
+        return receivePort;
     }
 
     public boolean isClosed() {
-        return receiveport.isClosed();
+        return receivePort.isClosed();
     }
 
     public ToServerMessage receive() throws Exception {
-        return receiveport.receive();
+        return receivePort.receive();
     }
+
 }

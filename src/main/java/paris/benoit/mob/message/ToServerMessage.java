@@ -3,8 +3,7 @@ package paris.benoit.mob.message;
 import org.json.JSONObject;
 
 /**
- * Message provenant du client.
- * @author ben
+ * Message from a client, destined to a Table.
  *
  */
 public class ToServerMessage {

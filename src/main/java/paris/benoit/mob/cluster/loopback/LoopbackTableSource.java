@@ -14,8 +14,8 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.TypedStreamTableSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
-public class JsonTableSource extends TypedStreamTableSource<Row> {
-    private static final Logger logger = LoggerFactory.getLogger(JsonTableSource.class);
+public class LoopbackTableSource extends TypedStreamTableSource<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(LoopbackTableSource.class);
 
     public static final String COLOCATION_KEY = "CLIENT_LOOPBACK";
 
@@ -30,7 +30,7 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
 
     private MobTableConfiguration configuration;
 
-    public JsonTableSource(MobTableConfiguration configuration) {
+    public LoopbackTableSource(MobTableConfiguration configuration) {
         fieldNames = FIELD_NAMES;
         DataType tempType = TypeConversions.fromLegacyInfoToDataType(JsonRowSchemaConverter.convert(configuration.content));
         DataType jsonDataType = LegacyDataTypeTransitionUtils.convertDataTypeRemoveLegacy(tempType);
@@ -41,7 +41,7 @@ public class JsonTableSource extends TypedStreamTableSource<Row> {
             DataTypes.STRING(),
             DataTypes.BIGINT()
         };
-        sourceFunction = new ActorSource(configuration, jsonDataType);
+        sourceFunction = new LoopbackSourceFunction(configuration, jsonDataType);
         name = configuration.fullyQualifiedName();
         this.configuration = configuration;
         logger.info("Created Source with json schema: " + jsonDataType.toString());

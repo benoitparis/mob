@@ -13,18 +13,17 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.message.ToServerMessage;
 
 @SuppressWarnings("serial")
-class ActorSource extends RichParallelSourceFunction<Row> {
-    
-    private static final Logger logger = LoggerFactory.getLogger(ActorSource.class);
-    
-    private volatile boolean isRunning = true;
+class LoopbackSourceFunction extends RichParallelSourceFunction<Row> {
+    private static final Logger logger = LoggerFactory.getLogger(LoopbackSourceFunction.class);
 
     private Integer loopbackIndex = -1;
     private final JsonRowDeserializationSchema jrds;
     private final MobTableConfiguration configuration;
     private ClusterSender sender;
+
+    private volatile boolean isRunning = true;
     
-    public ActorSource(MobTableConfiguration configuration, DataType jsonDataType) {
+    public LoopbackSourceFunction(MobTableConfiguration configuration, DataType jsonDataType) {
         super();
         this.jrds = new JsonRowDeserializationSchema.Builder((TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(jsonDataType)).build();
         this.configuration = configuration;
@@ -46,7 +45,7 @@ class ActorSource extends RichParallelSourceFunction<Row> {
 
             ToServerMessage msg = sender.receive();
 
-            Row root = new Row(JsonTableSource.FIELD_COUNT);
+            Row root = new Row(LoopbackTableSource.FIELD_COUNT);
             root.setField(0, loopbackIndex);
             root.setField(1, msg.from);
             root.setField(2, jrds.deserialize(msg.payload.toString().getBytes()));
