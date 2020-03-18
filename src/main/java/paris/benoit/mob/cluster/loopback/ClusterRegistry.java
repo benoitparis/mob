@@ -74,7 +74,7 @@ public class ClusterRegistry {
     }
 
 
-    public static CompletableFuture<Map<String, ClusterSender>> getClusterSender(String random) {
+    public static CompletableFuture<Map<String, ClusterSender>> getClusterSenders(String random) {
         return CompletableFuture.supplyAsync(() -> {
                 return transferMap.getAndWait(Math.abs(random.hashCode()) % parallelism);
             }

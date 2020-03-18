@@ -26,7 +26,7 @@ public class TransferMap<K, V> {
         return value;
     }
 
-    public V put(K key, V value){
+    public V put(K key, V value) {
         synchronized(lock) {
             backingMap.put(key, value);
             lock.notifyAll();

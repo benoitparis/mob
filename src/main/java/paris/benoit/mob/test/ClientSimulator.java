@@ -60,7 +60,7 @@ class ClientSimulator {
 
         new Thread(() -> {
             try {
-                clusterSenders = ClusterRegistry.getClusterSender(name).get();
+                clusterSenders = ClusterRegistry.getClusterSenders(name).get();
                 isReady = true;
             } catch (InterruptedException | ExecutionException e) {
                 logger.debug("Problem getting a ClusterSender", e);
@@ -99,24 +99,15 @@ class ClientSimulator {
             // TODO DRY avec UndertowActor
             ToServerMessage cMsg = new ToServerMessage(name, wsMessage);
             logger.info("Got message: " + cMsg);
-            switch (cMsg.intent) {
-                case WRITE: {
-                        ClusterSender specificSender = clusterSenders.get(cMsg.table);
-                        if (null == specificSender) {
-                            logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
-                        } else {
-                            try {
-                                specificSender.sendMessage(cMsg);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                    break;
-                case QUERY: logger.debug(cMsg.payload.toString());
-                    break;
-                case SUBSCRIBE: logger.debug(cMsg.payload.toString());
-                    break;
+            ClusterSender specificSender = clusterSenders.get(cMsg.table);
+            if (null == specificSender) {
+                logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
+            } else {
+                try {
+                    specificSender.sendMessage(cMsg);
+                } catch (Exception e) {
+                    logger.error("error in sending message", e);
+                }
             }
             return true;
         }

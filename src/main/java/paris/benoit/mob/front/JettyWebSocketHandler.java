@@ -47,7 +47,7 @@ public class JettyWebSocketHandler {
         logger.debug("onConnect: session=" + session);
         remote = session.getRemote();
         name = "fa-" + UUID.randomUUID().toString();
-        clusterSendersFuture = ClusterRegistry.getClusterSender(name);
+        clusterSendersFuture = ClusterRegistry.getClusterSenders(name);
         try {
             clusterSenders = clusterSendersFuture.get();
         } catch (InterruptedException e) {
@@ -68,25 +68,15 @@ public class JettyWebSocketHandler {
         //   utiliser avro, et s'envoyer des subsets
 
         // TODO DRY avec ClientSimulator
-        switch (cMsg.intent) {
-            case WRITE:
-            {
-                ClusterSender specificSender = clusterSenders.get(cMsg.table);
-                if (null == specificSender) {
-                    logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
-                } else {
-                    try {
-                        specificSender.sendMessage(cMsg);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
+        ClusterSender specificSender = clusterSenders.get(cMsg.table);
+        if (null == specificSender) {
+            logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
+        } else {
+            try {
+                specificSender.sendMessage(cMsg);
+            } catch (Exception e) {
+                logger.error("error in sending message", e);
             }
-            break;
-            case QUERY: logger.debug(cMsg.payload.toString());
-                break;
-            case SUBSCRIBE: logger.debug(cMsg.payload.toString());
-                break;
         }
     }
 

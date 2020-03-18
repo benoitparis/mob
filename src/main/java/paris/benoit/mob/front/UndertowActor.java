@@ -31,7 +31,7 @@ public class UndertowActor extends BasicActor<Object, Void> {
     
     public UndertowActor() throws InterruptedException {
         super("fa-" + UUID.randomUUID().toString());
-        clusterSendersFuture = ClusterRegistry.getClusterSender(getName());
+        clusterSendersFuture = ClusterRegistry.getClusterSenders(getName());
         logger.debug("new UndertowActor: " + getName());
     }
 
@@ -63,26 +63,17 @@ public class UndertowActor extends BasicActor<Object, Void> {
                 //   utiliser avro, et s'envoyer des subsets
 
                 // TODO DRY avec ClientSimulator
-                switch (cMsg.intent) {
-                case WRITE: 
-                    {
-                        ClusterSender specificSender = clusterSenders.get(cMsg.table);
-                        if (null == specificSender) {
-                            logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
-                        } else {
-                            try {
-                                specificSender.sendMessage(cMsg);
-                            } catch (Exception e) {
-                                logger.error("error in sending back message", e);
-                            }
-                        }
+                ClusterSender specificSender = clusterSenders.get(cMsg.table);
+                if (null == specificSender) {
+                    logger.warn("A ClusterSender (table destination) was not found: " + cMsg.table);
+                } else {
+                    try {
+                        specificSender.sendMessage(cMsg);
+                    } catch (Exception e) {
+                        logger.error("error in sending message", e);
                     }
-                break;
-                case QUERY: logger.debug(cMsg.payload.toString());
-                    break;
-                case SUBSCRIBE: logger.debug(cMsg.payload.toString());
-                    break;
                 }
+
             }
             else if (message instanceof ToClientMessage) {
                 ToClientMessage msg = (ToClientMessage) message;
