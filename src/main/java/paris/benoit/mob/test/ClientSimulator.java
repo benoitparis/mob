@@ -114,11 +114,11 @@ class ClientSimulator {
 
     }
 
-    public void offerMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
-        if (name.equals(identity)) {
-            logger.info("Message offer matched: " + loopbackIndex + "," + identity + ", message: " + message.toString());
+    public void offerMessage(ToClientMessage message) {
+        if (name.equals(message.to)) {
+            logger.info("Message offer matched: " + message.toString());
             lastClusterInteraction = System.currentTimeMillis();
-            fromServer.execute(message.toString());
+            fromServer.execute(message.toJson());
         }
     }
 

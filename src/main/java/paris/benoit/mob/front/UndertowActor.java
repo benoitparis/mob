@@ -78,7 +78,7 @@ public class UndertowActor extends BasicActor<Object, Void> {
             else if (message instanceof ToClientMessage) {
                 ToClientMessage msg = (ToClientMessage) message;
                 if (null != clientWSPort) {
-                    clientWSPort.send(new WebDataMessage(self(), msg.toString()));
+                    clientWSPort.send(new WebDataMessage(self(), msg.toJson()));
                 } else {
                     logger.warn("Received a message from the cluster without having a WS Port to sendMessage it back to");
                 }

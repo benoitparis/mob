@@ -88,7 +88,7 @@ public class JettyWebSocketHandler {
                 try {
                     ToClientMessage msg = queue.take();
                     // one at a time
-                    remote.sendString(msg.toString());
+                    remote.sendString(msg.toJson());
                 } catch (InterruptedException | IOException e) {
                     logger.error("error in dequeing to send client", e);
                 }

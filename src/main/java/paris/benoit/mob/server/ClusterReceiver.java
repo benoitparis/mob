@@ -6,6 +6,6 @@ import java.io.Serializable;
 
 public interface ClusterReceiver extends Serializable {
 
-    void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message);
+    void receiveMessage(ToClientMessage message);
 
 }

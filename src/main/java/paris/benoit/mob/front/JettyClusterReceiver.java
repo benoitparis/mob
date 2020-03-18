@@ -20,13 +20,13 @@ public class JettyClusterReceiver implements ClusterReceiver {
     }
 
     @Override
-    public void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
-        JettyWebSocketHandler client = clients.get(identity);
+    public void receiveMessage(ToClientMessage message) {
+        JettyWebSocketHandler client = clients.get(message.to);
 
         if (null != client) {
             client.processServerMessage(message);
         } else {
-            logger.warn("Unable to find client: " + identity);
+            logger.warn("Unable to find client: " + message.to);
         }
     }
 

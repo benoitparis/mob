@@ -52,8 +52,8 @@ class LoopbackSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> {
                 logger.error("Assumption broken on lookbackIndex: " + loopbackIndex + " vs " + this.loopbackIndex);
             }
 
-            ToClientMessage message = new ToClientMessage(configuration.name, new String(jrs.serialize(payload)));
-            receiver.receiveMessage(loopbackIndex, identity, message);
+            ToClientMessage message = new ToClientMessage(identity, configuration.name, new String(jrs.serialize(payload)));
+            receiver.receiveMessage(message);
             //logger.debug("new msg in sink: " + row);
             
         }

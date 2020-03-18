@@ -7,7 +7,7 @@ import org.json.JSONObject;
  */
 public class ToServerMessage {
 
-    public String from;
+    public final String from;
     public final String table;
     public final JSONObject payload;
     

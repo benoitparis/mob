@@ -19,7 +19,7 @@ public class AppTestMessageRouter implements ClusterReceiver {
     }
 
     @Override
-    public void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
-        simulators.forEach(it -> it.offerMessage(loopbackIndex, identity, message));
+    public void receiveMessage(ToClientMessage message) {
+        simulators.forEach(it -> it.offerMessage(message));
     }
 }

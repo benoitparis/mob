@@ -12,10 +12,10 @@ public class UndertowActorClusterReceiver implements ClusterReceiver {
     private static final Logger logger = LoggerFactory.getLogger(UndertowActorClusterReceiver.class);
 
     @Override
-    public void receiveMessage(Integer loopbackIndex, String identity, ToClientMessage message) {
+    public void receiveMessage(ToClientMessage message) {
         ActorRef<ToClientMessage> actor = null;
         try {
-            actor = (ActorRef<ToClientMessage>) ActorRegistry.tryGetActor(identity);
+            actor = (ActorRef<ToClientMessage>) ActorRegistry.tryGetActor(message.to);
         } catch (SuspendExecution suspendExecution) {
             logger.error("Exception while getting the actor ", suspendExecution);
         }
@@ -27,7 +27,7 @@ public class UndertowActorClusterReceiver implements ClusterReceiver {
                 suspendExecution.printStackTrace();
             }
         } else {
-            logger.error("Actor named " + identity + " was not found with loopbackIndex " + loopbackIndex);
+            logger.error("Actor named " + message.to + " was not found");
         }
     }
 }
