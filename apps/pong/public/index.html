@@ -5,7 +5,10 @@
 <script src="/app/pong/game.js"></script>
 <script type="text/javascript">
 
-  var buttonHeight = 30;
+  var buttonHeight = parseFloat(getComputedStyle(document.head).fontSize) * 6;
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('button-sides').style.height = buttonHeight + 'px';  
+  });
   var scalingWidth = 1.0;
   var scalingHeight = 1.0;
   
@@ -182,15 +185,15 @@
 <body style="margin: 0;">
   <div id="game">
     <div id="sketch-holder"></div>
-    <div id="button-sides" style="display: flex;height: 30px;">
+    <div id="button-sides" style="display: flex;">
     
-      <button id="side-chosen-left"    type="button" onclick="chooseSide('left');"    style="outline: none; flex-basis: 100%; width:100%;">
+      <button id="side-chosen-left"    type="button" onclick="chooseSide('left');"    style="outline: none; flex-basis: 100%; width:100%; font-size: 1.5em;">
         <span id="side-chosen-left-text"   >Play as Left</span>
       </button>
-      <button id="side-chosen-observe" type="button" onclick="chooseSide('observe');" style="outline: none; flex-basis: 100%; width:100%;border-style:inset;">
+      <button id="side-chosen-observe" type="button" onclick="chooseSide('observe');" style="outline: none; flex-basis: 100%; width:100%; font-size: 1.5em; border-style:inset;">
         <span id="side-chosen-observe-text">Observe</span>
       </button>
-      <button id="side-chosen-right"   type="button" onclick="chooseSide('right');"   style="outline: none; flex-basis: 100%; width:100%;">
+      <button id="side-chosen-right"   type="button" onclick="chooseSide('right');"   style="outline: none; flex-basis: 100%; width:100%; font-size: 1.5em;">
         <span id="side-chosen-right-text"  >Play as Right</span>
       </button>
     </div>
