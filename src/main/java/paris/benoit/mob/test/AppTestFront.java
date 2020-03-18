@@ -60,9 +60,6 @@ public class AppTestFront implements ClusterFront {
     }
 
     @Override
-    public void waitReady() {}
-
-    @Override
     public String accessString() {
         return null;
     }

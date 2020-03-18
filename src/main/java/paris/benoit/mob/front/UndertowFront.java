@@ -14,28 +14,24 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterFront;
 import paris.benoit.mob.server.ClusterReceiver;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class UndertowFront implements ClusterFront {
     private static final Logger logger = LoggerFactory.getLogger(UndertowFront.class);
 
     private final int port;
     private final String baseUrl;
-    private String mainApp;
+    private MobClusterConfiguration configuration;
     private CompletableFuture<Void> upFuture;
 
     public UndertowFront(int port) {
@@ -52,18 +48,9 @@ public class UndertowFront implements ClusterFront {
         sessionConfig.setMaxAge(60);
         final SessionAttachmentHandler sessionAttachmentHandler = new SessionAttachmentHandler(sessionManager, sessionConfig);
 
-        Spliterator<Path> files;
-        try {
-            files = Files
-                    .newDirectoryStream(Paths.get(System.getProperty("user.dir") + "/apps/"))
-                    .spliterator();
-        } catch (IOException e) {
-            files = Spliterators.emptySpliterator();
-        }
-        Map<String, HttpHandler> fileHandlersMap = StreamSupport
-                .stream(files, false)
-                .filter(Files::isDirectory)
-                .map(it -> it.getFileName().toString())
+        Map<String, HttpHandler> fileHandlersMap = configuration.apps
+                .stream()
+                .map(it -> it.name)
                 .collect(Collectors.toMap(Function.identity(), it ->
                         Handlers.disableCache(
                                 Handlers.resource(
@@ -77,7 +64,7 @@ public class UndertowFront implements ClusterFront {
         PathHandler handlers = Handlers.path().addPrefixPath("/service", actorHandler);
 
         fileHandlersMap.forEach((key, value) -> handlers.addPrefixPath("/app/" + key, value));
-        handlers.addPrefixPath("/", fileHandlersMap.get(mainApp));
+        handlers.addPrefixPath("/", fileHandlersMap.get(configuration.apps.get(0).name));
 
         Undertow server = Undertow.builder().addHttpListener(port, "0.0.0.0").setHandler(handlers).build();
 
@@ -110,8 +97,8 @@ public class UndertowFront implements ClusterFront {
     }
 
     @Override
-    public void setMain(String app) {
-        this.mainApp = app;
+    public void configure(MobClusterConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     @Override

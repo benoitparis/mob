@@ -39,6 +39,7 @@ public class JettyWebSocketHandler {
 
     @OnWebSocketError
     public void onError(Throwable t) {
+        JettyClusterReceiver.unRegister(this);
         logger.error("Error: " + t.getMessage());
     }
 

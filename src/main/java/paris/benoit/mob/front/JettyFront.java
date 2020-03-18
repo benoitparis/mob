@@ -9,26 +9,20 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.PathResource;
+import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterFront;
 import paris.benoit.mob.server.ClusterReceiver;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class JettyFront implements ClusterFront {
     private final int port;
     private final String baseUrl;
-    private String mainApp;
+    private MobClusterConfiguration configuration;
     private CompletableFuture<Void> upFuture;
 
     public JettyFront(int port) {
@@ -41,18 +35,11 @@ public class JettyFront implements ClusterFront {
     public void start() {
         Server server = new Server(port);
 
-        Spliterator<Path> files;
-        try {
-            files = Files
-                    .newDirectoryStream(Paths.get(System.getProperty("user.dir") + "/apps/"))
-                    .spliterator();
-        } catch (IOException e) {
-            files = Spliterators.emptySpliterator();
-        }
-        List<ContextHandler> fileHandlers = StreamSupport
-            .stream(files, false)
-            .filter(Files::isDirectory)
-            .map(it -> it.getFileName().toString())
+        String mainApp = configuration.apps.get(0).name;
+
+        List<ContextHandler> fileHandlers = configuration.apps
+            .stream()
+            .map(it -> it.name)
             .flatMap(it -> {
                     PathResource pathResource = new PathResource(Paths.get(System.getProperty("user.dir") + "/apps/" + it + "/public"));
                     ResourceHandler resourceHandler = new ResourceHandler();
@@ -94,19 +81,13 @@ public class JettyFront implements ClusterFront {
     }
 
     @Override
-    public void waitReady() throws ExecutionException, InterruptedException {
-        // TODO
-//        upFuture.get();
-    }
-
-    @Override
     public String accessString() {
         return baseUrl;
     }
 
     @Override
-    public void setMain(String app) {
-        this.mainApp = app;
+    public void configure(MobClusterConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     @Override

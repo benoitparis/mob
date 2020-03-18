@@ -1,14 +1,16 @@
 package paris.benoit.mob.server;
 
+import paris.benoit.mob.cluster.MobClusterConfiguration;
+
 public interface ClusterFront {
 
     void start();
 
-    void waitReady() throws Exception;
+    default void waitReady() throws Exception {};
 
     String accessString();
 
-    default void setMain(String app) {}
+    default void configure(MobClusterConfiguration configuration) {}
 
     ClusterReceiver getClusterReceiver();
 }
