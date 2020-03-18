@@ -33,12 +33,11 @@
 		ws.onmessage = doOnMessage;
 	}
   
-	//function writeTable(dBname, table, msg) {
 	function writeTable(table, msg) {
   	if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-        // because peut être en root: /
+        // can be root
         table : 'conversation.' + table,
 				payload : msg
 			};
@@ -55,8 +54,10 @@
   function postMessage() {
     var elt = document.getElementById('text-post');
     var msg = elt.value;
-    elt.value = '';
-    writeTable('post_message', {message: msg});
+    if ('' !== msg) {
+      elt.value = '';
+      writeTable('post_message', {message: msg});
+    }
 	}
 	
   function getRandomInt(max) {
@@ -82,7 +83,6 @@
     node.value = payload.message;
     node.readOnly = true;
     node.style.height = 'calc(100% / 14 * 1)';
-    node.style.transition = 'width 2s'; // TODO vérif que ça marche
     node.style.width = '100%';
     node.style.resize = 'none';
     var chatLog = document.getElementById("chat-log")
@@ -121,7 +121,7 @@ if ('localhost' !== window.location.hostname) {
         </div>
         <div id="chat-post" style="height: calc(100% / 8 * 1);">
           <textarea id="text-post" maxlength="180" style="width:100%;height:50%;resize: none; background: aliceblue;"></textarea>
-          <button id="" type="button" onclick="postMessage();" style="width:100%;height:50%;">
+          <button id="" type="button" onclick="postMessage();" style="width:100%; height:50%; font-size: 1.5em;">
             Post
           </button>
         </div>

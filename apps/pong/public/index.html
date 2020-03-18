@@ -7,7 +7,7 @@
 
   var buttonHeight = parseFloat(getComputedStyle(document.head).fontSize) * 6;
   window.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('button-sides').style.height = buttonHeight + 'px';  
+    document.getElementById('button-sides').style.height = buttonHeight + 'px';
   });
   var scalingWidth = 1.0;
   var scalingHeight = 1.0;
@@ -77,7 +77,11 @@
     fill(0, 0, 0);
     scaleRect(state.game.ballX - ballRadius, state.game.ballY - ballRadius, ballDiameter, ballDiameter);
     // draw se fait requestAnimationFramer? du coup on mettrait de l'interpolation ici?
-        
+    
+    if (state.click_count) {
+      text("click_count: " + state.click_count.global, 0, 0, 100, 50);
+    }
+    
   }
   
   // UI buttons
@@ -88,9 +92,9 @@
     document.getElementById('side-chosen-' + state.side + '').style.borderStyle = 'inset';
   }
   function updateScoresAndCounts() {
-    document.getElementById('side-chosen-left-text').innerHTML = 'Play as Left (score: ' + state.game.scoreLeft + ', users #: ' + state.user_count.countLeft + ')';
-    document.getElementById('side-chosen-observe-text').innerHTML = 'Observe (users #: ' + state.user_count.countObserve + ')';
-    document.getElementById('side-chosen-right-text').innerHTML = 'Play as Right (score: ' + state.game.scoreRight + ', users #: ' + state.user_count.countRight + ')';
+    document.getElementById('side-chosen-left-stats').innerHTML = '(score: ' + state.game.scoreLeft + ', users #: ' + state.user_count.countLeft + ')';
+    document.getElementById('side-chosen-observe-stats').innerHTML = '(users #: ' + state.user_count.countObserve + ')';
+    document.getElementById('side-chosen-right-stats').innerHTML = '(score: ' + state.game.scoreRight + ', users #: ' + state.user_count.countRight + ')';
   }
   
   // credits to https://stackoverflow.com/questions/879152/how-do-i-make-javascript-beepvar
@@ -101,6 +105,7 @@
 
   // Network setup
   function processServerMessage(evt) {
+    //logEvent(evt);
     var msg = JSON.parse(evt.data);
     if (msg.table === 'ack_side') {
       state.side = msg.payload.side;
@@ -118,6 +123,8 @@
     } else if (msg.table === 'user_count') {
       state.user_count = msg.payload;
       updateScoresAndCounts();
+    } else if (msg.table === 'click_count') {
+      state.click_count = msg.payload;
     } else {
       console.log('received msg of unknown table:');
       console.log(msg);
@@ -155,7 +162,6 @@
   
   
   
-  
   // Network business
   function chooseSide(e) {
     console.log(e);
@@ -178,7 +184,12 @@
   
   setInterval(sendPosition, 40);
   setInterval(getGlobalPosition, 41);
-  
+  window.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('sketch-holder').addEventListener('mousedown', function(e){
+      e.preventDefault(); 
+      sendToServer('click', {});
+    }, false);
+  });
 
 </script>
 </head>
@@ -188,13 +199,16 @@
     <div id="button-sides" style="display: flex;">
     
       <button id="side-chosen-left"    type="button" onclick="chooseSide('left');"    style="outline: none; flex-basis: 100%; width:100%; font-size: 1.5em;">
-        <span id="side-chosen-left-text"   >Play as Left</span>
+        <span id="side-chosen-left-text">Play as Left</span>
+        <span id="side-chosen-left-stats" style="display: inline-block;"></span>
       </button>
       <button id="side-chosen-observe" type="button" onclick="chooseSide('observe');" style="outline: none; flex-basis: 100%; width:100%; font-size: 1.5em; border-style:inset;">
         <span id="side-chosen-observe-text">Observe</span>
+        <span id="side-chosen-observe-stats" style="display: inline-block;"></span>
       </button>
       <button id="side-chosen-right"   type="button" onclick="chooseSide('right');"   style="outline: none; flex-basis: 100%; width:100%; font-size: 1.5em;">
         <span id="side-chosen-right-text"  >Play as Right</span>
+        <span id="side-chosen-right-stats" style="display: inline-block;"></span>
       </button>
     </div>
   </div>

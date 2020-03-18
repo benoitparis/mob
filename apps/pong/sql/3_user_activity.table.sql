@@ -1,12 +1,14 @@
 SELECT
+  activity.loopback_index,
   activity.actor_identity,
   sEnd IS NULL OR (CAST(tsActivity AS TIMESTAMP) > CAST(sEnd AS TIMESTAMP)) AS active
 FROM (
   SELECT
+    loopback_index,
     actor_identity,
     LAST_VALUE(CAST(proctime_append_stream AS VARCHAR)) AS tsActivity -- LAST_VALUE doesn't accept TIMESTAMP types
   FROM write_y
-  GROUP BY actor_identity
+  GROUP BY loopback_index, actor_identity
 ) AS activity
 LEFT JOIN
 (

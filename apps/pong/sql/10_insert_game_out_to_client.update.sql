@@ -17,4 +17,3 @@ SELECT
 FROM query_global_position AS gqp
    , LATERAL TABLE (game_out_temporal(gqp.proctime_append_stream)) AS got
 WHERE gqp.constant_dummy_source = got.dummy_key
-        
