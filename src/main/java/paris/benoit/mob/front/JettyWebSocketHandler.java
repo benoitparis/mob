@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 
 // TODO refactor ça avec le UndertowActor et ClientSimulator
 @WebSocket
-public class JettyWebSocketHandler {
+public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(JettyWebSocketHandler.class);
     public String name;
@@ -33,13 +33,13 @@ public class JettyWebSocketHandler {
     @OnWebSocketClose
     public void onClose(int statusCode, String reason) {
         logger.debug("Close: statusCode=" + statusCode + ", reason=" + reason);
-        JettyClusterReceiver.unRegister(this);
+        JettyClusterReceiver.unRegister(this.name);
         isRunning = false;
     }
 
     @OnWebSocketError
     public void onError(Throwable t) {
-        JettyClusterReceiver.unRegister(this);
+        JettyClusterReceiver.unRegister(this.name);
         logger.error("Error: " + t.getMessage());
     }
 
@@ -56,7 +56,7 @@ public class JettyWebSocketHandler {
         } catch (ExecutionException e) {
             logger.debug("ExecutionException", e);
         }
-        JettyClusterReceiver.register(this);
+        JettyClusterReceiver.register(this.name, this);
 
     }
 
@@ -96,6 +96,7 @@ public class JettyWebSocketHandler {
             }
         }).start();
     }
+    @Override
     public void processServerMessage(ToClientMessage message) {
         try {
             queue.put(message);

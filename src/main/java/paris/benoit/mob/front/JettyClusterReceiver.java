@@ -10,18 +10,20 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JettyClusterReceiver implements ClusterReceiver {
     private static final Logger logger = LoggerFactory.getLogger(JettyClusterReceiver.class);
 
-    private static ConcurrentHashMap<String, JettyWebSocketHandler> clients = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, JettyClusterMessageProcessor> clients = new ConcurrentHashMap<>();
 
-    public static void register(JettyWebSocketHandler handler) {
-        clients.put(handler.name, handler);
+    public static void register(String name, JettyClusterMessageProcessor handler) {
+        clients.put(name, handler);
     }
-    public static void unRegister(JettyWebSocketHandler handler) {
-        clients.remove(handler.name);
+    public static void unRegister(String name) {
+        // leak here: TODO manage better front handler lifecycle
+        //clients.remove(name);
+        clients.put(name, (it) -> {});
     }
 
     @Override
     public void receiveMessage(ToClientMessage message) {
-        JettyWebSocketHandler client = clients.get(message.to);
+        JettyClusterMessageProcessor client = clients.get(message.to);
 
         if (null != client) {
             client.processServerMessage(message);

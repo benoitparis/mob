@@ -156,6 +156,5 @@ function updateGame(gameIn, timeElapsedMs) {
 
   game.ballX += game.speedX * updateQuantity;
   game.ballY += game.speedY * updateQuantity;
-  //console.log('game:'+game);
   return game;
 }
