@@ -18,9 +18,9 @@ LEFT JOIN
   FROM (
     SELECT
       actor_identity,
-      SESSION_END(proctime_append_stream, INTERVAL '10' SECOND) sEnd
+      SESSION_END(proctime_append_stream, INTERVAL '20' SECOND) sEnd
     FROM write_y
-    GROUP BY actor_identity, SESSION(proctime_append_stream, INTERVAL '10' SECOND)
+    GROUP BY actor_identity, SESSION(proctime_append_stream, INTERVAL '20' SECOND)
   )
   GROUP BY actor_identity
 ) inactivity

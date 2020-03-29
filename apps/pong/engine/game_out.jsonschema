@@ -2,8 +2,11 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "properties": {
-    "position_timestamp": {
-      "type": "string"
+    "tick_number": {
+      "type": "number"
+    },
+    "gameStateTime": {
+      "type": "number"
     },
     "ballX": {
       "type": "number"

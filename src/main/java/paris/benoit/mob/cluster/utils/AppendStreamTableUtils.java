@@ -32,6 +32,7 @@ public class AppendStreamTableUtils {
             Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);
             DataStream<Row> filteredRetractStream = tEnv
                     .toRetractStream(fromTable, fromTable.getSchema().toRowType())
+//                    .toRetractStream(fromTable, Row.class) // very weird bug: not called, yet makes the ball flicker
                     .filter(it -> it.f0)
                     .map(it -> it.f1);
             Table retractTable = tEnv.fromDataStream(filteredRetractStream, StringUtils.join(fromTable.getSchema().getFieldNames(), ", ") +
@@ -52,7 +53,7 @@ public class AppendStreamTableUtils {
 
         Table rawTable = tEnv.fromTableSource(tableSource);
 
-        DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, rawTable.getSchema().toRowType());
+        DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, Row.class);
 
         logger.info("Registering as Table: " + appName + "." + name);
         tEnv.createTemporaryView(appName + "." + name, tEnv.fromDataStream(appendStream,
