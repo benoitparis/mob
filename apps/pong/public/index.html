@@ -43,27 +43,16 @@
     return Math.min(windowHeight - buttonHeight, y)
   }
   
-  var side;
-  
-  const MAX_INTERPOLATION_MS = 1000;
-  
-  var xSimu = CENTER_X;
-  var xSimuSpeed = INIT_SPEED_X;
-  var timexSimu=0;
-  
-  var lastDeltawrt = 0
-  
   function draw() {
     var state = interpolate();
     paint(state);
   }
   
+  const MAX_INTERPOLATION_MS = 1000;
   function interpolate() {
     //console.log(receivedGameData.gameStateTime);
     var now = new Date().getTime();
-    var deltaTime = now - receivedGameData.gameStateTime;
-    //console.log(deltaTime);
-    
+    var deltaTime = now - receivedGameData.gameStateTime - minClockDifferenceLocalVsServerMs;
         
     // client interpolation
     if (0 !== deltaTime && (Math.abs(deltaTime) < MAX_INTERPOLATION_MS)) {
@@ -74,8 +63,8 @@
     return state;
   }
   
-
   
+  var side; // On peut enlever?
   
   function paint(state) {
     var now = new Date().getTime();
@@ -121,6 +110,8 @@
   var lastBallX = 0;
   
   var receivedGameData = Object.assign({}, state.game);
+  var minClockDifferenceLocalVsServerMs = 24 * 60 * 60 * 1000;
+  
   // Network setup
   function processServerMessage(evt) {
     //logEvent(JSON.stringify(JSON.parse(evt.data)));
@@ -131,6 +122,10 @@
     } else if (msg.table === 'game_out_to_client') {
       state.game = Object.assign({}, msg.payload);
       receivedGameData = Object.assign({}, msg.payload);
+      minClockDifferenceLocalVsServerMs = Math.min(
+        minClockDifferenceLocalVsServerMs, 
+        new Date().getTime() - receivedGameData.gameStateTime
+      );
       updateScoresAndCounts();
     } else if (msg.table === 'user_count') {
       state.user_count = msg.payload;
@@ -171,7 +166,6 @@
     ws.onmessage = processServerMessage;
   }
   wsConnect();
-  
   
   
   // Network business
