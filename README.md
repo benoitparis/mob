@@ -2,9 +2,9 @@
 
 ## Real-time crowd interactions server on top of distributed streaming
 
-MOB consists of a websocket server, serviced by actors, that communicate to each other through distributed streaming with Flink and benefit from its low-latency map-reduce capabilities. 
+MOB consists of a WebSocket server, serviced by actors, that communicate to each other through distributed streaming with Flink and benefit from its low-latency map-reduce capabilities. 
 
-A particular setup of stream processing enables controlling the colocation of system input and output, thus allowing messages to be routed to their intended recipients.
+A particular setup of stream processing enables controlling the co-location of system input and output, thus allowing messages to be routed to their intended recipients.
 
 It is my opinion that this can enable crowds to interact with themselves; And that it opens a relatively easy pathway to try and test new ways to scale real-time multi-user experiences to massive sizes.
 
@@ -16,7 +16,7 @@ One app is available: 'pong'; where half of the players are on the left, half on
 
 ## API
 
-Developpers only have to specify html and javascript; and SQL for distributed processing. A JS engine is made available inside the distributed stream, in order to share business logic that is common between client and server.
+Developers only have to specify html and javascript; and SQL for distributed processing. A JS engine is made available inside the distributed stream, in order to share business logic that is common between client and server.
 
 ## Launching
 
