@@ -73,8 +73,7 @@ function gameTick(inString) {
   state.game.rightY = Math.round(parseFloat(inObj.rightY));
 
   if (60 < deltatime) {
-    console.log('Large deltatime, inString:' + JSON.stringify(inObj));
-    console.log('Large deltatime, deltatime:' + deltatime);
+    console.log('Large deltatime: ' + deltatime + '\tinString:' + JSON.stringify(inObj));
   }
   if (0 !== deltatime) {
     state.game = updateGame(state.game, deltatime);

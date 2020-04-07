@@ -25,7 +25,7 @@ FROM (
     LAST_VALUE(scoreLeft    ) AS scoreLeft    ,
     LAST_VALUE(scoreRight   ) AS scoreRight   
   FROM game_engine_out
-  WHERE MOD(tick_number, 2) = 0
+  WHERE MOD(tick_number, 1) = 0
 ) geo_last
 JOIN user_activity ua ON true
 WHERE ua.active

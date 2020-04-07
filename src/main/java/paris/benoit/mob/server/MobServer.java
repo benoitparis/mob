@@ -14,7 +14,7 @@ class MobServer {
     static {
         if(getVersion() != 8) {
             System.out.println("Error: A Java 8 runtime must be used");
-            System.out.println("The maven exec:exec goal can take an executable path with: -Djava.executable=path/to/java");
+            System.out.println("The maven exec:exec goal can take a java executable path with: -Djava.executable=path/to/java");
             System.exit(-2);
         }
     }
