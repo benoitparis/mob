@@ -7,3 +7,4 @@ target/*
 *.iml
 debug.log
 app.log
+twitter4j.properties

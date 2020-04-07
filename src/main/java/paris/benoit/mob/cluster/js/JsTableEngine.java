@@ -44,11 +44,11 @@ public class JsTableEngine {
             String outSchema = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/" + tableConf.dbName + "/" + m.group(4))));
             String invokeFunction = m.group(5);
 
-            MobTableConfiguration sinkConf = new MobTableConfiguration(tableConf.dbName, tableConf.name + "_in", inSchema, null);
-            JsTableSink sink = new JsTableSink(tableConf, sinkConf, invokeFunction, sourceCode);
-
             MobTableConfiguration sourceConf = new MobTableConfiguration(tableConf.dbName, tableConf.name + "_out", outSchema, null);
             JsTableSource source = new JsTableSource(tableConf, sourceConf);
+
+            MobTableConfiguration sinkConf = new MobTableConfiguration(tableConf.dbName, tableConf.name + "_in", inSchema, null);
+            JsTableSink sink = new JsTableSink(tableConf, sinkConf, invokeFunction, sourceCode);
 
             catalog.createTable(
                     sourceConf.getObjectPath(),

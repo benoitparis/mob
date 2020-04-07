@@ -17,9 +17,7 @@ import paris.benoit.mob.cluster.js.JsTableEngine;
 import paris.benoit.mob.cluster.loopback.ClusterRegistry;
 import paris.benoit.mob.cluster.loopback.LoopbackTableSink;
 import paris.benoit.mob.cluster.loopback.LoopbackTableSource;
-import paris.benoit.mob.cluster.services.DebugTableSink;
-import paris.benoit.mob.cluster.services.DirectoryTableSource;
-import paris.benoit.mob.cluster.services.TickTableSource;
+import paris.benoit.mob.cluster.services.*;
 import paris.benoit.mob.cluster.utils.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
 import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
@@ -192,11 +190,14 @@ public class MobCluster {
                     case APPEND:
                         AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
+                    case UPDATE:
+                        tEnv.sqlUpdate(sqlConf.content);
+                        break;
                     case JS_ENGINE:
                         JsTableEngine.createAndRegister(catalog, sqlConf);
                         break;
-                    case UPDATE:
-                        tEnv.sqlUpdate(sqlConf.content);
+                    case TWITTER_SINK:
+                        TwitterTableSink.createAndRegister(tEnv, catalog, sqlConf);
                         break;
                         default:
                             throw new RuntimeException("No SQL type was specified");
