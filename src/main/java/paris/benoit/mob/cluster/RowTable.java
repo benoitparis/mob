@@ -4,8 +4,9 @@ import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.utils.TypeConversions;
+import org.apache.flink.types.Row;
 
-public abstract class TypedTable<T> {
+public abstract class RowTable {
 
     protected String[] fieldNames;
     protected DataType[] fieldTypes;
@@ -19,8 +20,8 @@ public abstract class TypedTable<T> {
         return getTableSchema().toRowDataType();
     }
 
-    TypeInformation<T> getReturnType() {
-        return (TypeInformation<T>) TypeConversions.fromDataTypeToLegacyInfo(getProducedDataType());
+    TypeInformation<Row> getReturnType() {
+        return (TypeInformation<Row>) TypeConversions.fromDataTypeToLegacyInfo(getProducedDataType());
     }
 
 }

@@ -11,12 +11,12 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.TypedStreamTableSource;
+import paris.benoit.mob.cluster.RowStreamTableSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
 import javax.annotation.Nullable;
 
-class JsTableSource extends TypedStreamTableSource<Row> implements DefinedProctimeAttribute {
+class JsTableSource extends RowStreamTableSource implements DefinedProctimeAttribute {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSource.class);
 
     public JsTableSource(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration) {

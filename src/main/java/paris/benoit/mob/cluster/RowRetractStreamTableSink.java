@@ -7,13 +7,14 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
 import org.apache.flink.table.sinks.TableSink;
+import org.apache.flink.types.Row;
 
-public abstract class TypedRetractStreamTableSink<T> extends TypedTable<T> implements RetractStreamTableSink<T> {
+public abstract class RowRetractStreamTableSink extends RowTable implements RetractStreamTableSink<Row> {
 
-    protected RichSinkFunction<Tuple2<Boolean, T>> sinkFunction;
+    protected RichSinkFunction<Tuple2<Boolean, Row>> sinkFunction;
 
     @Override
-    public TableSink<Tuple2<Boolean, T>> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
+    public TableSink<Tuple2<Boolean, Row>> configure(String[] fieldNames, TypeInformation<?>[] fieldTypes) {
         throw new UnsupportedOperationException(
                 "TypedRetractStreamTableSink classes are to be configured through their constructors"
         );
@@ -25,12 +26,12 @@ public abstract class TypedRetractStreamTableSink<T> extends TypedTable<T> imple
     }
 
     @Override
-    public TypeInformation<T> getRecordType() {
+    public TypeInformation<Row> getRecordType() {
         return super.getReturnType();
     }
 
     @Override
-    public void emitDataStream(DataStream<Tuple2<Boolean, T>> ds) {
+    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         consumeDataStream(ds);
     }
 }

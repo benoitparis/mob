@@ -5,10 +5,11 @@ import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunctio
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.table.types.DataType;
+import org.apache.flink.types.Row;
 
-public abstract class TypedStreamTableSource<T> extends TypedTable<T> implements StreamTableSource<T> {
+public abstract class RowStreamTableSource extends RowTable implements StreamTableSource<Row> {
 
-    protected RichParallelSourceFunction<T> sourceFunction;
+    protected RichParallelSourceFunction<Row> sourceFunction;
 
     @Override
     public TableSchema getTableSchema() {
@@ -22,7 +23,7 @@ public abstract class TypedStreamTableSource<T> extends TypedTable<T> implements
 
     // TODO remove when they are ready with types
     @Override
-    public TypeInformation<T> getReturnType() {
+    public TypeInformation<Row> getReturnType() {
         return super.getReturnType();
     }
 

@@ -11,10 +11,10 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.TypedStreamTableSource;
+import paris.benoit.mob.cluster.RowStreamTableSource;
 import paris.benoit.mob.cluster.utils.LegacyDataTypeTransitionUtils;
 
-public class LoopbackTableSource extends TypedStreamTableSource<Row> {
+public class LoopbackTableSource extends RowStreamTableSource {
     private static final Logger logger = LoggerFactory.getLogger(LoopbackTableSource.class);
 
     public static final String COLOCATION_KEY = "CLIENT_LOOPBACK";

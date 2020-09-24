@@ -10,9 +10,9 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
+import paris.benoit.mob.cluster.RowRetractStreamTableSink;
 
-class JsTableSink extends TypedRetractStreamTableSink<Row> {
+class JsTableSink extends RowRetractStreamTableSink {
     private static final Logger logger = LoggerFactory.getLogger(JsTableSink.class);
 
     public JsTableSink(MobTableConfiguration parentConfiguration, MobTableConfiguration configuration, String invokeFunction, String code) {
@@ -32,5 +32,5 @@ class JsTableSink extends TypedRetractStreamTableSink<Row> {
             .name(name);
     }
 
-
+ 
 }

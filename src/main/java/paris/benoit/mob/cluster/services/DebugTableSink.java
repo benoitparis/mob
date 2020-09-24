@@ -6,19 +6,20 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.types.DataType;
+import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
+import paris.benoit.mob.cluster.RowRetractStreamTableSink;
 
-public class DebugTableSink extends TypedRetractStreamTableSink<String> {
+public class DebugTableSink extends RowRetractStreamTableSink {
     private static final Logger logger = LoggerFactory.getLogger(DebugTableSink.class);
 
     public DebugTableSink() {
         fieldNames = new String[] { "debug_info" };
         fieldTypes = new DataType[] { DataTypes.STRING() };
-        sinkFunction = new RichSinkFunction<Tuple2<Boolean, String>>() {
+        sinkFunction = new RichSinkFunction<Tuple2<Boolean, Row>>() {
             @Override
-            public void invoke(Tuple2<Boolean, String> value, Context context) {
+            public void invoke(Tuple2<Boolean, Row> value, Context context) {
                 logger.info(value.toString());
             }
         };
@@ -26,7 +27,7 @@ public class DebugTableSink extends TypedRetractStreamTableSink<String> {
     }
 
     @Override
-    public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, String>> ds) {
+    public DataStreamSink<?> consumeDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
         return ds
                 .addSink(sinkFunction)
                 .name(name);

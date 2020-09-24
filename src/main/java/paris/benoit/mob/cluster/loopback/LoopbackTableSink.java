@@ -12,10 +12,10 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
-import paris.benoit.mob.cluster.TypedRetractStreamTableSink;
+import paris.benoit.mob.cluster.RowRetractStreamTableSink;
 import paris.benoit.mob.server.ClusterReceiver;
 
-public class LoopbackTableSink extends TypedRetractStreamTableSink<Row> {
+public class LoopbackTableSink extends RowRetractStreamTableSink {
     private static final Logger logger = LoggerFactory.getLogger(LoopbackTableSink.class);
 
     private static final String[] FIELD_NAMES = new String[] {

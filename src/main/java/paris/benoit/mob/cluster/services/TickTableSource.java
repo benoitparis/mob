@@ -6,9 +6,9 @@ import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.sources.DefinedProctimeAttribute;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
-import paris.benoit.mob.cluster.TypedStreamTableSource;
+import paris.benoit.mob.cluster.RowStreamTableSource;
 
-public class TickTableSource extends TypedStreamTableSource<Row> implements DefinedProctimeAttribute {
+public class TickTableSource extends RowStreamTableSource implements DefinedProctimeAttribute {
 
     private static final String[] FIELD_NAMES = new String[] {
             "tick_number",
