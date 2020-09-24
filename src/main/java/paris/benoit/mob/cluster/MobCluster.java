@@ -146,7 +146,12 @@ public class MobCluster {
                 ConnectorCatalogTable.source(new DirectoryTableSource(configuration.apps), false),
                 false
         );
-
+        // TODO lister les services dont une app a besoin
+        catalog.createTable(
+                new ObjectPath("services", "twitter"),
+                ConnectorCatalogTable.sink(new TwitterTableSink(), false),
+                false
+        );
     }
 
     private void registerInputOutputTables(MobAppConfiguration app) throws TableAlreadyExistException, DatabaseNotExistException {
@@ -195,9 +200,6 @@ public class MobCluster {
                         break;
                     case JS_ENGINE:
                         JsTableEngine.createAndRegister(catalog, sqlConf);
-                        break;
-                    case TWITTER_SINK:
-                        TwitterTableSink.createAndRegister(tEnv, catalog, sqlConf);
                         break;
                         default:
                             throw new RuntimeException("No SQL type was specified");

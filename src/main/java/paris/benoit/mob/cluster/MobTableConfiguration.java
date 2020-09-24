@@ -8,7 +8,6 @@ public class MobTableConfiguration implements Serializable {
     public enum CONF_TYPE {
         TABLE // TODO rename en VIEW? -> faire avec passage en yaml
         , STATE, UPDATE, JS_ENGINE, RETRACT, APPEND
-        , TWITTER_SINK // TODO: service declaration?
         , IN_JSONSCHEMA, OUT_JSONSCHEMA // TODO: use?
     }
 
