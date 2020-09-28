@@ -1,36 +1,22 @@
 package paris.benoit.mob.cluster.loopback;
 
-import co.paralleluniverse.strands.channels.Channel;
-import co.paralleluniverse.strands.channels.Channels;
-import co.paralleluniverse.strands.channels.Channels.OverflowPolicy;
-import co.paralleluniverse.strands.channels.ThreadReceivePort;
 import paris.benoit.mob.message.ToServerMessage;
 
+import java.util.concurrent.ArrayBlockingQueue;
+
+/**
+ * Wrapper class, used for Sources to poll messages sent from the front.
+ */
 public class ClusterSender {
 
-    private final Channel<ToServerMessage> channel;
-    private final ThreadReceivePort<ToServerMessage> receivePort;
-    
-    public ClusterSender() {
-        super();
-        this.channel = Channels.newChannel(100_000, OverflowPolicy.BACKOFF, false, false);
-        this.receivePort = new ThreadReceivePort<>(channel);
-    }
-    
-    public void sendMessage(ToServerMessage message) throws Exception {
-        channel.send(message);
-    }
-    
-    public ThreadReceivePort<ToServerMessage> getReceivePort() {
-        return receivePort;
-    }
+    private final ArrayBlockingQueue<ToServerMessage> queue = new ArrayBlockingQueue<ToServerMessage>(100_000);
 
-    public boolean isClosed() {
-        return receivePort.isClosed();
+    public void sendMessage(ToServerMessage message) throws Exception {
+        queue.put(message);
     }
 
     public ToServerMessage receive() throws Exception {
-        return receivePort.receive();
+        return queue.take();
     }
 
 }

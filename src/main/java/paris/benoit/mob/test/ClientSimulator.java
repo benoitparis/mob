@@ -1,6 +1,5 @@
 package paris.benoit.mob.test;
 
-import co.paralleluniverse.fibers.SuspendExecution;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Engine;
 import org.graalvm.polyglot.Source;
@@ -78,7 +77,7 @@ class ClientSimulator {
         return isReady;
     }
 
-    public boolean progress() throws SuspendExecution, InterruptedException {
+    public boolean progress() throws InterruptedException {
         boolean doContinue = progress.execute(progressCounter).asBoolean();
         progressCounter++;
         logger.info("Client Simulator can continue progress: " + doContinue);
@@ -89,7 +88,7 @@ class ClientSimulator {
 
     }
 
-    private boolean drainWsMessageQueue() throws InterruptedException, SuspendExecution {
+    private boolean drainWsMessageQueue() throws InterruptedException {
 
         String wsMessage = toServer.execute(progressCounter).asString();
         if (null == wsMessage) {

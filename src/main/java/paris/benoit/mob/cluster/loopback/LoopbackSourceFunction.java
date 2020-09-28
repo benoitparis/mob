@@ -41,7 +41,7 @@ class LoopbackSourceFunction extends RichParallelSourceFunction<Row> {
     @Override
     public void run(SourceContext<Row> sc) throws Exception {
         
-        while (isRunning && !sender.isClosed()) {
+        while (isRunning) {
 
             ToServerMessage msg = sender.receive();
 
