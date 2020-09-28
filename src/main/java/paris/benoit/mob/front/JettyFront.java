@@ -1,7 +1,9 @@
 package paris.benoit.mob.front;
 
+import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -33,7 +35,13 @@ public class JettyFront implements ClusterFront {
 
     @Override
     public void start() {
-        Server server = new Server(port);
+        Server server = new Server(new JettyLoomThreadPool());
+
+        ServerConnector connector = new ServerConnector(server);
+        connector.setPort(port);
+
+        server.setConnectors(new Connector[]{connector});
+
 
         String mainApp = configuration.apps.get(0).name;
 

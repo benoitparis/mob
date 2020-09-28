@@ -20,7 +20,6 @@ public class ServerRunner implements ClusterRunner {
     public void run(List<String> apps) throws Exception {
         MobClusterConfiguration configuration = new MobClusterConfiguration(
                 apps,
-//                new UndertowFront(DEFAULT_FRONT_PORT),
                 new JettyFront(DEFAULT_FRONT_PORT),
                 TimeCharacteristic.IngestionTime,
                 DEFAULT_STREAM_PARALLELISM,

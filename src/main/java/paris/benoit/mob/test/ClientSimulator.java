@@ -96,7 +96,7 @@ class ClientSimulator {
             return false;
         } else {
 
-            // TODO DRY avec UndertowActor
+            // TODO DRY avec JettyWebSocketHandler
             ToServerMessage cMsg = new ToServerMessage(name, wsMessage);
             logger.info("Got message: " + cMsg);
             ClusterSender specificSender = clusterSenders.get(cMsg.table);

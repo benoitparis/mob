@@ -18,7 +18,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-// TODO refactor ça avec le UndertowActor et ClientSimulator
+// TODO refactor ça avec le ClientSimulator
 @WebSocket
 public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
 
@@ -84,6 +84,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     ArrayBlockingQueue<ToClientMessage> queue = new ArrayBlockingQueue<>(100);
     {
         // FIXME can't wait for virtual threads
+        //   actually orthogonal. use futures?
         new Thread(() -> {
             while(isRunning) {
                 try {
