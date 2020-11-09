@@ -158,6 +158,14 @@ public class MobCluster {
 
         for (MobTableConfiguration inSchema: app.inSchemas) {
             AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(app.name, tEnv, catalog, new LoopbackTableSource(inSchema), inSchema.name);
+//            catalog.createTable(
+//                new ObjectPath(app.name, inSchema.name),
+//                    ConnectorCatalogTable.source(new LoopbackTableSource(inSchema), false),
+//                    false
+//            )
+//            ;
+
+
         }
 
         for (MobTableConfiguration outSchema: app.outSchemas) {

@@ -51,10 +51,17 @@
     writeTable('subscribe_apps', {});
     writeTable('subscribe_messages', {});
 	}
-  function postMessage() {
+  function postMessageEnter(e) {
+    if (e.key && e.key === "Enter" //&& !e.shiftKey
+    ) {
+      postMessage(e);
+    }
+  }
+  function postMessage(e) {
     var elt = document.getElementById('text-post');
     var msg = elt.value;
-    if ('' !== msg) {
+    console.log(e);
+    if ('' !== msg.trim()) {
       elt.value = '';
       writeTable('post_message', {message: msg});
     }
@@ -116,17 +123,13 @@ if ('localhost' !== window.location.hostname) {
   <div id="top-level" style="display:flex;height:100%;">
     <div id="current-app" style="width: calc(100% / 4 * 3);"></div>
     <div id="chat" style="width: calc(100% / 4 * 1);height:100%;">
-      <div style="height:5%;">Upvoted messages are published on Twitter 
-        <a href="https://twitter.com/FatMob_io?ref_src=twsrc%5Etfw" class="twitter-follow-button" data-show-count="false">Follow @FatMob_io</a>
-        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-      </div>
-      <div style="height:95%;>
+      <div style="height:100%;>
         <div id="chat-sections" style="display:flex;flex-direction:column;height:100%;">
           <div id="chat-log" style="height: calc(100% / 8 * 7);overflow: overlay;">
           </div>
           <div id="chat-post" style="height: calc(100% / 8 * 1);">
-            <textarea id="text-post" maxlength="180" style="width:100%;height:50%;resize: none; background: aliceblue;"></textarea>
-            <button id="" type="button" onclick="postMessage();" style="width:100%; height:50%; font-size: 1.5em;">
+            <textarea id="text-post" onkeydown="postMessageEnter(event)" maxlength="180" style="width:100%;height:50%;resize: none; background: aliceblue;"></textarea>
+            <button id="" type="button" onclick="postMessage(event)" style="width:100%; height:50%; font-size: 1.5em;">
               Post
             </button>
           </div>
