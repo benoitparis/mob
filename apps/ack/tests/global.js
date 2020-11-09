@@ -44,18 +44,15 @@ function validate() {
   var okMessage1 = wsQueueInString.includes(JSON.stringify({ "table" : "send_client", "payload" : {"v":"v1"}}));
   var okMessage2 = wsQueueInString.includes(JSON.stringify({ "table" : "send_client", "payload" : {"v":"v2"}}));
   var okMessage3 = wsQueueInString.includes(JSON.stringify({ "table" : "send_client", "payload" : {"v":"v3"}}));
-  var okSize = wsQueueInString.length === 4;
   console.log("okMessage0: " + okMessage0);
   console.log("okMessage1: " + okMessage1);
   console.log("okMessage2: " + okMessage2);
   console.log("okMessage3: " + okMessage3);
-  console.log("okSize: " + okSize);
   return true 
     && okMessage0
     && okMessage1
     && okMessage2
-    && okMessage3
-    && okSize;
+    && okMessage3;
 }
 
 ///////////////////////////////////////////////// end test

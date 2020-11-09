@@ -53,7 +53,6 @@ public class MobCluster {
         //   - for each app: IO > DataFlow
         setupEnvironment();
         ClusterRegistry.setConf(
-                sEnv.getParallelism(),
                 configuration
         );
         configuration.clusterFront.configure(configuration);

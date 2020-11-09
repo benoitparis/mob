@@ -7,9 +7,10 @@ import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.loopback.ClusterRegistry;
-import paris.benoit.mob.cluster.loopback.ClusterSender;
+import paris.benoit.mob.cluster.loopback.LocalQueueClusterSender;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
+import paris.benoit.mob.server.ClusterSender;
 
 import java.io.IOException;
 import java.util.Map;

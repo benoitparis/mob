@@ -3,6 +3,7 @@ package paris.benoit.mob.test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobAppConfiguration;
+import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.server.ClusterFront;
 import paris.benoit.mob.server.ClusterReceiver;
@@ -17,6 +18,11 @@ public class AppTestFront implements ClusterFront {
     private List<Future<Boolean>> results;
 
     private MobAppConfiguration conf;
+
+    @Override
+    public void configure(MobClusterConfiguration configuration) {
+
+    }
 
     @Override
     public void start() {

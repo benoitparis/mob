@@ -18,7 +18,6 @@
     log('Received payload: ' + JSON.stringify(JSON.parse(evt.data).payload) + '\n');
 	};
 
-  var appName = window.location.pathname.replace('/app/', '').replace('/', '');
 	var ws;
   function wsConnect() {
 		var mypath = "/service"
@@ -33,7 +32,7 @@
   	if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-        table : appName + '.' + table,
+        table : 'ack' + '.' + table,
 				payload : msg
 			};
 			console.log(serverMsg);
@@ -44,7 +43,7 @@
   
 	function pushValue() {
     writeTable('write_value', {
-				v : 'v' + getRandomInt(3)
+				v : '' + getRandomInt(500)
 			}
     );
 	}

@@ -17,7 +17,6 @@ import paris.benoit.mob.server.ClusterReceiver;
 
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,7 +24,6 @@ public class JettyFront implements ClusterFront {
     private final int port;
     private final String baseUrl;
     private MobClusterConfiguration configuration;
-    private CompletableFuture<Void> upFuture;
 
     public JettyFront(int port) {
         super();

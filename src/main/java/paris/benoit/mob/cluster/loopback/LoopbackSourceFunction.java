@@ -19,7 +19,7 @@ class LoopbackSourceFunction extends RichParallelSourceFunction<Row> {
     private Integer loopbackIndex = -1;
     private final JsonRowDeserializationSchema jrds;
     private final MobTableConfiguration configuration;
-    private ClusterSender sender;
+    private LocalQueueClusterSender sender;
 
     private volatile boolean isRunning = true;
     
@@ -32,7 +32,7 @@ class LoopbackSourceFunction extends RichParallelSourceFunction<Row> {
     @Override
     public void open(Configuration parameters) throws Exception {
         super.open(parameters);
-        sender = new ClusterSender();
+        sender = new LocalQueueClusterSender();
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
         ClusterRegistry.registerClusterSender(configuration.fullyQualifiedName(), sender, loopbackIndex);
         logger.info("Opening source #" + loopbackIndex + " (" + configuration.fullyQualifiedName() + ")");

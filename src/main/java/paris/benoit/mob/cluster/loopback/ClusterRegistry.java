@@ -6,6 +6,7 @@ import paris.benoit.mob.cluster.MobAppConfiguration;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.utils.TransferMap;
+import paris.benoit.mob.server.ClusterSender;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,14 +18,12 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+// TODO DELETE
 public class ClusterRegistry {
     private static final Logger logger = LoggerFactory.getLogger(ClusterRegistry.class);
 
     private static final CopyOnWriteArrayList<NameSenderPair> clusterSenderRaw = new CopyOnWriteArrayList<>();
 
-    // TODO fix: local parallelism is not cluster parallelism
-    private static int parallelism;
-    private static int inSchemaCount;
     private static MobClusterConfiguration configuration;
     private static CountDownLatch latch;
 
@@ -35,19 +34,17 @@ public class ClusterRegistry {
         latch.countDown();
     }
 
-    public static void setConf(int parallelism, MobClusterConfiguration configuration) {
-        ClusterRegistry.parallelism = parallelism;
+    public static void setConf(MobClusterConfiguration configuration) {
         ClusterRegistry.configuration = configuration;
-        ClusterRegistry.inSchemaCount = configuration.apps.stream().mapToInt(it -> it.inSchemas.size()).sum();
-        ClusterRegistry.latch = new CountDownLatch(parallelism * inSchemaCount);
+        ClusterRegistry.latch = new CountDownLatch(configuration.streamParallelism * configuration.apps.stream().mapToInt(it -> it.inSchemas.size()).sum());
     }
 
     public static void waitRegistrationsReady() throws InterruptedException {
         latch.await();
-        doClusterSendersMatching(parallelism, configuration);
+        doClusterSendersMatching(configuration);
     }
 
-    private static void doClusterSendersMatching(int parallelism, MobClusterConfiguration configuration) {
+    private static void doClusterSendersMatching(MobClusterConfiguration configuration) {
 
         Map<String, List<NameSenderPair>> byName = clusterSenderRaw.stream()
                 .sorted(Comparator.comparing(NameSenderPair::getLoopbackIndex))
@@ -60,7 +57,7 @@ public class ClusterRegistry {
 
         logger.info("Cluster senders names: " + byName.keySet());
 
-        IntStream.range(0, parallelism).forEach(i -> {
+        IntStream.range(0, configuration.streamParallelism).forEach(i -> {
             HashMap<String, ClusterSender> localMap = new HashMap<>();
             for (MobAppConfiguration app : configuration.apps) {
                 for (MobTableConfiguration ci : app.inSchemas) {
@@ -76,7 +73,7 @@ public class ClusterRegistry {
 
     public static CompletableFuture<Map<String, ClusterSender>> getClusterSenders(String random) {
         return CompletableFuture.supplyAsync(() -> {
-                return transferMap.getAndWait(Math.abs(random.hashCode()) % parallelism);
+                return transferMap.getAndWait(Math.abs(random.hashCode()) % configuration.streamParallelism);
             }
         );
     }
