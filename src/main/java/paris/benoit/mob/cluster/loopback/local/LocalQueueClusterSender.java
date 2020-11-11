@@ -1,6 +1,7 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.loopback.local;
 
-import paris.benoit.mob.cluster.MobClusterConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import paris.benoit.mob.message.ToServerMessage;
 import paris.benoit.mob.server.ClusterSender;
 
@@ -10,7 +11,9 @@ import java.util.concurrent.ArrayBlockingQueue;
  * Wrapper class, used for Sources to poll messages sent from the front.
  */
 public class LocalQueueClusterSender implements ClusterSender {
+    private static final Logger logger = LoggerFactory.getLogger(LocalQueueClusterSender.class);
 
+    // NON STATIC
     private final ArrayBlockingQueue<ToServerMessage> queue = new ArrayBlockingQueue<ToServerMessage>(100_000);
 
     @Override
@@ -21,20 +24,6 @@ public class LocalQueueClusterSender implements ClusterSender {
     @Override
     public ToServerMessage receive() throws Exception {
         return queue.take();
-    }
-
-
-    public static void registerClusterSender(String fullName, ClusterSender sender, Integer loopbackIndex) {
-
-    }
-
-    public static void waitRegistrationsReady() throws InterruptedException {
-
-    }
-
-
-    private static void doClusterSendersMatching(int parallelism, MobClusterConfiguration configuration) {
-
     }
 
 }

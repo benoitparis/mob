@@ -1,5 +1,6 @@
 package paris.benoit.mob.message;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.json.JSONObject;
 
 /**
@@ -7,21 +8,34 @@ import org.json.JSONObject;
  */
 public class ToServerMessage {
 
-    public final String from;
+    @JsonProperty
+    public final String client_id;
+
+    @JsonProperty
     public final String table;
+
+    @JsonProperty
     public final JSONObject payload;
     
-    public ToServerMessage(String from, String fromClient) {
-        this.from = from;
+    public ToServerMessage(String client_id, String fromClient) {
+        this.client_id = client_id;
         JSONObject json = new JSONObject(fromClient);
         this.table = json.getString("table");
         this.payload = json.getJSONObject("payload");
     }
 
+    // TODO proper schema management
+    public String toJsonString() {
+        return "{" +
+                "\"client_id\":\"" + client_id + '\"' +
+                ", \"payload\":" + payload +
+                '}';
+    }
+
     @Override
     public String toString() {
         return "ToServerMessage{" +
-                "from='" + from + '\'' +
+                "client_id='" + client_id + '\'' +
                 ", table='" + table + '\'' +
                 ", payload=" + payload +
                 '}';

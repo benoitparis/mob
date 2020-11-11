@@ -1,11 +1,10 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.loopback.local;
 
 import org.apache.flink.formats.json.JsonRowSchemaConverter;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.table.api.DataTypes;
-import org.apache.flink.table.descriptors.JsonValidator;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.utils.TypeConversions;
 import org.apache.flink.types.Row;

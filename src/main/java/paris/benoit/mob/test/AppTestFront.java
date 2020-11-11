@@ -70,11 +70,6 @@ public class AppTestFront implements ClusterFront {
         return null;
     }
 
-    @Override
-    public ClusterReceiver getClusterReceiver() {
-        return new AppTestMessageRouter();
-    }
-
     public Boolean collectResult() {
         return results.stream()
             .map(it -> {

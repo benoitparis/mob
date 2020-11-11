@@ -34,6 +34,9 @@
     <logger name="org.apache.flink.runtime.resourcemanager.slotmanager.SlotManagerImpl" level="WARN" additivity="false" />
     <logger name="org.apache.flink.runtime.jobmaster.JobMaster" level="WARN" additivity="false" />
     <logger name="org.apache.flink.runtime.jobmaster.slotpool.SlotPoolImpl" level="WARN" additivity="false" />
+    <logger name="org.apache.kafka.clients" level="WARN" additivity="false" />
+
+
     <logger name="twitter4j" level="WARN" additivity="false" />
 	<logger name="io.undertow.websockets.core.request" level="WARN" />
 	<logger name="org.eclipse.jetty" level="INFO" additivity="false" />

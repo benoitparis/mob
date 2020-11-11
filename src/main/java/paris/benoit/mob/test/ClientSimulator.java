@@ -6,8 +6,7 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.ClusterRegistry;
-import paris.benoit.mob.cluster.loopback.LocalQueueClusterSender;
+import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 import paris.benoit.mob.server.ClusterSender;
@@ -60,7 +59,7 @@ class ClientSimulator {
 
         new Thread(() -> {
             try {
-                clusterSenders = ClusterRegistry.getClusterSenders(name).get();
+                clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name).get();
                 isReady = true;
             } catch (InterruptedException | ExecutionException e) {
                 logger.debug("Problem getting a ClusterSender", e);
@@ -115,7 +114,7 @@ class ClientSimulator {
     }
 
     public void offerMessage(ToClientMessage message) {
-        if (name.equals(message.to)) {
+        if (name.equals(message.client_id)) {
             logger.info("Message offer matched: " + message.toString());
             lastClusterInteraction = System.currentTimeMillis();
             fromServer.execute(message.toJson());

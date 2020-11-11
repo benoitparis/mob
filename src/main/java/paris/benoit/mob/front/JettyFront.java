@@ -96,10 +96,5 @@ public class JettyFront implements ClusterFront {
         this.configuration = configuration;
     }
 
-    @Override
-    public ClusterReceiver getClusterReceiver() {
-        return new JettyClusterReceiver();
-    }
-
 
 }

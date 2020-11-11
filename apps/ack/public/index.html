@@ -32,7 +32,7 @@
   	if (ws && ws.readyState === WebSocket.OPEN) {
 			var serverMsg = {
 				intent : 'WRITE',
-        table : 'ack' + '.' + table,
+        table : 'mobcatalog.ack' + '.' + table,
 				payload : msg
 			};
 			console.log(serverMsg);

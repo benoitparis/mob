@@ -1,5 +1,7 @@
 package paris.benoit.mob.cluster.utils;
 
+import java.util.List;
+
 public class Colors {
 
     private static final String ANSI_RESET = "\u001B[0m";

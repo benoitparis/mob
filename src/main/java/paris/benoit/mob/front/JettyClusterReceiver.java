@@ -23,12 +23,12 @@ public class JettyClusterReceiver implements ClusterReceiver {
 
     @Override
     public void receiveMessage(ToClientMessage message) {
-        JettyClusterMessageProcessor client = clients.get(message.to);
+        JettyClusterMessageProcessor client = clients.get(message.client_id);
 
         if (null != client) {
             client.processServerMessage(message);
         } else {
-            logger.warn("Unable to find client: " + message.to);
+            logger.warn("Unable to find client: " + message.client_id);
         }
     }
 

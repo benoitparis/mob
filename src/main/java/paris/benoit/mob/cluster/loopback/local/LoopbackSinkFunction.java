@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.loopback.local;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;

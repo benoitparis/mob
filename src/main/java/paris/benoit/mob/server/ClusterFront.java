@@ -2,6 +2,8 @@ package paris.benoit.mob.server;
 
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 
+import java.util.List;
+
 public interface ClusterFront {
 
     void start();
@@ -12,5 +14,4 @@ public interface ClusterFront {
 
     default void configure(MobClusterConfiguration configuration) {}
 
-    ClusterReceiver getClusterReceiver();
 }

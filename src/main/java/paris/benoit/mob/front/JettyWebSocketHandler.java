@@ -6,8 +6,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.ClusterRegistry;
-import paris.benoit.mob.cluster.loopback.LocalQueueClusterSender;
+import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 import paris.benoit.mob.server.ClusterSender;
@@ -18,6 +17,7 @@ import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 // TODO refactor ça avec le ClientSimulator
 @WebSocket
@@ -41,7 +41,12 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     @OnWebSocketError
     public void onError(Throwable t) {
         JettyClusterReceiver.unRegister(this.name);
-        logger.error("Error: " + t.getMessage());
+        if (t instanceof TimeoutException) {
+            logger.info("Idle client disconnected: " + t.getMessage());
+        } else {
+            logger.error("Error: " + t.getMessage());
+        }
+
     }
 
     @OnWebSocketConnect
@@ -49,9 +54,11 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         logger.debug("onConnect: session=" + session);
         remote = session.getRemote();
         name = "fa-" + UUID.randomUUID().toString();
-        clusterSendersFuture = ClusterRegistry.getClusterSenders(name);
+        clusterSendersFuture = GlobalClusterSenderRegistry.getClusterSenders(name);
+        System.out.println(clusterSendersFuture);
         try {
             clusterSenders = clusterSendersFuture.get();
+            System.out.println(clusterSenders);
         } catch (InterruptedException e) {
             logger.debug("InterruptedException", e);
         } catch (ExecutionException e) {
@@ -67,7 +74,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         ToServerMessage cMsg = new ToServerMessage(name, msg);
 
         // TODO !on seri/déséri deux fois
-        //   utiliser avro, et s'envoyer des subsets
+        //   utiliser avro/protobuf/thrift, s'envoyer des subsets
 
         // TODO DRY avec ClientSimulator
         ClusterSender specificSender = clusterSenders.get(cMsg.table);
@@ -76,6 +83,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         } else {
             try {
                 specificSender.sendMessage(cMsg);
+                System.out.println("sent: " + cMsg);
             } catch (Exception e) {
                 logger.error("error in sending message", e);
             }

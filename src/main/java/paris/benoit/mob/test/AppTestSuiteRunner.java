@@ -5,9 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.message.ToServerMessage;
+import paris.benoit.mob.cluster.loopback.local.LocalQueueClusterSenderRegistry;
 import paris.benoit.mob.server.ClusterRunner;
-import paris.benoit.mob.server.ClusterSender;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,16 +48,8 @@ public class AppTestSuiteRunner implements ClusterRunner {
                     add(name);
                 }},
                 front,
-                new ClusterSender() {
-                    @Override
-                    public void sendMessage(ToServerMessage message) throws Exception {
-                        throw new RuntimeException("TODO do something about me");
-                    }
-                    @Override
-                    public ToServerMessage receive() throws Exception {
-                        throw new RuntimeException("TODO do something about me");
-                    }
-                },
+                new AppTestMessageRouter(),
+                new LocalQueueClusterSenderRegistry(),
                 TimeCharacteristic.IngestionTime,
                 3,
                 50,

@@ -7,10 +7,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -34,6 +33,7 @@ public class MobAppConfiguration {
         this.sql = buildConfigurationItem("sql");
         this.tests = buildConfigurationItem("tests");
     }
+
 
     private List<MobTableConfiguration> buildConfigurationItem(final String folder) throws RuntimeException {
 

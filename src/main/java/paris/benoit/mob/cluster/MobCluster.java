@@ -5,7 +5,11 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.streaming.api.graph.StreamNode;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableSchema;
+import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.api.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
@@ -14,12 +18,14 @@ import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.js.JsTableEngine;
-import paris.benoit.mob.cluster.loopback.ClusterRegistry;
-import paris.benoit.mob.cluster.loopback.LoopbackTableSink;
-import paris.benoit.mob.cluster.loopback.LoopbackTableSource;
+import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
+import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
+import paris.benoit.mob.cluster.loopback.local.LoopbackTableSink;
+import paris.benoit.mob.cluster.loopback.local.LoopbackTableSource;
 import paris.benoit.mob.cluster.services.*;
 import paris.benoit.mob.cluster.utils.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
+import paris.benoit.mob.cluster.utils.TableSchemaConverter;
 import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
 
 import java.util.Arrays;
@@ -52,7 +58,7 @@ public class MobCluster {
         //   - have an env > service > apps > exec > info
         //   - for each app: IO > DataFlow
         setupEnvironment();
-        ClusterRegistry.setConf(
+        GlobalClusterSenderRegistry.setConf(
                 configuration
         );
         configuration.clusterFront.configure(configuration);
@@ -71,14 +77,12 @@ public class MobCluster {
         JobClient jobClient = sEnv.executeAsync();
 
         configuration.clusterFront.waitReady();
-        ClusterRegistry.waitRegistrationsReady();
+        GlobalClusterSenderRegistry.waitRegistrationsReady();
 
+        // TODO en faire qqch?
         JobStatus status = jobClient.getJobStatus().get();
 
-        logger.info("\n" + brightBlack(plan));
-        logger.info("Plan ↑");
-
-        String tables = Arrays.stream(tEnv.listCatalogs())
+        List<String> tables = Arrays.stream(tEnv.listCatalogs())
                 .flatMap(it -> {
                     tEnv.useCatalog(it);
                     return Arrays.stream(tEnv.listDatabases());
@@ -87,9 +91,24 @@ public class MobCluster {
                     tEnv.useDatabase(it);
                     return Arrays.stream(tEnv.listTables()).map(at -> it + "." + at);
                 })
-                .collect(Collectors.joining(",\n ", "\n[\n ", "\n]"));
+                .collect(Collectors.toList());
+        String tablesString = tables.stream().collect(Collectors.joining(",\n ", "\n[\n ", "\n]"));
 
-        logger.info("Tables: " + yellow(tables));
+        KafkaSchemaRegistry.registerConfiguration(configuration);
+        tables.stream()
+            .forEach(name -> {
+                // TODO enlever, toujours prendre tout le nom en entier
+                KafkaSchemaRegistry.registerSchema("mobcatalog." + name, TableSchemaConverter.toJsonSchema(tEnv.from(name).getSchema()));
+            })
+        ;
+
+        logger.debug("Input schemas:\n" + KafkaSchemaRegistry.getInputSchemas());
+        logger.debug("Output schemas:\n" + KafkaSchemaRegistry.getOutputSchemas());
+
+        logger.info("\n" + brightBlack(plan));
+        logger.info("Plan ↑");
+
+        logger.info("Tables: " + yellow(tablesString));
         logger.info("Job is: " + yellow(status.toString()));
         logger.info("Front: " + yellow(configuration.clusterFront.accessString()));
         logger.info("Web UI: " + yellow("http://localhost:" + configuration.flinkWebUiPort));
@@ -109,7 +128,7 @@ public class MobCluster {
             sEnv = StreamExecutionEnvironment.createRemoteEnvironment("127.0.0.1", 8081);
         }
         
-        sEnv.setStreamTimeCharacteristic(configuration.processingtime);
+        sEnv.setStreamTimeCharacteristic(configuration.processingTime);
         // TODO sort out setParallelism vs setMaxParallelism
         sEnv.setParallelism(configuration.streamParallelism);
         sEnv.setMaxParallelism(configuration.streamParallelism); // "It also defines the number of key groups used for partitioned state. "
@@ -122,6 +141,7 @@ public class MobCluster {
             .build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
 
+        // TODO mettre "mobcatalog" en constante
         catalog = new GenericInMemoryCatalog("mobcatalog");
         tEnv.registerCatalog("mobcatalog", catalog);
         tEnv.useCatalog("mobcatalog");
@@ -170,7 +190,7 @@ public class MobCluster {
         for (MobTableConfiguration outSchema: app.outSchemas) {
             catalog.createTable(
                     new ObjectPath(app.name, outSchema.name),
-                    ConnectorCatalogTable.sink(new LoopbackTableSink(outSchema, configuration.router), false),
+                    ConnectorCatalogTable.sink(new LoopbackTableSink(outSchema, configuration.clusterReceiver), false),
                     false
             );
             logger.debug("Registered Table Sink: " + outSchema);

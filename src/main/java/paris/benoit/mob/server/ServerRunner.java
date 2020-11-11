@@ -3,8 +3,10 @@ package paris.benoit.mob.server;
 import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
+import paris.benoit.mob.cluster.loopback.distributed.KafkaClusterSenderRegistry;
+import paris.benoit.mob.cluster.loopback.local.LocalQueueClusterSenderRegistry;
+import paris.benoit.mob.front.JettyClusterReceiver;
 import paris.benoit.mob.front.JettyFront;
-import paris.benoit.mob.message.ToServerMessage;
 
 import java.util.List;
 
@@ -22,16 +24,9 @@ public class ServerRunner implements ClusterRunner {
         MobClusterConfiguration configuration = new MobClusterConfiguration(
                 apps,
                 new JettyFront(DEFAULT_FRONT_PORT),
-                new ClusterSender() {
-                    @Override
-                    public void sendMessage(ToServerMessage message) throws Exception {
-                        throw new RuntimeException("TODO do something about me");
-                    }
-                    @Override
-                    public ToServerMessage receive() throws Exception {
-                        throw new RuntimeException("TODO do something about me");
-                    }
-                },
+                new JettyClusterReceiver(),
+//                new LocalQueueClusterSenderRegistry(),
+                new KafkaClusterSenderRegistry(),
                 TimeCharacteristic.IngestionTime,
                 DEFAULT_STREAM_PARALLELISM,
                 DEFAULT_MAX_BUFFER_TIME_MILLIS,

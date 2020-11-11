@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.loopback.local;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.configuration.Configuration;
@@ -10,6 +10,7 @@ import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobTableConfiguration;
+import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.message.ToServerMessage;
 
 @SuppressWarnings("serial")
@@ -34,7 +35,7 @@ class LoopbackSourceFunction extends RichParallelSourceFunction<Row> {
         super.open(parameters);
         sender = new LocalQueueClusterSender();
         loopbackIndex = getRuntimeContext().getIndexOfThisSubtask();
-        ClusterRegistry.registerClusterSender(configuration.fullyQualifiedName(), sender, loopbackIndex);
+        GlobalClusterSenderRegistry.registerClusterSender(configuration.fullyQualifiedName(), sender, loopbackIndex);
         logger.info("Opening source #" + loopbackIndex + " (" + configuration.fullyQualifiedName() + ")");
     }
 
@@ -47,7 +48,7 @@ class LoopbackSourceFunction extends RichParallelSourceFunction<Row> {
 
             Row root = new Row(LoopbackTableSource.FIELD_COUNT);
             root.setField(0, loopbackIndex);
-            root.setField(1, msg.from);
+            root.setField(1, msg.client_id);
             root.setField(2, jrds.deserialize(msg.payload.toString().getBytes()));
             root.setField(3, "1"); // temporary, to be removed when Blink can to Tables and not TableSources
             root.setField(4, System.currentTimeMillis());
