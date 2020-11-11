@@ -1,7 +1,7 @@
 package paris.benoit.mob.cluster.utils;
 
 import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.TemporalTableFunction;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 

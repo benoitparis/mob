@@ -30,6 +30,12 @@
                 <flink.version>1.12-SNAPSHOT</flink.version>
             </properties>
         </profile>
+        <profile>
+            <id>1.11.2</id>
+            <properties>
+                <flink.version>1.11.2</flink.version>
+            </properties>
+        </profile>
     </profiles>
 
     <repositories>
@@ -338,11 +344,6 @@
 
         <!-- Kafka -->
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>kafka</artifactId>
-            <version>1.15.0</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
             <version>2.6.0</version>
@@ -356,11 +357,6 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.11.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>connect-json</artifactId>
-            <version>2.6.0</version>
         </dependency>
 
 

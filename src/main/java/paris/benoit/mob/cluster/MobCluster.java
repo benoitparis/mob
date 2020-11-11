@@ -1,16 +1,10 @@
 package paris.benoit.mob.cluster;
 
-import org.apache.flink.api.common.JobStatus;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
-import org.apache.flink.core.execution.JobClient;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.graph.StreamNode;
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableSchema;
-import org.apache.flink.table.api.ValidationException;
-import org.apache.flink.table.api.java.StreamTableEnvironment;
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.catalog.*;
 import org.apache.flink.table.catalog.exceptions.DatabaseAlreadyExistException;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
@@ -22,7 +16,10 @@ import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
 import paris.benoit.mob.cluster.loopback.local.LoopbackTableSink;
 import paris.benoit.mob.cluster.loopback.local.LoopbackTableSource;
-import paris.benoit.mob.cluster.services.*;
+import paris.benoit.mob.cluster.services.DebugTableSink;
+import paris.benoit.mob.cluster.services.DirectoryTableSource;
+import paris.benoit.mob.cluster.services.TickTableSource;
+import paris.benoit.mob.cluster.services.TwitterTableSink;
 import paris.benoit.mob.cluster.utils.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
 import paris.benoit.mob.cluster.utils.TableSchemaConverter;
@@ -33,7 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static paris.benoit.mob.cluster.utils.Colors.*;
+import static paris.benoit.mob.cluster.utils.Colors.cyan;
+import static paris.benoit.mob.cluster.utils.Colors.yellow;
 
 public class MobCluster {
     private static final Logger logger = LoggerFactory.getLogger(MobCluster.class);
@@ -73,14 +71,14 @@ public class MobCluster {
             registerDataFlow(app);
         }
 
-        String plan = sEnv.getExecutionPlan();
-        JobClient jobClient = sEnv.executeAsync();
+//        String plan = sEnv.getExecutionPlan();
+//        JobClient jobClient = sEnv.executeAsync();
+
 
         configuration.clusterFront.waitReady();
-        GlobalClusterSenderRegistry.waitRegistrationsReady();
 
         // TODO en faire qqch?
-        JobStatus status = jobClient.getJobStatus().get();
+//        JobStatus status = jobClient.getJobStatus().get();
 
         List<String> tables = Arrays.stream(tEnv.listCatalogs())
                 .flatMap(it -> {
@@ -102,17 +100,31 @@ public class MobCluster {
             })
         ;
 
+        GlobalClusterSenderRegistry.waitRegistrationsReady();
+
         logger.debug("Input schemas:\n" + KafkaSchemaRegistry.getInputSchemas());
         logger.debug("Output schemas:\n" + KafkaSchemaRegistry.getOutputSchemas());
 
-        logger.info("\n" + brightBlack(plan));
+        new Thread(() -> {
+            try {
+                // ptet y mettre le nom de l'app?
+                //tEnv.execute("job_name_TODO");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+
+//        logger.info("\n" + brightBlack(plan));
         logger.info("Plan ↑");
 
         logger.info("Tables: " + yellow(tablesString));
-        logger.info("Job is: " + yellow(status.toString()));
+//        logger.info("Job is: " + yellow(status.toString()));
         logger.info("Front: " + yellow(configuration.clusterFront.accessString()));
         logger.info("Web UI: " + yellow("http://localhost:" + configuration.flinkWebUiPort));
         logger.info(cyan("Mob Cluster is up"));
+
+
+        tEnv.execute("job_name_TODO");
     }
 
     private void setupEnvironment() {
@@ -200,8 +212,6 @@ public class MobCluster {
 
     private void registerDataFlow(MobAppConfiguration app) throws DatabaseNotExistException {
 
-        List<String> tables = catalog.listTables(app.name);
-        logger.info("Tables are: " + tables);
 
         for (MobTableConfiguration sqlConf: app.sql) {
             logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
@@ -237,6 +247,8 @@ public class MobCluster {
                 throw new RuntimeException("" + sqlConf, t);
             }
         }
+
+
 
     }
 }

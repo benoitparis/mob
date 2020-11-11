@@ -2,7 +2,6 @@ package paris.benoit.mob.cluster;
 
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.api.java.tuple.Tuple2;
-import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.table.api.TableSchema;
 import org.apache.flink.table.sinks.RetractStreamTableSink;
@@ -30,8 +29,9 @@ public abstract class RowRetractStreamTableSink extends RowTable implements Retr
         return super.getReturnType();
     }
 
-    @Override
-    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
-        consumeDataStream(ds);
-    }
+//    @Override
+//    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
+//        consumeDataStream(ds);
+//    }
+
 }
