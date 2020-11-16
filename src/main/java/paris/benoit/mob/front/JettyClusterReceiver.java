@@ -15,6 +15,7 @@ public class JettyClusterReceiver implements ClusterReceiver {
     public static void register(String name, JettyClusterMessageProcessor handler) {
         clients.put(name, handler);
     }
+
     public static void unRegister(String name) {
         // leak here: TODO manage better front handler lifecycle
         //clients.remove(name);

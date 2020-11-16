@@ -17,7 +17,7 @@ public class MobTableConfiguration implements Serializable {
     public enum CONF_TYPE {
         // TODO remove? ou bien adapt avec un pattern de l'action à faire (admin vs client vs js-engine? hey, on a toujours besoin des retracts)
         TABLE // TODO rename en VIEW? -> faire avec passage en yaml? Mettre juste insert ou update, pour suivre l'API Flink?
-        , STATE, UPDATE, JS_ENGINE, RETRACT, APPEND
+        , STATE, UPDATE, RETRACT, APPEND
     }
 
     public final String dbName;

@@ -13,7 +13,6 @@ import paris.benoit.mob.server.ClusterSender;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 class ClientSimulator {
     private static final Logger logger = LoggerFactory.getLogger(ClientSimulator.class);
@@ -58,12 +57,8 @@ class ClientSimulator {
         AppTestMessageRouter.registerClientSimulator(this);
 
         new Thread(() -> {
-            try {
-                clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name).get();
-                isReady = true;
-            } catch (InterruptedException | ExecutionException e) {
-                logger.debug("Problem getting a ClusterSender", e);
-            }
+            clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name);
+            isReady = true;
         }).start();
 
     }

@@ -15,8 +15,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 // TODO refactor ça avec le ClientSimulator
@@ -26,7 +24,6 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     private static final Logger logger = LoggerFactory.getLogger(JettyWebSocketHandler.class);
     public String name;
 
-    private CompletableFuture<Map<String, ClusterSender>> clusterSendersFuture;
     private Map<String, ClusterSender> clusterSenders;
     private RemoteEndpoint remote;
     private volatile boolean isRunning = true;
@@ -54,18 +51,9 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         logger.debug("onConnect: session=" + session);
         remote = session.getRemote();
         name = "fa-" + UUID.randomUUID().toString();
-        clusterSendersFuture = GlobalClusterSenderRegistry.getClusterSenders(name);
-        System.out.println(clusterSendersFuture);
-        try {
-            clusterSenders = clusterSendersFuture.get();
-            System.out.println(clusterSenders);
-        } catch (InterruptedException e) {
-            logger.debug("InterruptedException", e);
-        } catch (ExecutionException e) {
-            logger.debug("ExecutionException", e);
-        }
+        clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name);
+        System.out.println(clusterSenders);
         JettyClusterReceiver.register(this.name, this);
-
     }
 
     @OnWebSocketMessage

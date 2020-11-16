@@ -1,6 +1,5 @@
 package paris.benoit.mob.server;
 
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaClusterSenderRegistry;
@@ -24,9 +23,7 @@ public class ServerRunner implements ClusterRunner {
                 apps,
                 new JettyFront(DEFAULT_FRONT_PORT),
                 new JettyClusterReceiver(),
-//                new LocalQueueClusterSenderRegistry(),
                 new KafkaClusterSenderRegistry(),
-                TimeCharacteristic.IngestionTime,
                 DEFAULT_STREAM_PARALLELISM,
                 DEFAULT_MAX_BUFFER_TIME_MILLIS,
                 DEFAULT_FLINK_WEB_UI_PORT,

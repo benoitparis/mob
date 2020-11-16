@@ -76,6 +76,6 @@ public class KafkaSchemaRegistry {
         // strings pour le moment
         return propertiesMap.entrySet().stream()
                 .filter(it -> "js-engine".equals(it.getValue().get(MOB_CLUSTER_IO_TYPE)))
-                .collect(Collectors.toMap(it -> (String) it.getValue().get(MOB_CLUSTER_IO_FLOW), it -> it.getValue()));
+                .collect(Collectors.toMap(it -> (String) it.getValue().get(MOB_CLUSTER_IO_FLOW), Map.Entry::getValue));
     }
 }

@@ -1,15 +1,16 @@
 package paris.benoit.mob.test;
 
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.loopback.local.LocalQueueClusterSenderRegistry;
 import paris.benoit.mob.server.ClusterRunner;
+import paris.benoit.mob.server.ClusterSender;
+import paris.benoit.mob.server.ClusterSenderRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static paris.benoit.mob.cluster.utils.Colors.green;
 import static paris.benoit.mob.cluster.utils.Colors.red;
@@ -49,8 +50,14 @@ public class AppTestSuiteRunner implements ClusterRunner {
                 }},
                 front,
                 new AppTestMessageRouter(),
-                new LocalQueueClusterSenderRegistry(),
-                TimeCharacteristic.IngestionTime,
+                new ClusterSenderRegistry() {
+                    @Override
+                    public void setConf(MobClusterConfiguration configuration) {}
+                    @Override
+                    public void waitRegistrationsReady() throws InterruptedException {}
+                    @Override
+                    public Map<String, ClusterSender> getClusterSenders(String random) {return null;}
+                }, // TODO fix test
                 3,
                 50,
                 null,

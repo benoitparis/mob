@@ -4,10 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
-import org.apache.flink.table.catalog.Catalog;
-import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
-import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
-import org.apache.flink.table.sources.StreamTableSource;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,20 +46,5 @@ public class AppendStreamTableUtils {
         }
     }
 
-    // FIXME https://issues.apache.org/jira/browse/FLINK-15775
-    public static void createAndRegisterTableSourceDoMaterializeAsAppendStream(String appName, StreamTableEnvironment tEnv, Catalog catalog, StreamTableSource tableSource, String name) throws TableAlreadyExistException, DatabaseNotExistException {
-
-        Table rawTable = tEnv.fromTableSource(tableSource);
-
-        DataStream<Row> appendStream = tEnv.toAppendStream(rawTable, Row.class);
-
-        logger.info("Registering as Table: " + appName + "." + name);
-        tEnv.createTemporaryView(appName + "." + name, tEnv.fromDataStream(appendStream,
-                StringUtils.join(rawTable.getSchema().getFieldNames(), ", ") +
-                ", proctime_append_stream.proctime"
-            )
-        );
-
-    }
 
 }

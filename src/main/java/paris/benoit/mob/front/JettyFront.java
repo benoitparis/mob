@@ -13,14 +13,15 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.PathResource;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterFront;
-import paris.benoit.mob.server.ClusterReceiver;
 
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class JettyFront implements ClusterFront {
+
     private final int port;
     private final String baseUrl;
     private MobClusterConfiguration configuration;
@@ -39,7 +40,6 @@ public class JettyFront implements ClusterFront {
         connector.setPort(port);
 
         server.setConnectors(new Connector[]{connector});
-
 
         String mainApp = configuration.apps.get(0).name;
 
@@ -65,7 +65,7 @@ public class JettyFront implements ClusterFront {
                 }
             ).collect(Collectors.toList());
 
-        Handler[] handlersArray = fileHandlers.stream().collect(Collectors.toList()).toArray(new Handler[]{});
+        Handler[] handlersArray = new ArrayList<>(fileHandlers).toArray(new Handler[]{});
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(handlersArray);
 

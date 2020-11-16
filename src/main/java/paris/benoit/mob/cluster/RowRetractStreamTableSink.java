@@ -29,9 +29,5 @@ public abstract class RowRetractStreamTableSink extends RowTable implements Retr
         return super.getReturnType();
     }
 
-//    @Override
-//    public void emitDataStream(DataStream<Tuple2<Boolean, Row>> ds) {
-//        consumeDataStream(ds);
-//    }
 
 }

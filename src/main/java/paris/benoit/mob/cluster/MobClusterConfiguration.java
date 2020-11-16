@@ -1,9 +1,7 @@
 package paris.benoit.mob.cluster;
 
-import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.server.ClusterFront;
 import paris.benoit.mob.server.ClusterReceiver;
-import paris.benoit.mob.server.ClusterSender;
 import paris.benoit.mob.server.ClusterSenderRegistry;
 
 import java.util.List;
@@ -17,7 +15,6 @@ public class MobClusterConfiguration {
     public final ClusterSenderRegistry clusterSenderRegistry;
     public final ClusterReceiver clusterReceiver;
 
-    final TimeCharacteristic processingTime;
     public final int streamParallelism;
     final int maxBufferTimeMillis;
     final Integer flinkWebUiPort;
@@ -31,14 +28,12 @@ public class MobClusterConfiguration {
             ClusterFront clusterFront,
             ClusterReceiver clusterReceiver,
             ClusterSenderRegistry clusterSenderRegistry,
-            TimeCharacteristic processingTime,
             int streamParallelism,
             int maxBufferTimeMillis,
             Integer flinkWebUiPort,
             ENV_MODE mode) {
 
         super();
-        this.processingTime = processingTime;
         this.streamParallelism = streamParallelism;
         this.maxBufferTimeMillis = maxBufferTimeMillis;
         this.flinkWebUiPort = flinkWebUiPort;

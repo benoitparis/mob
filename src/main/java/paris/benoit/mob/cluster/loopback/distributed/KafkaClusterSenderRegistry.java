@@ -7,7 +7,6 @@ import paris.benoit.mob.server.ClusterSenderRegistry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.CompletableFuture;
 
 public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
 
@@ -15,15 +14,9 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
     Properties props = new Properties();
 
     {
-
         props.put("bootstrap.servers", "localhost:9092");
         // TODO mettre les mob.cluster-io.type distincts collectés
         props.put("group.id", "clients");
-    }
-
-    @Override
-    public void registerClusterSender(String fullName, ClusterSender sender, Integer loopbackIndex) {
-        // do nothing
     }
 
     @Override
@@ -32,24 +25,19 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
     }
 
     @Override
-    public void waitRegistrationsReady() throws InterruptedException {
-        // do nothing
-        KafkaSchemaRegistry.getOutputSchemas().entrySet().stream()
-            .forEach(it -> new KafkaClusterConsumer(props, it.getKey(), configuration.clusterReceiver).start());
+    public void waitRegistrationsReady() {
+        // TODO nothing to wait for, remove?
+        // TODO refactor interface
+        KafkaSchemaRegistry.getOutputSchemas().forEach((key, value) -> new KafkaClusterConsumer(props, key, configuration.clusterReceiver).start());
 
     }
 
     @Override
-    public CompletableFuture<Map<String, ClusterSender>> getClusterSenders(String random) {
-        return CompletableFuture.supplyAsync(() -> {
-            HashMap<String, ClusterSender> result = new HashMap<>();
+    public Map<String, ClusterSender> getClusterSenders(String random) {
+        HashMap<String, ClusterSender> result = new HashMap<>();
 
-            KafkaSchemaRegistry.getInputSchemas().entrySet().stream()
-                .forEach(it -> result.put(it.getKey(), new KafkaClusterSender(props, it.getKey())));
+        KafkaSchemaRegistry.getInputSchemas().forEach((key, value) -> result.put(key, new KafkaClusterSender(props, key)));
 
-
-            return result;
-        });
-
+        return result;
     }
 }

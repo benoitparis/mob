@@ -11,12 +11,9 @@ import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.js.JsTableEngine;
 import paris.benoit.mob.cluster.js.external.ExternalJsEngine;
 import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
-import paris.benoit.mob.cluster.loopback.local.LoopbackTableSink;
-import paris.benoit.mob.cluster.loopback.local.LoopbackTableSource;
 import paris.benoit.mob.cluster.services.DebugTableSink;
 import paris.benoit.mob.cluster.services.DirectoryTableSource;
 import paris.benoit.mob.cluster.services.TickTableSource;
@@ -57,9 +54,8 @@ public class MobCluster {
         //   - have an env > service > apps > exec > info
         //   - for each app: IO > DataFlow
         setupEnvironment();
-        GlobalClusterSenderRegistry.setConf(
-                configuration
-        );
+        configuration.clusterSenderRegistry.setConf(configuration);
+        GlobalClusterSenderRegistry.setConf(configuration);
         configuration.clusterFront.configure(configuration);
 
         configuration.clusterFront.start();
@@ -102,7 +98,7 @@ public class MobCluster {
 
         ExternalJsEngine.scanAndCreateJsEngine();
 
-        GlobalClusterSenderRegistry.waitRegistrationsReady();
+        configuration.clusterSenderRegistry.waitRegistrationsReady();
 
         logger.debug("Input schemas:\n" + KafkaSchemaRegistry.getInputSchemas());
         logger.debug("Output schemas:\n" + KafkaSchemaRegistry.getOutputSchemas());
@@ -133,12 +129,8 @@ public class MobCluster {
             sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
         } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
             sEnv = StreamExecutionEnvironment.createLocalEnvironment();
-        } else if (MobClusterConfiguration.ENV_MODE.REMOTE.equals(configuration.mode)) {
-            // TODO investigate jar and get vs remote
-            sEnv = StreamExecutionEnvironment.createRemoteEnvironment("127.0.0.1", 8081);
         }
-        
-        sEnv.setStreamTimeCharacteristic(configuration.processingTime);
+
         // TODO sort out setParallelism vs setMaxParallelism
         sEnv.setParallelism(configuration.streamParallelism);
         sEnv.setMaxParallelism(configuration.streamParallelism); // "It also defines the number of key groups used for partitioned state. "
@@ -183,31 +175,6 @@ public class MobCluster {
         );
     }
 
-    private void registerInputOutputTables(MobAppConfiguration app) throws TableAlreadyExistException, DatabaseNotExistException {
-
-        for (MobTableConfiguration inSchema: app.inSchemas) {
-            AppendStreamTableUtils.createAndRegisterTableSourceDoMaterializeAsAppendStream(app.name, tEnv, catalog, new LoopbackTableSource(inSchema), inSchema.name);
-//            catalog.createTable(
-//                new ObjectPath(app.name, inSchema.name),
-//                    ConnectorCatalogTable.source(new LoopbackTableSource(inSchema), false),
-//                    false
-//            )
-//            ;
-
-
-        }
-
-        for (MobTableConfiguration outSchema: app.outSchemas) {
-            catalog.createTable(
-                    new ObjectPath(app.name, outSchema.name),
-                    ConnectorCatalogTable.sink(new LoopbackTableSink(outSchema, configuration.clusterReceiver), false),
-                    false
-            );
-            logger.debug("Registered Table Sink: " + outSchema);
-        }
-        
-    }
-
     private void registerDataFlow(MobAppConfiguration app) throws DatabaseNotExistException {
 
 
@@ -235,9 +202,6 @@ public class MobCluster {
                         // TODO refactor avec des statements, pour tout mettre en même temps, et que ça optimize
                         tEnv.sqlUpdate(sqlConf.content);
 //                        tEnv.executeSql(sqlConf.content);
-                        break;
-                    case JS_ENGINE:
-                        JsTableEngine.createAndRegister(catalog, sqlConf);
                         break;
                         default:
                             throw new RuntimeException("No SQL type was specified");

@@ -17,12 +17,9 @@ public class ToClientMessage {
 
     @JsonProperty
     public JsonNode payload = null;
-    
-    public ToClientMessage(String client_id, String table, String payload) {
-        this.client_id = client_id;
-        this.table = table;
-//        this.payload = payload;
-    }
+
+    // Jackson needs it
+    public ToClientMessage() {}
 
     public static ToClientMessage fromString(String value, String tableName) {
         System.out.println(value);
@@ -50,9 +47,6 @@ public class ToClientMessage {
     public String toJson() {
         return "{ \"table\" : \"" + table + "\", \"payload\" : " + payload + "}" ;
     }
-
-    // Jackson en a besoin
-    public ToClientMessage() {}
 
     public void setClient_id(String client_id) {
         this.client_id = client_id;

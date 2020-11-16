@@ -33,14 +33,12 @@ import java.util.Properties;
 public class ExternalJsEngine {
     private static final Logger logger = LoggerFactory.getLogger(ExternalJsEngine.class);
 
-    private static final int JS_QUEUE_CAPACITY = 100;
-
     public static void scanAndCreateJsEngine() throws IOException, ScriptException, InterruptedException {
 
         Map<String, Properties> jsConf = KafkaSchemaRegistry.getJsEngineConfiguration();
         logger.info("Creating js engine with schemas: " + jsConf);
-        if (null != jsConf) {
-            if (2 < jsConf.entrySet().size()) {
+        if (null != jsConf && jsConf.size() > 0) {
+            if (2 < jsConf.size()) {
                 throw new RuntimeException("Only one js engine can be created at a time");
             }
             // TODO avoir les deux dasn une même fichier?
@@ -99,7 +97,7 @@ public class ExternalJsEngine {
 
     }
 
-    private static ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private static Map convertJsonStringToMap(String json) throws JsonProcessingException {
         return mapper.readValue(json, Map.class);

@@ -22,7 +22,7 @@ public class KafkaClusterSender implements ClusterSender {
         this.props.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
         this.props.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
         this.tableName = tableName;
-        this.producer = new KafkaProducer(this.props);
+        this.producer = new KafkaProducer<>(this.props);
     }
 
     @Override
