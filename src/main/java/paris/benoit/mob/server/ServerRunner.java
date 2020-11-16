@@ -4,7 +4,6 @@ import org.apache.flink.streaming.api.TimeCharacteristic;
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaClusterSenderRegistry;
-import paris.benoit.mob.cluster.loopback.local.LocalQueueClusterSenderRegistry;
 import paris.benoit.mob.front.JettyClusterReceiver;
 import paris.benoit.mob.front.JettyFront;
 
@@ -33,9 +32,10 @@ public class ServerRunner implements ClusterRunner {
                 DEFAULT_FLINK_WEB_UI_PORT,
                 MobClusterConfiguration.ENV_MODE.LOCAL_UI
         );
-        MobCluster registry = new MobCluster(configuration);
 
-        registry.start();
+        // TODO change name, genre "deploy-app-job"
+        MobCluster cluster = new MobCluster(configuration);
+        cluster.start();
 
     }
 }

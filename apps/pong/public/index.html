@@ -87,7 +87,7 @@
     scaleRect(state.game.ballX - ballRadius, state.game.ballY - ballRadius, ballDiameter, ballDiameter);
     
     if (state.click_count) {
-      text("click_count: " + state.click_count.global, 0, 0, 100, 50);
+      text("click_count: " + state.click_count.count_value, 0, 0, 100, 50);
     }
     
     
@@ -116,10 +116,12 @@
   function processServerMessage(evt) {
     //logEvent(JSON.stringify(JSON.parse(evt.data)));
     var msg = JSON.parse(evt.data);
-    if (msg.table === 'ack_side') {
+    //console.log(msg);
+    if (msg.table === 'mobcatalog.pong.ack_side') {
+      console.log(msg);
       state.side = msg.payload.side;
       updateSide();
-    } else if (msg.table === 'game_out_to_client') {
+    } else if (msg.table === 'mobcatalog.pong.game_out_to_client') {
       state.game = Object.assign({}, msg.payload);
       receivedGameData = Object.assign({}, msg.payload);
       minClockDifferenceLocalVsServerMs = Math.min(
@@ -127,10 +129,12 @@
         new Date().getTime() - receivedGameData.gameStateTime
       );
       updateScoresAndCounts();
-    } else if (msg.table === 'user_count') {
+    } else if (msg.table === 'mobcatalog.pong.user_count') {
+      console.log(msg);
       state.user_count = msg.payload;
       updateScoresAndCounts();
-    } else if (msg.table === 'click_count') {
+    } else if (msg.table === 'mobcatalog.pong.click_count') {
+      console.log(msg);
       state.click_count = msg.payload;
     } else {
       console.log('received msg of unknown table:');
@@ -145,7 +149,7 @@
     if (ws && ws.readyState === WebSocket.OPEN) {
       var serverMsg = {
         intent : 'WRITE',
-        table : 'pong.' + table, // TODO+ trouver un moyen d'avoir le nom de l'app dans la lib
+        table : 'mobcatalog.pong.' + table, // TODO+ trouver un moyen d'avoir le nom de l'app dans la lib
         payload : msg
       };
       ws.send(JSON.stringify(serverMsg));

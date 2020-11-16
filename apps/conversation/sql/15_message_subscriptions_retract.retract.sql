@@ -1,0 +1,2 @@
+CREATE TABLE message_subscriptions_retract AS
+CONVERT message_subscriptions TO RETRACT STREAM

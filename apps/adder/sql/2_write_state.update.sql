@@ -6,7 +6,8 @@
 CREATE TABLE write_state (
   client_id STRING,
   payload ROW(k STRING),
-  proctime AS PROCTIME()
+  ts AS localtimestamp,
+  WATERMARK FOR ts AS ts
 ) WITH (
   'connector.type' = 'kafka',
   'connector.version' = 'universal',

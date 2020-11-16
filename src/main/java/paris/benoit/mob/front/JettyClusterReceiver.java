@@ -23,6 +23,7 @@ public class JettyClusterReceiver implements ClusterReceiver {
 
     @Override
     public void receiveMessage(ToClientMessage message) {
+        System.out.println(message);
         JettyClusterMessageProcessor client = clients.get(message.client_id);
 
         if (null != client) {

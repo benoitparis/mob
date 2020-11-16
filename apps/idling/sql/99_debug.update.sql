@@ -9,47 +9,42 @@ SELECT
   COALESCE(CAST((sEnd IS NULL OR (CAST(tsActivity AS TIMESTAMP) > CAST(sEnd AS TIMESTAMP))) AS VARCHAR), '') || ' - ' 
 FROM (
   SELECT
-    activity.loopback_index,
-    activity.actor_identity,
+    activity.client_id,
     activity.tsActivity,
     inactivity.clicks,
     inactivity.sEnd
   FROM (
     SELECT
-      loopback_index,
-      actor_identity,
-      LAST_VALUE(CAST(proctime_append_stream AS VARCHAR)) AS tsActivity
+      client_id,
+      LAST_VALUE(CAST(ts AS VARCHAR)) AS tsActivity
     FROM write_state
-    GROUP BY loopback_index, actor_identity
+    GROUP BY client_id
   ) AS activity
   LEFT JOIN
   (
     SELECT
-      loopback_index,
-      actor_identity,
+      client_id,
       LAST_VALUE(clicks) AS clicks,
       LAST_VALUE(CAST(sEnd AS VARCHAR)) AS sEnd
     FROM (
       SELECT
-        loopback_index,
-        actor_identity,
+        client_id,
         count(*) clicks,
-        SESSION_END(write_state.proctime_append_stream, INTERVAL '10' SECOND) sEnd
+        SESSION_END(write_state.ts, INTERVAL '10' SECOND) sEnd
       FROM write_state
-      GROUP BY loopback_index, actor_identity, SESSION(write_state.proctime_append_stream, INTERVAL '10' SECOND)
+      GROUP BY client_id, SESSION(write_state.ts, INTERVAL '10' SECOND)
     )
-    GROUP BY loopback_index, actor_identity
+    GROUP BY client_id
   ) inactivity
-  ON activity.actor_identity = inactivity.actor_identity
+  ON activity.client_id = inactivity.client_id
 )
 
 UNION
 
 SELECT
   COALESCE(CAST('sessions' AS VARCHAR), '')                                                            || ' - ' ||
-  COALESCE(CAST(loopback_index AS VARCHAR), '')                                                        || ' - ' ||
-  COALESCE(CAST(actor_identity AS VARCHAR), '')                                                        || ' - ' ||
+  COALESCE(CAST(client_id AS VARCHAR), '')                                                             || ' - ' ||
   COALESCE(CAST(count(*) AS VARCHAR), '')                                                              || ' - ' ||
-  COALESCE(CAST(SESSION_END(write_state.proctime_append_stream, INTERVAL '10' SECOND) AS VARCHAR), '') || ' - ' 
+  COALESCE(CAST(SESSION_END(write_state.ts, INTERVAL '10' SECOND) AS VARCHAR), '') || ' - ' 
 FROM write_state
-GROUP BY loopback_index, actor_identity, SESSION(write_state.proctime_append_stream, INTERVAL '10' SECOND)
+GROUP BY client_id, SESSION(write_state.ts, INTERVAL '10' SECOND)

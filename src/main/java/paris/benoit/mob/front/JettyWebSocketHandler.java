@@ -94,14 +94,16 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     {
         // FIXME can't wait for virtual threads
         //   actually orthogonal. use futures?
+        //   can't wait for scopes? for structured concurrency?
         new Thread(() -> {
             while(isRunning) {
                 try {
                     ToClientMessage msg = queue.take();
-                    // one at a time
+                    logger.debug("Sent Client: " + msg);
+                    // one at a time, could compress?
                     remote.sendString(msg.toJson());
                 } catch (InterruptedException | IOException e) {
-                    logger.error("error in dequeing to send client", e);
+                    logger.error("error in dequeuing to send client", e);
                 }
             }
         }).start();

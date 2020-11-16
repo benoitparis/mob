@@ -1,9 +1,15 @@
 INSERT INTO send_client
 SELECT
-  client_id,
+  qs.client_id,
   ROW(
-    CAST(key_count AS VARCHAR)
+    CAST(kvs.key_count AS VARCHAR)
   )
-FROM (SELECT client_id, k, proctime FROM query_state) AS qs
-   , LATERAL TABLE (kv_state(qs.proctime)) AS kvs
-WHERE qs.k = kvs.k
+FROM (
+  SELECT
+    client_id,
+    payload.k AS k,
+    ts
+  FROM query_state
+) AS qs
+LEFT JOIN write_state_mef FOR SYSTEM_TIME AS OF qs.ts AS kvs
+  ON kvs.k = qs.k

@@ -15,7 +15,9 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
     Properties props = new Properties();
 
     {
+
         props.put("bootstrap.servers", "localhost:9092");
+        // TODO mettre les mob.cluster-io.type distincts collectés
         props.put("group.id", "clients");
     }
 
@@ -32,7 +34,6 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
     @Override
     public void waitRegistrationsReady() throws InterruptedException {
         // do nothing
-        System.out.println(props);
         KafkaSchemaRegistry.getOutputSchemas().entrySet().stream()
             .forEach(it -> new KafkaClusterConsumer(props, it.getKey(), configuration.clusterReceiver).start());
 

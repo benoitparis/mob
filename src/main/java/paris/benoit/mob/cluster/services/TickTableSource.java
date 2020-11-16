@@ -13,6 +13,7 @@ public class TickTableSource extends RowStreamTableSource implements DefinedProc
     private static final String[] FIELD_NAMES = new String[] {
             "tick_number",
             "constant_dummy_source",
+            // TODO rename
             "proctime_append_stream"
     };
     private final DataType[] FIELD_TYPES = new DataType[] {

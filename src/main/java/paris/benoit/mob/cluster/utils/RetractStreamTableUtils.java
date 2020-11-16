@@ -19,10 +19,14 @@ public class RetractStreamTableUtils {
         Matcher m = RETRACT_TABLE_PATTERN.matcher(state.content);
 
         if (m.matches()) {
+            System.out.println(m.group(2));
+
             String fromTableName = m.group(2);
 
+            // TODO faire avec .from
             Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);
             DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, fromTable.getSchema().toRowType());
+//            DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, Row.class);
             Table retractTable = tEnv.fromDataStream(retractStream, "accumulate_flag, content");
             tEnv.createTemporaryView(state.getObjectPath().getFullName(), retractTable);
 

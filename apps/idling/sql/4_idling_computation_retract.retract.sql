@@ -1,0 +1,2 @@
+CREATE TABLE idling_computation_retract AS
+CONVERT idling_computation TO RETRACT STREAM

@@ -17,6 +17,8 @@ public class DebugTableSink extends RowRetractStreamTableSink {
     public DebugTableSink() {
         fieldNames = new String[] { "debug_info" };
         fieldTypes = new DataType[] { DataTypes.STRING() };
+        // TODO avoir un topic kafka? genre un par app, et puis un global (ou bien pour les services)
+        //   -> pas besoin de le créer avec ça du coup? vu que ça irait dans kafka
         sinkFunction = new RichSinkFunction<Tuple2<Boolean, Row>>() {
             @Override
             public void invoke(Tuple2<Boolean, Row> value, Context context) {

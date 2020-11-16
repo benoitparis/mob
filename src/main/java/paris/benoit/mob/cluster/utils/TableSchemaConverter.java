@@ -38,6 +38,16 @@ public class TableSchemaConverter {
             return formatProp(pair, "string", Collections.emptyList(), level);
         } else if (pair.type instanceof BigIntType) {
             return formatProp(pair, "number", Collections.emptyList(), level);
+        } else if (pair.type instanceof IntType) {
+            return formatProp(pair, "number", Collections.emptyList(), level);
+        } else if (pair.type instanceof DoubleType) {
+            return formatProp(pair, "number", Collections.emptyList(), level);
+        } else if (pair.type instanceof DecimalType) {
+            return formatProp(pair, "number", Collections.emptyList(), level);
+        } else if (pair.type instanceof BooleanType) {
+            // TODO https://stackoverflow.com/questions/16825108/json-schema-how-do-i-specify-that-a-boolean-value-must-be-false
+            //   "some_flag": { "enum": [ false ] }
+            return formatProp(pair, "string", Collections.emptyList(), level);
         } else if (pair.type instanceof RowType) {
             RowType logicalTypeCasted = (RowType) pair.type;
             List<NameTypePair> list = logicalTypeCasted.getFields().stream()
@@ -45,6 +55,11 @@ public class TableSchemaConverter {
                     .collect(Collectors.toList()
             );
             return formatProp(pair, "object", list, level);
+        } else if (pair.type instanceof LegacyTypeInformationType) {
+            LegacyTypeInformationType logicalTypeCasted = (LegacyTypeInformationType) pair.type;
+            // TODO ?
+            return new StringBuffer("");
+
         }
         throw new RuntimeException("Unknown type: " + pair);
     }

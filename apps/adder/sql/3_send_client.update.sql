@@ -1,11 +1,11 @@
 /* +moblib (
-  mob.client-io.category = input
+  mob.client-io.category = output
   mob.table-name=mobcatalog.adder.send_client
 )
 */
 CREATE TABLE send_client (
   client_id STRING,
-  payload ROW(key_count STRING) 
+  payload ROW(key_count STRING)
 ) WITH (
   'connector.type' = 'kafka',
   'connector.version' = 'universal',

@@ -28,7 +28,7 @@ public class KafkaClusterSender implements ClusterSender {
     @Override
     public void sendMessage(ToServerMessage message) throws Exception {
 
-        ProducerRecord<String, String> msg = new ProducerRecord<>("mobcatalog.ack.write_value", message.toJsonString());
+        ProducerRecord<String, String> msg = new ProducerRecord<>(tableName, message.toJsonString());
         producer.send(msg);
         System.out.println("sent : " + msg);
     }

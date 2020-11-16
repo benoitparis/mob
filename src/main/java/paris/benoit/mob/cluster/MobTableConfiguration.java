@@ -3,12 +3,10 @@ package paris.benoit.mob.cluster;
 import org.apache.flink.table.catalog.ObjectPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.local.LoopbackTableSource;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
-import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +15,7 @@ public class MobTableConfiguration implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(MobTableConfiguration.class);
 
     public enum CONF_TYPE {
+        // TODO remove? ou bien adapt avec un pattern de l'action à faire (admin vs client vs js-engine? hey, on a toujours besoin des retracts)
         TABLE // TODO rename en VIEW? -> faire avec passage en yaml? Mettre juste insert ou update, pour suivre l'API Flink?
         , STATE, UPDATE, JS_ENGINE, RETRACT, APPEND
     }
@@ -25,6 +24,8 @@ public class MobTableConfiguration implements Serializable {
     public final String name;
     final CONF_TYPE confType;
     public final String content;
+
+    // TODO interpret avec Properties, store as HashMap (pour le masking des defaults)
     public final Properties properties;
 
     public MobTableConfiguration(String dbName, String name, String content, CONF_TYPE confType) throws IOException {

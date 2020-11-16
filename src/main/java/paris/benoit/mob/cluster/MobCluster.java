@@ -12,6 +12,7 @@ import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.js.JsTableEngine;
+import paris.benoit.mob.cluster.js.external.ExternalJsEngine;
 import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
 import paris.benoit.mob.cluster.loopback.local.LoopbackTableSink;
@@ -67,13 +68,12 @@ public class MobCluster {
         for(MobAppConfiguration app : configuration.apps) {
             catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<>(), null), false);
             tEnv.useDatabase(app.name);
-            registerInputOutputTables(app);
+            //registerInputOutputTables(app);
             registerDataFlow(app);
         }
 
 //        String plan = sEnv.getExecutionPlan();
 //        JobClient jobClient = sEnv.executeAsync();
-
 
         configuration.clusterFront.waitReady();
 
@@ -100,19 +100,12 @@ public class MobCluster {
             })
         ;
 
+        ExternalJsEngine.scanAndCreateJsEngine();
+
         GlobalClusterSenderRegistry.waitRegistrationsReady();
 
         logger.debug("Input schemas:\n" + KafkaSchemaRegistry.getInputSchemas());
         logger.debug("Output schemas:\n" + KafkaSchemaRegistry.getOutputSchemas());
-
-        new Thread(() -> {
-            try {
-                // ptet y mettre le nom de l'app?
-                //tEnv.execute("job_name_TODO");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }).start();
 
 //        logger.info("\n" + brightBlack(plan));
         logger.info("Plan ↑");
@@ -123,12 +116,17 @@ public class MobCluster {
         logger.info("Web UI: " + yellow("http://localhost:" + configuration.flinkWebUiPort));
         logger.info(cyan("Mob Cluster is up"));
 
+        // TODO utiliser les StatementSet.execute, quand on aura le support des temporal table en DDL
+        // TODO utiliser les StatementSet.execute, pour avoir le résultat du plan à la fin
+        // TODO utiliser les StatementSet.execute, pour chopper le result, et chopper un schema directement, et le register dans la foulée?
+        // TODO faire un StatementSet.execute, et le mettre pas à la fin
 
         tEnv.execute("job_name_TODO");
     }
 
     private void setupEnvironment() {
 
+        // TODO rework deployment et faire un seul type de lancement
         if (MobClusterConfiguration.ENV_MODE.LOCAL_UI.equals(configuration.mode)) {
             Configuration conf = new Configuration();
             conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
@@ -146,10 +144,10 @@ public class MobCluster {
         sEnv.setMaxParallelism(configuration.streamParallelism); // "It also defines the number of key groups used for partitioned state. "
         sEnv.setBufferTimeout(configuration.maxBufferTimeMillis);
         
-        EnvironmentSettings bsSettings = 
+        EnvironmentSettings bsSettings =
             EnvironmentSettings.newInstance()
-                .useBlinkPlanner()
-                .inStreamingMode()
+                .useBlinkPlanner() // TODO remove, is default
+                .inStreamingMode() // TODO remove, is default
             .build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
 
@@ -221,6 +219,7 @@ public class MobCluster {
                 }
                 switch (sqlConf.confType) {
                     case TABLE:
+                        // TODO remove, Obsolete avec le CREATE VIEW; et ça va dans le update
                         tEnv.createTemporaryView(sqlConf.fullyQualifiedName(), tEnv.sqlQuery(sqlConf.content));
                         break;
                     case STATE:
@@ -233,7 +232,9 @@ public class MobCluster {
                         AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
                     case UPDATE:
+                        // TODO refactor avec des statements, pour tout mettre en même temps, et que ça optimize
                         tEnv.sqlUpdate(sqlConf.content);
+//                        tEnv.executeSql(sqlConf.content);
                         break;
                     case JS_ENGINE:
                         JsTableEngine.createAndRegister(catalog, sqlConf);

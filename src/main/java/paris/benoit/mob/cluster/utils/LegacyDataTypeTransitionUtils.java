@@ -39,7 +39,7 @@ public class LegacyDataTypeTransitionUtils {
 //            }
 //        }
 //        return result;
-        return null;
+        return currentType;
 
     }
 

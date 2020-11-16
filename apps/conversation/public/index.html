@@ -12,11 +12,11 @@
 	};
 	function doOnMessage(evt) {
     var msg = JSON.parse(evt.data);
-    log('Received payload: ' + JSON.stringify(msg.payload) + '\n');
-    if (msg.table === 'messages') {
+    log('Received msg: ' + JSON.stringify(msg) + '\n');
+    if (msg.table === 'mobcatalog.conversation.messages') {
       displayMessage(msg.payload);
     }
-    if (msg.table === 'apps') {
+    if (msg.table === 'mobcatalog.conversation.apps') {
       displayApp(msg.payload);
     }
 	};
@@ -38,12 +38,12 @@
 			var serverMsg = {
 				intent : 'WRITE',
         // can be root
-        table : 'conversation.' + table,
+        table : 'mobcatalog.conversation.' + table,
 				payload : msg
 			};
 			console.log(serverMsg);
 			ws.send(JSON.stringify(serverMsg));
-      log('Sent payload    : ' + JSON.stringify(msg) + '\n');
+      log('Sent to table: ' + table + ', payload : ' + JSON.stringify(msg) + '\n');
 		}
   }
   
@@ -72,7 +72,7 @@
   }
   
   function log(str) {
-    document.getElementById("console").value += str;
+    console.log(str);
   }
   function displayApp(payload) {
     if ('conversation' !== payload.app_name) {

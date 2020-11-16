@@ -30,16 +30,15 @@ public class KafkaClusterConsumer {
     }
 
     public void start() {
-
         // TODO get static local JVM UUID
-        consumer.subscribe(Collections.singleton("mobcatalog.ack.send_client"));
+        consumer.subscribe(Collections.singleton(tableName));
 
         // TODO et comment on stoppe gracefully?
         new Thread(() -> {
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
-                records.records("mobcatalog.ack.send_client").forEach((it) -> {
-                    clusterReceiver.receiveMessage(ToClientMessage.fromString(it.value()));
+                records.records(tableName).forEach((it) -> {
+                    clusterReceiver.receiveMessage(ToClientMessage.fromString(it.value(), tableName));
                 });
             }
         }).start();

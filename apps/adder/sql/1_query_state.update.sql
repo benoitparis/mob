@@ -5,8 +5,9 @@
 */
 CREATE TABLE query_state (
   client_id STRING,
-  proctime AS PROCTIME(),
-  payload ROW(k STRING) 
+  payload ROW(k STRING),
+  ts AS localtimestamp,
+  WATERMARK FOR ts AS ts
 ) WITH (
   'connector.type' = 'kafka',
   'connector.version' = 'universal',

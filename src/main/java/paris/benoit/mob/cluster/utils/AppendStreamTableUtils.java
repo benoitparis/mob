@@ -23,13 +23,15 @@ public class AppendStreamTableUtils {
     private static final String APPEND_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO APPEND STREAM(.*)";
     private static final Pattern APPEND_TABLE_PATTERN = Pattern.compile(APPEND_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
+    // TODO remove au profit de kafka-upsert, et d'un éventuel EMIT CHANGESTREAM
     public static void convertAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = APPEND_TABLE_PATTERN.matcher(state.content);
 
         if (m.matches()) {
             String fromTableName = m.group(2);
 
-            Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);
+            Table fromTable = tEnv.from(fromTableName);
+
             DataStream<Row> filteredRetractStream = tEnv
                     .toRetractStream(fromTable, fromTable.getSchema().toRowType())
 //                    .toRetractStream(fromTable, Row.class) // very weird bug: not called, yet makes the ball flicker

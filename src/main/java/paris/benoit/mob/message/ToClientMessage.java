@@ -24,12 +24,12 @@ public class ToClientMessage {
 //        this.payload = payload;
     }
 
-    public static ToClientMessage fromString(String value) {
+    public static ToClientMessage fromString(String value, String tableName) {
         System.out.println(value);
         ObjectMapper mapper = new ObjectMapper();
         try {
             ToClientMessage result = mapper.readValue(value, ToClientMessage.class);
-
+            result.table = tableName;
 
             return result;
         } catch (JsonProcessingException e) {
