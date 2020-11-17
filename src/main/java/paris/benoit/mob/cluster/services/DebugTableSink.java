@@ -26,6 +26,7 @@ public class DebugTableSink extends RowRetractStreamTableSink {
             }
         };
         name = "Debug DataStreamSink";
+
     }
 
     @Override

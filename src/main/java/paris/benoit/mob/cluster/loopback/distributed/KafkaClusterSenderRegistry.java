@@ -30,6 +30,7 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
         // TODO refactor interface
         KafkaSchemaRegistry.getOutputSchemas().forEach((key, value) -> new KafkaClusterConsumer(props, key, configuration.clusterReceiver).start());
 
+
     }
 
     @Override

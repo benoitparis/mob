@@ -12,7 +12,7 @@ FROM (
       SELECT
         client_id,
         true active,
-        LAST_VALUE(ts) ts
+        MAX(ts) ts
       FROM write_y
       GROUP BY client_id
       
@@ -21,9 +21,9 @@ FROM (
       SELECT
         client_id,
         false active,
-        SESSION_END(ts, INTERVAL '20' SECOND) ts
+        SESSION_END(ts, INTERVAL '3' SECOND) ts
       FROM write_y
-      GROUP BY client_id, SESSION(ts, INTERVAL '20' SECOND)
+      GROUP BY client_id, SESSION(ts, INTERVAL '3' SECOND)
     
     )
   )

@@ -4,7 +4,6 @@ import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterSender;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class GlobalClusterSenderRegistry {
 

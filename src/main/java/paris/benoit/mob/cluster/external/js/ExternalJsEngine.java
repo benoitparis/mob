@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.js.external;
+package paris.benoit.mob.cluster.external.js;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

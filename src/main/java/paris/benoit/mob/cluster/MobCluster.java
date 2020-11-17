@@ -11,7 +11,7 @@ import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.js.external.ExternalJsEngine;
+import paris.benoit.mob.cluster.external.js.ExternalJsEngine;
 import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
 import paris.benoit.mob.cluster.services.DebugTableSink;

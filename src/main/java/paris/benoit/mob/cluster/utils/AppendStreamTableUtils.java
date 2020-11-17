@@ -16,6 +16,7 @@ public class AppendStreamTableUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(AppendStreamTableUtils.class);
 
+    // more like UPDATE STREAM?
     private static final String APPEND_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO APPEND STREAM(.*)";
     private static final Pattern APPEND_TABLE_PATTERN = Pattern.compile(APPEND_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
