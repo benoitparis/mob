@@ -18,7 +18,6 @@ import paris.benoit.mob.cluster.services.DebugTableSink;
 import paris.benoit.mob.cluster.services.DirectoryTableSource;
 import paris.benoit.mob.cluster.services.TickTableSource;
 import paris.benoit.mob.cluster.services.TwitterTableSink;
-import paris.benoit.mob.cluster.utils.AppendStreamTableUtils;
 import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
 import paris.benoit.mob.cluster.utils.TableSchemaConverter;
 import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
@@ -64,7 +63,6 @@ public class MobCluster {
         for(MobAppConfiguration app : configuration.apps) {
             catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<>(), null), false);
             tEnv.useDatabase(app.name);
-            //registerInputOutputTables(app);
             registerDataFlow(app);
         }
 
@@ -72,9 +70,6 @@ public class MobCluster {
 //        JobClient jobClient = sEnv.executeAsync();
 
         configuration.clusterFront.waitReady();
-
-        // TODO en faire qqch?
-//        JobStatus status = jobClient.getJobStatus().get();
 
         List<String> tables = Arrays.stream(tEnv.listCatalogs())
                 .flatMap(it -> {
@@ -89,12 +84,10 @@ public class MobCluster {
         String tablesString = tables.stream().collect(Collectors.joining(",\n ", "\n[\n ", "\n]"));
 
         KafkaSchemaRegistry.registerConfiguration(configuration);
-        tables.stream()
-            .forEach(name -> {
+        tables.forEach(name -> {
                 // TODO enlever, toujours prendre tout le nom en entier
                 KafkaSchemaRegistry.registerSchema("mobcatalog." + name, TableSchemaConverter.toJsonSchema(tEnv.from(name).getSchema()));
-            })
-        ;
+        });
 
         ExternalJsEngine.scanAndCreateJsEngine();
 
@@ -107,7 +100,6 @@ public class MobCluster {
         logger.info("Plan ↑");
 
         logger.info("Tables: " + yellow(tablesString));
-//        logger.info("Job is: " + yellow(status.toString()));
         logger.info("Front: " + yellow(configuration.clusterFront.accessString()));
         logger.info("Web UI: " + yellow("http://localhost:" + configuration.flinkWebUiPort));
         logger.info(cyan("Mob Cluster is up"));
@@ -122,25 +114,16 @@ public class MobCluster {
 
     private void setupEnvironment() {
 
-        // TODO rework deployment et faire un seul type de lancement
-        if (MobClusterConfiguration.ENV_MODE.LOCAL_UI.equals(configuration.mode)) {
-            Configuration conf = new Configuration();
-            conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
-            sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
-        } else if (MobClusterConfiguration.ENV_MODE.LOCAL.equals(configuration.mode)) {
-            sEnv = StreamExecutionEnvironment.createLocalEnvironment();
-        }
+        Configuration conf = new Configuration();
+        conf.setInteger(RestOptions.PORT, configuration.flinkWebUiPort);
+        sEnv = StreamExecutionEnvironment.createLocalEnvironmentWithWebUI(conf);
+        // TODO mode de lancement en local, sinon par default en jar avec getExecutionEnvironment()
 
-        // TODO sort out setParallelism vs setMaxParallelism
         sEnv.setParallelism(configuration.streamParallelism);
-        sEnv.setMaxParallelism(configuration.streamParallelism); // "It also defines the number of key groups used for partitioned state. "
+        sEnv.setMaxParallelism(configuration.streamParallelism);
         sEnv.setBufferTimeout(configuration.maxBufferTimeMillis);
         
-        EnvironmentSettings bsSettings =
-            EnvironmentSettings.newInstance()
-                .useBlinkPlanner() // TODO remove, is default
-                .inStreamingMode() // TODO remove, is default
-            .build();
+        EnvironmentSettings bsSettings = EnvironmentSettings.newInstance().build();
         tEnv = StreamTableEnvironment.create(sEnv, bsSettings);
 
         // TODO mettre "mobcatalog" en constante
@@ -185,18 +168,11 @@ public class MobCluster {
                     throw new RuntimeException("Configuration type required for " + sqlConf);
                 }
                 switch (sqlConf.confType) {
-                    case TABLE:
-                        // TODO remove, Obsolete avec le CREATE VIEW; et ça va dans le update
-                        tEnv.createTemporaryView(sqlConf.fullyQualifiedName(), tEnv.sqlQuery(sqlConf.content));
-                        break;
                     case STATE:
                         TemporalTableFunctionUtils.createAndRegister(tEnv, sqlConf);
                         break;
                     case RETRACT:
                         RetractStreamTableUtils.convertAndRegister(tEnv, sqlConf);
-                        break;
-                    case APPEND:
-                        AppendStreamTableUtils.convertAndRegister(tEnv, sqlConf);
                         break;
                     case UPDATE:
                         // TODO refactor avec des statements, pour tout mettre en même temps, et que ça optimize

@@ -5,3 +5,4 @@ SELECT
     count_value
   )
 FROM click_count_retract
+WHERE accumulate_flag

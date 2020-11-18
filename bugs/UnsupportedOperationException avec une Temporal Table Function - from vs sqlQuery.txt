@@ -1,0 +1,81 @@
+JIRA ici: https://issues.apache.org/jira/browse/FLINK-20226
+
+workaround:
+  Table historyTable = tEnv.sqlQuery("SELECT * FROM datagen_history_v");
+plutôt que:
+  Table historyTable = tEnv.from("datagen_history_v");
+
+
+
+"C:\Program Files\Java\jdk-15.0.1.9-hotspot\bin\java.exe" "-javaagent:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 203.3645.34\lib\idea_rt.jar=55014:C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 203.3645.34\bin" -Dfile.encoding=UTF-8 -classpath C:\ws\flink-test-temporal-table-function-from\target\classes;C:\Users\ben\.m2\repository\org\apache\flink\flink-core\1.12-SNAPSHOT\flink-core-1.12-20201117.213511-284.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-annotations\1.12-SNAPSHOT\flink-annotations-1.12-20201117.213437-288.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-metrics-core\1.12-SNAPSHOT\flink-metrics-core-1.12-20201117.213448-287.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-shaded-asm-7\7.1-12.0\flink-shaded-asm-7-7.1-12.0.jar;C:\Users\ben\.m2\repository\org\apache\commons\commons-lang3\3.3.2\commons-lang3-3.3.2.jar;C:\Users\ben\.m2\repository\com\esotericsoftware\kryo\kryo\2.24.0\kryo-2.24.0.jar;C:\Users\ben\.m2\repository\com\esotericsoftware\minlog\minlog\1.2\minlog-1.2.jar;C:\Users\ben\.m2\repository\org\objenesis\objenesis\2.1\objenesis-2.1.jar;C:\Users\ben\.m2\repository\commons-collections\commons-collections\3.2.2\commons-collections-3.2.2.jar;C:\Users\ben\.m2\repository\org\apache\commons\commons-compress\1.20\commons-compress-1.20.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-shaded-guava\18.0-12.0\flink-shaded-guava-18.0-12.0.jar;C:\Users\ben\.m2\repository\org\slf4j\slf4j-api\1.7.15\slf4j-api-1.7.15.jar;C:\Users\ben\.m2\repository\com\google\code\findbugs\jsr305\1.3.9\jsr305-1.3.9.jar;C:\Users\ben\.m2\repository\org\apache\flink\force-shading\1.12-SNAPSHOT\force-shading-1.12-20201117.213430-290.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-uber_2.11\1.12-SNAPSHOT\flink-table-uber_2.11-1.12-20201117.213026-189.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-sql-parser\1.12-SNAPSHOT\flink-sql-parser-1.12-20201117.214440-283.jar;C:\Users\ben\.m2\repository\org\apache\calcite\calcite-core\1.26.0\calcite-core-1.26.0.jar;C:\Users\ben\.m2\repository\org\apiguardian\apiguardian-api\1.1.0\apiguardian-api-1.1.0.jar;C:\Users\ben\.m2\repository\com\google\guava\guava\29.0-jre\guava-29.0-jre.jar;C:\Users\ben\.m2\repository\com\google\guava\failureaccess\1.0.1\failureaccess-1.0.1.jar;C:\Users\ben\.m2\repository\com\google\guava\listenablefuture\9999.0-empty-to-avoid-conflict-with-guava\listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar;C:\Users\ben\.m2\repository\org\checkerframework\checker-qual\2.11.1\checker-qual-2.11.1.jar;C:\Users\ben\.m2\repository\com\google\errorprone\error_prone_annotations\2.3.4\error_prone_annotations-2.3.4.jar;C:\Users\ben\.m2\repository\com\google\j2objc\j2objc-annotations\1.3\j2objc-annotations-1.3.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-clients_2.11\1.12-SNAPSHOT\flink-clients_2.11-1.12-20201117.210831-192.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-runtime_2.11\1.12-SNAPSHOT\flink-runtime_2.11-1.12-20201117.210532-192.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-queryable-state-client-java\1.12-SNAPSHOT\flink-queryable-state-client-java-1.12-20201117.213527-284.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-hadoop-fs\1.12-SNAPSHOT\flink-hadoop-fs-1.12-20201117.213532-284.jar;C:\Users\ben\.m2\repository\commons-io\commons-io\2.7\commons-io-2.7.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-shaded-netty\4.1.49.Final-12.0\flink-shaded-netty-4.1.49.Final-12.0.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-shaded-jackson\2.10.1-12.0\flink-shaded-jackson-2.10.1-12.0.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-shaded-zookeeper-3\3.4.14-12.0\flink-shaded-zookeeper-3-3.4.14-12.0.jar;C:\Users\ben\.m2\repository\org\javassist\javassist\3.24.0-GA\javassist-3.24.0-GA.jar;C:\Users\ben\.m2\repository\org\scala-lang\scala-library\2.11.12\scala-library-2.11.12.jar;C:\Users\ben\.m2\repository\com\typesafe\akka\akka-actor_2.11\2.5.21\akka-actor_2.11-2.5.21.jar;C:\Users\ben\.m2\repository\com\typesafe\config\1.3.3\config-1.3.3.jar;C:\Users\ben\.m2\repository\org\scala-lang\modules\scala-java8-compat_2.11\0.7.0\scala-java8-compat_2.11-0.7.0.jar;C:\Users\ben\.m2\repository\com\typesafe\akka\akka-stream_2.11\2.5.21\akka-stream_2.11-2.5.21.jar;C:\Users\ben\.m2\repository\org\reactivestreams\reactive-streams\1.0.2\reactive-streams-1.0.2.jar;C:\Users\ben\.m2\repository\com\typesafe\ssl-config-core_2.11\0.3.7\ssl-config-core_2.11-0.3.7.jar;C:\Users\ben\.m2\repository\com\typesafe\akka\akka-protobuf_2.11\2.5.21\akka-protobuf_2.11-2.5.21.jar;C:\Users\ben\.m2\repository\com\typesafe\akka\akka-slf4j_2.11\2.5.21\akka-slf4j_2.11-2.5.21.jar;C:\Users\ben\.m2\repository\org\clapper\grizzled-slf4j_2.11\1.3.2\grizzled-slf4j_2.11-1.3.2.jar;C:\Users\ben\.m2\repository\com\github\scopt\scopt_2.11\3.5.0\scopt_2.11-3.5.0.jar;C:\Users\ben\.m2\repository\org\xerial\snappy\snappy-java\1.1.4\snappy-java-1.1.4.jar;C:\Users\ben\.m2\repository\com\twitter\chill_2.11\0.7.6\chill_2.11-0.7.6.jar;C:\Users\ben\.m2\repository\com\twitter\chill-java\0.7.6\chill-java-0.7.6.jar;C:\Users\ben\.m2\repository\org\lz4\lz4-java\1.6.0\lz4-java-1.6.0.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-optimizer_2.11\1.12-SNAPSHOT\flink-optimizer_2.11-1.12-20201117.210758-192.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-java\1.12-SNAPSHOT\flink-java-1.12-20201117.213523-284.jar;C:\Users\ben\.m2\repository\org\apache\commons\commons-math3\3.5\commons-math3-3.5.jar;C:\Users\ben\.m2\repository\commons-cli\commons-cli\1.3.1\commons-cli-1.3.1.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-streaming-java_2.11\1.12-SNAPSHOT\flink-streaming-java_2.11-1.12-20201117.210824-192.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-file-sink-common\1.12-SNAPSHOT\flink-file-sink-common-1.12-20201117.213841-26.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-planner-blink_2.11\1.12-SNAPSHOT\flink-table-planner-blink_2.11-1.12-20201117.212230-189.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-common\1.12-SNAPSHOT\flink-table-common-1.12-20201117.214350-283.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-connector-files\1.12-SNAPSHOT\flink-connector-files-1.12-20201117.214340-114.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-connector-base\1.12-SNAPSHOT\flink-connector-base-1.12-20201117.214337-281.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-api-java\1.12-SNAPSHOT\flink-table-api-java-1.12-20201117.214359-283.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-api-scala_2.11\1.12-SNAPSHOT\flink-table-api-scala_2.11-1.12-20201117.211508-191.jar;C:\Users\ben\.m2\repository\org\scala-lang\scala-reflect\2.11.12\scala-reflect-2.11.12.jar;C:\Users\ben\.m2\repository\org\scala-lang\scala-compiler\2.11.12\scala-compiler-2.11.12.jar;C:\Users\ben\.m2\repository\org\scala-lang\modules\scala-xml_2.11\1.0.5\scala-xml_2.11-1.0.5.jar;C:\Users\ben\.m2\repository\org\scala-lang\modules\scala-parser-combinators_2.11\1.0.4\scala-parser-combinators_2.11-1.0.4.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-api-java-bridge_2.11\1.12-SNAPSHOT\flink-table-api-java-bridge_2.11-1.12-20201117.211453-191.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-api-scala-bridge_2.11\1.12-SNAPSHOT\flink-table-api-scala-bridge_2.11-1.12-20201117.211526-191.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-scala_2.11\1.12-SNAPSHOT\flink-scala_2.11-1.12-20201117.210626-192.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-streaming-scala_2.11\1.12-SNAPSHOT\flink-streaming-scala_2.11-1.12-20201117.211401-192.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-table-runtime-blink_2.11\1.12-SNAPSHOT\flink-table-runtime-blink_2.11-1.12-20201117.211854-190.jar;C:\Users\ben\.m2\repository\org\codehaus\janino\janino\3.0.11\janino-3.0.11.jar;C:\Users\ben\.m2\repository\org\codehaus\janino\commons-compiler\3.0.11\commons-compiler-3.0.11.jar;C:\Users\ben\.m2\repository\org\apache\calcite\avatica\avatica-core\1.17.0\avatica-core-1.17.0.jar;C:\Users\ben\.m2\repository\org\reflections\reflections\0.9.10\reflections-0.9.10.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-csv\1.12-SNAPSHOT\flink-csv-1.12-20201117.215101-281.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-json\1.12-SNAPSHOT\flink-json-1.12-20201117.214936-281.jar;C:\Users\ben\.m2\repository\org\apache\flink\flink-connector-kafka_2.11\1.12-SNAPSHOT\flink-connector-kafka_2.11-1.12-20201117.212503-189.jar;C:\Users\ben\.m2\repository\org\apache\kafka\kafka-clients\2.4.1\kafka-clients-2.4.1.jar;C:\Users\ben\.m2\repository\com\github\luben\zstd-jni\1.4.3-1\zstd-jni-1.4.3-1.jar KO_TempTableFunctionFrom
+SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+Exception in thread "main" java.lang.UnsupportedOperationException
+	at org.apache.calcite.plan.ViewExpanders$2.expandView(ViewExpanders.java:81)
+	at org.apache.calcite.plan.ViewExpanders$1.expandView(ViewExpanders.java:52)
+	at org.apache.flink.table.planner.catalog.SqlCatalogViewTable.convertToRel(SqlCatalogViewTable.java:58)
+	at org.apache.flink.table.planner.plan.schema.ExpandingPreparingTable.expand(ExpandingPreparingTable.java:59)
+	at org.apache.flink.table.planner.plan.schema.ExpandingPreparingTable.toRel(ExpandingPreparingTable.java:55)
+	at org.apache.calcite.rel.core.RelFactories$TableScanFactoryImpl.createScan(RelFactories.java:495)
+	at org.apache.calcite.tools.RelBuilder.scan(RelBuilder.java:1099)
+	at org.apache.calcite.tools.RelBuilder.scan(RelBuilder.java:1123)
+	at org.apache.flink.table.planner.plan.QueryOperationConverter$SingleRelVisitor.visit(QueryOperationConverter.java:339)
+	at org.apache.flink.table.planner.plan.QueryOperationConverter$SingleRelVisitor.visit(QueryOperationConverter.java:149)
+	at org.apache.flink.table.operations.CatalogQueryOperation.accept(CatalogQueryOperation.java:69)
+	at org.apache.flink.table.planner.plan.QueryOperationConverter.defaultMethod(QueryOperationConverter.java:146)
+	at org.apache.flink.table.planner.plan.QueryOperationConverter.defaultMethod(QueryOperationConverter.java:128)
+	at org.apache.flink.table.operations.utils.QueryOperationDefaultVisitor.visit(QueryOperationDefaultVisitor.java:92)
+	at org.apache.flink.table.operations.CatalogQueryOperation.accept(CatalogQueryOperation.java:69)
+	at org.apache.flink.table.planner.calcite.FlinkRelBuilder.queryOperation(FlinkRelBuilder.scala:186)
+	at org.apache.flink.table.planner.plan.rules.logical.LogicalCorrelateToJoinFromTemporalTableFunctionRule.onMatch(LogicalCorrelateToJoinFromTemporalTableFunctionRule.scala:100)
+	at org.apache.calcite.plan.AbstractRelOptPlanner.fireRule(AbstractRelOptPlanner.java:333)
+	at org.apache.calcite.plan.hep.HepPlanner.applyRule(HepPlanner.java:542)
+	at org.apache.calcite.plan.hep.HepPlanner.applyRules(HepPlanner.java:407)
+	at org.apache.calcite.plan.hep.HepPlanner.executeInstruction(HepPlanner.java:243)
+	at org.apache.calcite.plan.hep.HepInstruction$RuleInstance.execute(HepInstruction.java:127)
+	at org.apache.calcite.plan.hep.HepPlanner.executeProgram(HepPlanner.java:202)
+	at org.apache.calcite.plan.hep.HepPlanner.findBestExp(HepPlanner.java:189)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkHepProgram.optimize(FlinkHepProgram.scala:69)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkHepRuleSetProgram.optimize(FlinkHepRuleSetProgram.scala:87)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkGroupProgram$$anonfun$optimize$1$$anonfun$apply$1.apply(FlinkGroupProgram.scala:63)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkGroupProgram$$anonfun$optimize$1$$anonfun$apply$1.apply(FlinkGroupProgram.scala:60)
+	at scala.collection.TraversableOnce$$anonfun$foldLeft$1.apply(TraversableOnce.scala:157)
+	at scala.collection.TraversableOnce$$anonfun$foldLeft$1.apply(TraversableOnce.scala:157)
+	at scala.collection.Iterator$class.foreach(Iterator.scala:891)
+	at scala.collection.AbstractIterator.foreach(Iterator.scala:1334)
+	at scala.collection.IterableLike$class.foreach(IterableLike.scala:72)
+	at scala.collection.AbstractIterable.foreach(Iterable.scala:54)
+	at scala.collection.TraversableOnce$class.foldLeft(TraversableOnce.scala:157)
+	at scala.collection.AbstractTraversable.foldLeft(Traversable.scala:104)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkGroupProgram$$anonfun$optimize$1.apply(FlinkGroupProgram.scala:60)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkGroupProgram$$anonfun$optimize$1.apply(FlinkGroupProgram.scala:55)
+	at scala.collection.TraversableOnce$$anonfun$foldLeft$1.apply(TraversableOnce.scala:157)
+	at scala.collection.TraversableOnce$$anonfun$foldLeft$1.apply(TraversableOnce.scala:157)
+	at scala.collection.immutable.Range.foreach(Range.scala:160)
+	at scala.collection.TraversableOnce$class.foldLeft(TraversableOnce.scala:157)
+	at scala.collection.AbstractTraversable.foldLeft(Traversable.scala:104)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkGroupProgram.optimize(FlinkGroupProgram.scala:55)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkChainedProgram$$anonfun$optimize$1.apply(FlinkChainedProgram.scala:62)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkChainedProgram$$anonfun$optimize$1.apply(FlinkChainedProgram.scala:58)
+	at scala.collection.TraversableOnce$$anonfun$foldLeft$1.apply(TraversableOnce.scala:157)
+	at scala.collection.TraversableOnce$$anonfun$foldLeft$1.apply(TraversableOnce.scala:157)
+	at scala.collection.Iterator$class.foreach(Iterator.scala:891)
+	at scala.collection.AbstractIterator.foreach(Iterator.scala:1334)
+	at scala.collection.IterableLike$class.foreach(IterableLike.scala:72)
+	at scala.collection.AbstractIterable.foreach(Iterable.scala:54)
+	at scala.collection.TraversableOnce$class.foldLeft(TraversableOnce.scala:157)
+	at scala.collection.AbstractTraversable.foldLeft(Traversable.scala:104)
+	at org.apache.flink.table.planner.plan.optimize.program.FlinkChainedProgram.optimize(FlinkChainedProgram.scala:57)
+	at org.apache.flink.table.planner.plan.optimize.StreamCommonSubGraphBasedOptimizer.optimizeTree(StreamCommonSubGraphBasedOptimizer.scala:163)
+	at org.apache.flink.table.planner.plan.optimize.StreamCommonSubGraphBasedOptimizer.doOptimize(StreamCommonSubGraphBasedOptimizer.scala:79)
+	at org.apache.flink.table.planner.plan.optimize.CommonSubGraphBasedOptimizer.optimize(CommonSubGraphBasedOptimizer.scala:77)
+	at org.apache.flink.table.planner.delegation.PlannerBase.optimize(PlannerBase.scala:286)
+	at org.apache.flink.table.planner.delegation.PlannerBase.translate(PlannerBase.scala:165)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.translate(TableEnvironmentImpl.java:1261)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeInternal(TableEnvironmentImpl.java:702)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeOperation(TableEnvironmentImpl.java:1065)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.executeSql(TableEnvironmentImpl.java:664)
+	at KO_TempTableFunctionFrom.main(KO_TempTableFunctionFrom.java:63)
+
+Process finished with exit code 1

@@ -16,8 +16,11 @@ public class MobTableConfiguration implements Serializable {
 
     public enum CONF_TYPE {
         // TODO remove? ou bien adapt avec un pattern de l'action à faire (admin vs client vs js-engine? hey, on a toujours besoin des retracts)
-        TABLE // TODO rename en VIEW? -> faire avec passage en yaml? Mettre juste insert ou update, pour suivre l'API Flink?
-        , STATE, UPDATE, RETRACT, APPEND
+        STATE, UPDATE, RETRACT
+        // TODO mettre des conversions?: mob.conversion=retract/temporal-table-function(key,time)
+        //   ou bien des CREATE STREAM <table_name> AS CREATE TEMPORAL TABLE FUNCTION <table_name>(key,time) AS?
+        //     comme on faisait, mais avec détection auto?
+        //       c'est pas ouf, et pas yaml-compatible
     }
 
     public final String dbName;

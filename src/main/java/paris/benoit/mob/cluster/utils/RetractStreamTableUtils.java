@@ -10,11 +10,14 @@ import paris.benoit.mob.cluster.MobTableConfiguration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.apache.flink.table.api.Expressions.$;
+
 public class RetractStreamTableUtils {
 
     private static final String RETRACT_TABLE_PATTERN_REGEX = "CREATE TABLE ([^ ]+) AS\\s+CONVERT ([^ ]+) TO RETRACT STREAM(.*)";
     private static final Pattern RETRACT_TABLE_PATTERN = Pattern.compile(RETRACT_TABLE_PATTERN_REGEX, Pattern.DOTALL);
 
+    // TODO mettre dans les properties, mapper sur les yaml du client SQL
     public static void convertAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = RETRACT_TABLE_PATTERN.matcher(state.content);
 
@@ -23,11 +26,9 @@ public class RetractStreamTableUtils {
 
             String fromTableName = m.group(2);
 
-            // TODO faire avec .from
-            Table fromTable = tEnv.sqlQuery("SELECT * FROM " + fromTableName);
-            DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, fromTable.getSchema().toRowType());
-//            DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, Row.class);
-            Table retractTable = tEnv.fromDataStream(retractStream, "accumulate_flag, content");
+            Table fromTable = tEnv.from(fromTableName);
+            DataStream<Tuple2<Boolean, Row>> retractStream = tEnv.toRetractStream(fromTable, Row.class);
+            Table retractTable = tEnv.fromDataStream(retractStream, $("accumulate_flag"), $("content"));
             tEnv.createTemporaryView(state.getObjectPath().getFullName(), retractTable);
 
         } else {

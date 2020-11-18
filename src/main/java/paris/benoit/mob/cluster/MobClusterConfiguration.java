@@ -9,8 +9,6 @@ import java.util.stream.Collectors;
 
 public class MobClusterConfiguration {
 
-    public enum ENV_MODE {LOCAL, LOCAL_UI, REMOTE}
-
     final ClusterFront clusterFront;
     public final ClusterSenderRegistry clusterSenderRegistry;
     public final ClusterReceiver clusterReceiver;
@@ -18,8 +16,6 @@ public class MobClusterConfiguration {
     public final int streamParallelism;
     final int maxBufferTimeMillis;
     final Integer flinkWebUiPort;
-
-    final ENV_MODE mode;
 
     public final List<MobAppConfiguration> apps;
 
@@ -30,15 +26,12 @@ public class MobClusterConfiguration {
             ClusterSenderRegistry clusterSenderRegistry,
             int streamParallelism,
             int maxBufferTimeMillis,
-            Integer flinkWebUiPort,
-            ENV_MODE mode) {
+            Integer flinkWebUiPort) {
 
         super();
         this.streamParallelism = streamParallelism;
         this.maxBufferTimeMillis = maxBufferTimeMillis;
         this.flinkWebUiPort = flinkWebUiPort;
-
-        this.mode = mode;
 
         this.clusterFront = clusterFront;
         this.clusterSenderRegistry = clusterSenderRegistry;

@@ -11,6 +11,7 @@ public class GlobalClusterSenderRegistry {
 
     public static void setConf(MobClusterConfiguration configuration) {
         GlobalClusterSenderRegistry.configuration = configuration;
+        //LogicalCorrelateToJoinFromTemporalTableFunctionRule
     }
 
     public static Map<String, ClusterSender> getClusterSenders(String random) {

@@ -1,3 +1,4 @@
+CREATE VIEW aggregated_time_manipulations AS
 SELECT COALESCE(CAST('aggregated time manipulations: '
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  tick_count 
   AS VARCHAR), '') || ' - ' || COALESCE(CAST(  max_proctime_append_stream 

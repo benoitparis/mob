@@ -26,8 +26,7 @@ public class ServerRunner implements ClusterRunner {
                 new KafkaClusterSenderRegistry(),
                 DEFAULT_STREAM_PARALLELISM,
                 DEFAULT_MAX_BUFFER_TIME_MILLIS,
-                DEFAULT_FLINK_WEB_UI_PORT,
-                MobClusterConfiguration.ENV_MODE.LOCAL_UI
+                DEFAULT_FLINK_WEB_UI_PORT
         );
 
         // TODO change name, genre "deploy-app-job"

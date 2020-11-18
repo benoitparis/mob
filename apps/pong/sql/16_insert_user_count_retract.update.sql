@@ -8,3 +8,4 @@ SELECT
     CAST(content.countGlobal AS VARCHAR)
   )
 FROM user_count_retract
+WHERE accumulate_flag

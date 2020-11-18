@@ -10,7 +10,8 @@ SELECT
   rightY       ,
   scoreLeft    ,
   scoreRight
-FROM (
+FROM user_active_v ua 
+JOIN (
   SELECT
     LAST_VALUE(gameStateTime) AS gameStateTime,
     LAST_VALUE(ballX        ) AS ballX        ,
@@ -23,6 +24,4 @@ FROM (
     LAST_VALUE(scoreRight   ) AS scoreRight   
   FROM game_out
   WHERE MOD(tick_number, 1) = 0
-) geo_last
-JOIN user_activity ua ON true
-WHERE ua.active
+) geo_last ON true

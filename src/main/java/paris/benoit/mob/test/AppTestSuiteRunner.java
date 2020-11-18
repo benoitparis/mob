@@ -19,6 +19,7 @@ public class AppTestSuiteRunner implements ClusterRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
     private static AppTestFront front = new AppTestFront();
+    private final static int DEFAULT_FLINK_WEB_UI_PORT = 8082;
 
     @Override
     public void run(List<String> apps) throws Exception {
@@ -60,8 +61,7 @@ public class AppTestSuiteRunner implements ClusterRunner {
                 }, // TODO fix test
                 3,
                 50,
-                null,
-                MobClusterConfiguration.ENV_MODE.LOCAL
+                DEFAULT_FLINK_WEB_UI_PORT
         );
 
         logger.info("App to be tested: " + configuration.apps.get(0).name);

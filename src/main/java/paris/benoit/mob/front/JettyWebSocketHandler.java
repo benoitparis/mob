@@ -32,16 +32,19 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     public void onClose(int statusCode, String reason) {
         logger.debug("Close: statusCode=" + statusCode + ", reason=" + reason);
         JettyClusterReceiver.unRegister(this.name);
+//        ClientRegistry.unRegister(this.name);
         isRunning = false;
     }
 
     @OnWebSocketError
     public void onError(Throwable t) {
         JettyClusterReceiver.unRegister(this.name);
+//        ClientRegistry.unRegister(this.name);
         if (t instanceof TimeoutException) {
             logger.info("Idle client disconnected: " + t.getMessage());
         } else {
             logger.error("Error: " + t.getMessage());
+            throw new RuntimeException(t);
         }
 
     }
@@ -54,6 +57,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name);
         System.out.println(clusterSenders);
         JettyClusterReceiver.register(this.name, this);
+//        ClientRegistry.register(this.name);
     }
 
     @OnWebSocketMessage
@@ -78,6 +82,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         }
     }
 
+
     ArrayBlockingQueue<ToClientMessage> queue = new ArrayBlockingQueue<>(100);
     {
         // FIXME can't wait for virtual threads
@@ -96,6 +101,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
             }
         }).start();
     }
+
     @Override
     public void processServerMessage(ToClientMessage message) {
         try {
