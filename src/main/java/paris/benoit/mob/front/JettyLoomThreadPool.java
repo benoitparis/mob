@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 public class JettyLoomThreadPool implements ThreadPool {
     // TODO bump quand asm sera OK avec du Java 16+ (on a du EA Loom sur 16)
 //    ExecutorService executorService = Executors.newVirtualThreadExecutor();
-    ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+    final ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
 
     @Override
     public void join() throws InterruptedException {

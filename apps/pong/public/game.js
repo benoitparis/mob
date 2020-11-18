@@ -69,8 +69,9 @@ function gameTick(inString) {
     deltatime = 0;
   }
   
-  state.game.leftY = Math.round(parseFloat(inObj.leftY));
+  state.game.leftY  = Math.round(parseFloat(inObj.leftY));
   state.game.rightY = Math.round(parseFloat(inObj.rightY));
+  
 
   if (60 < deltatime) {
     console.log('Large deltatime: ' + deltatime + '\tinString:' + JSON.stringify(inObj));
@@ -143,8 +144,6 @@ function updateGame(gameIn, timeElapsedMs) {
     game.scoreLeft = 0;
     game.scoreRight = 0;
   }
-  
-  
   
   game.ballX = Math.min(game.ballX, width );
   game.ballX = Math.max(game.ballX, 0     );

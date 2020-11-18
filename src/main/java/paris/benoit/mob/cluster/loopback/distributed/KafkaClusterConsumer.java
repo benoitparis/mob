@@ -37,9 +37,7 @@ public class KafkaClusterConsumer {
         new Thread(() -> {
             while (true) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
-                records.records(tableName).forEach((it) -> {
-                    clusterReceiver.receiveMessage(ToClientMessage.fromString(it.value(), tableName));
-                });
+                records.records(tableName).forEach((it) -> clusterReceiver.receiveMessage(ToClientMessage.fromString(it.value(), tableName)));
             }
         }).start();
 

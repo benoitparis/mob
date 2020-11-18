@@ -7,9 +7,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -17,8 +18,6 @@ public class MobAppConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobAppConfiguration.class);
 
     public final String name;
-    public final List<MobTableConfiguration> inSchemas;
-    public final List<MobTableConfiguration> outSchemas;
     public final List<MobTableConfiguration> sql;
     public final List<MobTableConfiguration> tests;
     private final String basePath;
@@ -28,8 +27,6 @@ public class MobAppConfiguration {
         this.basePath = System.getProperty("user.dir") + "/apps/" + name + "/";
         logger.info("Configuration with basePath:" + basePath);
 
-        this.inSchemas = buildConfigurationItem("in-schemas");
-        this.outSchemas = buildConfigurationItem("out-schemas");
         this.sql = buildConfigurationItem("sql");
         this.tests = buildConfigurationItem("tests");
     }

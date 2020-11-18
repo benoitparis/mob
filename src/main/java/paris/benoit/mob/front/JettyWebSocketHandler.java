@@ -52,7 +52,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         logger.debug("onConnect: session=" + session);
         remote = session.getRemote();
         name = "fa-" + UUID.randomUUID().toString();
-        clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name);
+        clusterSenders = GlobalClusterSenderRegistry.getClusterSenders();
         System.out.println(clusterSenders);
         JettyClusterReceiver.register(this.name, this);
     }
@@ -72,7 +72,6 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         } else {
             try {
                 specificSender.sendMessage(cMsg);
-                System.out.println("sent: " + cMsg);
             } catch (Exception e) {
                 logger.error("error in sending message", e);
             }
@@ -80,7 +79,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     }
 
 
-    ArrayBlockingQueue<ToClientMessage> queue = new ArrayBlockingQueue<>(100);
+    final ArrayBlockingQueue<ToClientMessage> queue = new ArrayBlockingQueue<>(100);
     {
         // FIXME can't wait for virtual threads
         //   actually orthogonal. use futures?
@@ -89,7 +88,6 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
             while(isRunning) {
                 try {
                     ToClientMessage msg = queue.take();
-                    logger.debug("Sent Client: " + msg);
                     // one at a time, could compress?
                     remote.sendString(msg.toJson());
                 } catch (InterruptedException | IOException e) {
@@ -104,6 +102,7 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         try {
             queue.put(message);
         } catch (Exception e) {
+            logger.error("Error putting message in queue for Websocket", e);
         }
     }
 

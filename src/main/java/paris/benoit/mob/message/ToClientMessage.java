@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Message to be sent to the client.
  */
+@SuppressWarnings("unused") // Jasckson
 public class ToClientMessage {
 
     @JsonProperty
@@ -22,7 +23,6 @@ public class ToClientMessage {
     public ToClientMessage() {}
 
     public static ToClientMessage fromString(String value, String tableName) {
-        System.out.println(value);
         ObjectMapper mapper = new ObjectMapper();
         try {
             ToClientMessage result = mapper.readValue(value, ToClientMessage.class);
@@ -63,4 +63,5 @@ public class ToClientMessage {
     public JsonNode getPayload() {
         return payload;
     }
+
 }

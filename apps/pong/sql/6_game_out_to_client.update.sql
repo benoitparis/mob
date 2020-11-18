@@ -6,7 +6,6 @@
 CREATE TABLE game_out_to_client (
   client_id STRING,
   payload ROW(
-    -- DOUBLE is necessary?
     gameStateTime DOUBLE,
     ballX         DOUBLE,
     ballY         DOUBLE,

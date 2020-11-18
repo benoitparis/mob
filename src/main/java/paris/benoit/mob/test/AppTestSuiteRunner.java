@@ -18,7 +18,7 @@ import static paris.benoit.mob.cluster.utils.Colors.red;
 public class AppTestSuiteRunner implements ClusterRunner {
     private static final Logger logger = LoggerFactory.getLogger(AppTestSuiteRunner.class);
 
-    private static AppTestFront front = new AppTestFront();
+    private static final AppTestFront front = new AppTestFront();
     private final static int DEFAULT_FLINK_WEB_UI_PORT = 8082;
 
     @Override
@@ -55,9 +55,9 @@ public class AppTestSuiteRunner implements ClusterRunner {
                     @Override
                     public void setConf(MobClusterConfiguration configuration) {}
                     @Override
-                    public void waitRegistrationsReady() throws InterruptedException {}
+                    public void waitRegistrationsReady() {}
                     @Override
-                    public Map<String, ClusterSender> getClusterSenders(String random) {return null;}
+                    public Map<String, ClusterSender> getClusterSenders() {return null;}
                 }, // TODO fix test
                 3,
                 50,

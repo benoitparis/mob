@@ -1,31 +1,13 @@
 INSERT INTO services.debug
-SELECT client_id || ' - ' || CAST(active AS STRING)
-FROM (
-  SELECT
-    client_id, active
-  FROM (
-    SELECT
-      client_id, active,
-      ROW_NUMBER() OVER (PARTITION BY client_id ORDER BY ts DESC) rnb
-    FROM (
-    
-      SELECT
-        client_id,
-        true active,
-        MAX(ts) ts
-      FROM write_y
-      GROUP BY client_id
-      
-      UNION ALL
-      
-      SELECT
-        client_id,
-        false active,
-        SESSION_END(ts, INTERVAL '3' SECOND) ts
-      FROM write_y
-      GROUP BY client_id, SESSION(ts, INTERVAL '3' SECOND)
-    
-    )
-  )
-  WHERE rnb = 1
-)
+SELECT 
+  CAST(gameStateTime AS STRING) || ' - ' || 
+  CAST(ballX         AS STRING) || ' - ' || 
+  CAST(ballY         AS STRING) || ' - ' || 
+  CAST(speedX        AS STRING) || ' - ' || 
+  CAST(speedY        AS STRING) || ' - ' || 
+  CAST(leftY         AS STRING) || ' - ' || 
+  CAST(rightY        AS STRING) || ' - ' || 
+  CAST(scoreLeft     AS STRING) || ' - ' || 
+  CAST(scoreRight    AS STRING) || ' - ' || 
+  CAST(content.client_id        AS STRING) 
+FROM game_out_to_client_retract

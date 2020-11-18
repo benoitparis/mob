@@ -8,7 +8,7 @@ public interface ClusterSenderRegistry {
 
     void setConf(MobClusterConfiguration configuration);
 
-    void waitRegistrationsReady() throws InterruptedException;
+    void waitRegistrationsReady();
 
-    Map<String, ClusterSender> getClusterSenders(String random);
+    Map<String, ClusterSender> getClusterSenders();
 }

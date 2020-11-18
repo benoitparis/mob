@@ -58,6 +58,7 @@ public class TableSchemaConverter {
         } else if (pair.type instanceof LegacyTypeInformationType) {
             LegacyTypeInformationType logicalTypeCasted = (LegacyTypeInformationType) pair.type;
             // TODO ?
+            //   do avoid
             return new StringBuffer("");
 
         }
@@ -91,8 +92,8 @@ public class TableSchemaConverter {
     }
 
     static class NameTypePair {
-        String name;
-        LogicalType type;
+        final String name;
+        final LogicalType type;
         public NameTypePair(String name, LogicalType type) {
             this.name = name;
             this.type = type;

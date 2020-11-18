@@ -11,5 +11,5 @@ SELECT
     rightY       ,
     scoreLeft    ,
     scoreRight   
-  )
+  ) payload
 FROM game_out_to_client_retract

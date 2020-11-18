@@ -33,7 +33,7 @@ import java.util.Properties;
 public class ExternalJsEngine {
     private static final Logger logger = LoggerFactory.getLogger(ExternalJsEngine.class);
 
-    public static void scanAndCreateJsEngine() throws IOException, ScriptException, InterruptedException {
+    public static void scanAndCreateJsEngine() throws IOException, ScriptException {
 
         Map<String, Properties> jsConf = KafkaSchemaRegistry.getJsEngineConfiguration();
         logger.info("Creating js engine with schemas: " + jsConf);
@@ -78,13 +78,13 @@ public class ExternalJsEngine {
                     ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
                     records.records(tableNameInEngine).forEach((it) -> {
                         try {
+                            // TODO get standard output / err to a Kafka topic
                             Map out = (Map) inv.invokeFunction(invokeFunction, it.value());
                             @SuppressWarnings("unchecked") HashMap copy = new HashMap(out); // defensive copying
                             String result = convertMapToJsonString(copy);
 
                             ProducerRecord<String, String> msg = new ProducerRecord<>(tableNameOutEngine, result);
                             producer.send(msg);
-                            System.out.println("sent : " + msg);
 
                         } catch (ScriptException | NoSuchMethodException | JsonProcessingException e) {
                             logger.error("Error executing scripting engine", e);
@@ -98,10 +98,6 @@ public class ExternalJsEngine {
     }
 
     private static final ObjectMapper mapper = new ObjectMapper();
-
-    private static Map convertJsonStringToMap(String json) throws JsonProcessingException {
-        return mapper.readValue(json, Map.class);
-    }
 
     private static String convertMapToJsonString(Map map) throws JsonProcessingException {
         return mapper.writeValueAsString(map);

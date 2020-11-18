@@ -6,7 +6,6 @@ import paris.benoit.mob.cluster.MobAppConfiguration;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.server.ClusterFront;
-import paris.benoit.mob.server.ClusterReceiver;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

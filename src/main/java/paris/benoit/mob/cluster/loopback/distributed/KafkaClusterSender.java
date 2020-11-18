@@ -26,17 +26,9 @@ public class KafkaClusterSender implements ClusterSender {
     }
 
     @Override
-    public void sendMessage(ToServerMessage message) throws Exception {
-
+    public void sendMessage(ToServerMessage message) {
         ProducerRecord<String, String> msg = new ProducerRecord<>(tableName, message.toJsonString());
         producer.send(msg);
-        System.out.println("sent : " + msg);
     }
-
-    @Override
-    public ToServerMessage receive() throws Exception {
-        return null;
-    }
-
 
 }

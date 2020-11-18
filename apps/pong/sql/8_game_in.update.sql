@@ -8,12 +8,10 @@
 )
 */
 CREATE TABLE game_in (
-  payload ROW(
-    tick_number STRING,
-    insert_time STRING,
-    leftY       STRING,
-    rightY      STRING
-  ) 
+  tick_number STRING,
+  insert_time STRING,
+  leftY       STRING,
+  rightY      STRING
 ) WITH (
   'connector.type' = 'kafka',
   'connector.version' = 'universal',

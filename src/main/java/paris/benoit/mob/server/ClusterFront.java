@@ -6,7 +6,7 @@ public interface ClusterFront {
 
     void start();
 
-    default void waitReady() {};
+    default void waitReady() {}
 
     String accessString();
 

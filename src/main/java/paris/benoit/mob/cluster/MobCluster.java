@@ -158,7 +158,7 @@ public class MobCluster {
         );
     }
 
-    private void registerDataFlow(MobAppConfiguration app) throws DatabaseNotExistException {
+    private void registerDataFlow(MobAppConfiguration app) {
 
 
         for (MobTableConfiguration sqlConf: app.sql) {

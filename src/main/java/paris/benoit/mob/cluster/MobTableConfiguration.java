@@ -66,10 +66,6 @@ public class MobTableConfiguration implements Serializable {
                 '}';
     }
 
-    public String fullyQualifiedName() {
-        return getObjectPath().getFullName();
-    }
-
     public ObjectPath getObjectPath() {
         return new ObjectPath(dbName, name);
     }

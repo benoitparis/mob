@@ -57,7 +57,7 @@ class ClientSimulator {
         AppTestMessageRouter.registerClientSimulator(this);
 
         new Thread(() -> {
-            clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name);
+            clusterSenders = GlobalClusterSenderRegistry.getClusterSenders();
             isReady = true;
         }).start();
 
@@ -83,7 +83,7 @@ class ClientSimulator {
 
     }
 
-    private boolean drainWsMessageQueue() throws InterruptedException {
+    private boolean drainWsMessageQueue() {
 
         String wsMessage = toServer.execute(progressCounter).asString();
         if (null == wsMessage) {

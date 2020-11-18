@@ -15,7 +15,7 @@ public class JettyClusterReceiver implements ClusterReceiver {
     private static final Logger logger = LoggerFactory.getLogger(JettyClusterReceiver.class);
     public static final String MOBCATALOG_SERVICES_CLIENT_SESSION = "mobcatalog.services.client_session";
 
-    private static ConcurrentHashMap<String, JettyClusterMessageProcessor> clients = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, JettyClusterMessageProcessor> clients = new ConcurrentHashMap<>();
     private static final KafkaProducer<String, String> producer;
 
     static {
@@ -40,7 +40,6 @@ public class JettyClusterReceiver implements ClusterReceiver {
 
     @Override
     public void receiveMessage(ToClientMessage message) {
-        System.out.println(message);
         JettyClusterMessageProcessor client = clients.get(message.client_id);
 
         if (null != client) {

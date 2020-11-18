@@ -6,18 +6,16 @@
 )
 */
 CREATE TABLE game_out (
-  payload ROW(
-    tick_number   INTEGER,
-    gameStateTime DOUBLE,
-    ballX         DOUBLE,
-    ballY         DOUBLE,
-    speedX        DOUBLE,
-    speedY        DOUBLE,
-    leftY         DOUBLE,
-    rightY        DOUBLE,
-    scoreLeft     DOUBLE,
-    scoreRight    DOUBLE
-  ) 
+  tick_number   INTEGER,
+  gameStateTime DOUBLE,
+  ballX         DOUBLE,
+  ballY         DOUBLE,
+  speedX        DOUBLE,
+  speedY        DOUBLE,
+  leftY         DOUBLE,
+  rightY        DOUBLE,
+  scoreLeft     DOUBLE,
+  scoreRight    DOUBLE
 ) WITH (
   'connector.type' = 'kafka',
   'connector.version' = 'universal',

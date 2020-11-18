@@ -21,7 +21,7 @@ public class KafkaSchemaRegistry {
     public static final String MOB_CLUSTER_IO_FLOW = "mob.cluster-io.flow";
 
     static Map<String, Properties> propertiesMap;
-    static Map<String, String> schemas = new HashMap<>();
+    static final Map<String, String> schemas = new HashMap<>();
 
     public static void registerSchema(String tableName, String jsonSchema) {
         // TODO Write to kafka, with properties, with category parsed, with client_accessible, schema, etc ? "TableRegistry"

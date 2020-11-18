@@ -11,7 +11,7 @@ import java.util.Properties;
 public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
 
     private MobClusterConfiguration configuration;
-    Properties props = new Properties();
+    final Properties props = new Properties();
 
     {
         props.put("bootstrap.servers", "localhost:9092");
@@ -30,11 +30,12 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
         // TODO refactor interface
         KafkaSchemaRegistry.getOutputSchemas().forEach((key, value) -> new KafkaClusterConsumer(props, key, configuration.clusterReceiver).start());
 
-
     }
 
     @Override
-    public Map<String, ClusterSender> getClusterSenders(String random) {
+    public Map<String, ClusterSender> getClusterSenders() {
+        // TODO vu qu'on peut tout envoyer avec un producer, on peut le faire comme KafkaClusterSender sans trop de fuss (mais méthode de routage de schema?)
+
         HashMap<String, ClusterSender> result = new HashMap<>();
 
         KafkaSchemaRegistry.getInputSchemas().forEach((key, value) -> result.put(key, new KafkaClusterSender(props, key)));

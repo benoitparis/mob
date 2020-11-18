@@ -39,6 +39,7 @@ class TickSourceFunction extends RichParallelSourceFunction<Row> implements List
             row.setField(0, (offset + counter));
             row.setField(1, "1");
             long targetSleepTime = (initialTs + interval * counter) - System.currentTimeMillis();
+            // TODO trancher: Bonne chose? utiliser le datagen? datagen stoppe quand on tire pas dessus?
             Thread.sleep(Math.max(MIN_SLEEP_DURATION, targetSleepTime));
 
             synchronized (lock) {
