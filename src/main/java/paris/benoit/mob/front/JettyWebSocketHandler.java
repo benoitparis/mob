@@ -32,14 +32,12 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
     public void onClose(int statusCode, String reason) {
         logger.debug("Close: statusCode=" + statusCode + ", reason=" + reason);
         JettyClusterReceiver.unRegister(this.name);
-//        ClientRegistry.unRegister(this.name);
         isRunning = false;
     }
 
     @OnWebSocketError
     public void onError(Throwable t) {
         JettyClusterReceiver.unRegister(this.name);
-//        ClientRegistry.unRegister(this.name);
         if (t instanceof TimeoutException) {
             logger.info("Idle client disconnected: " + t.getMessage());
         } else {
@@ -57,7 +55,6 @@ public class JettyWebSocketHandler implements JettyClusterMessageProcessor {
         clusterSenders = GlobalClusterSenderRegistry.getClusterSenders(name);
         System.out.println(clusterSenders);
         JettyClusterReceiver.register(this.name, this);
-//        ClientRegistry.register(this.name);
     }
 
     @OnWebSocketMessage

@@ -3,7 +3,6 @@ package paris.benoit.mob.cluster.utils;
 import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.functions.TemporalTableFunction;
-import org.apache.flink.table.planner.catalog.QueryOperationCatalogViewTable;
 import paris.benoit.mob.cluster.MobTableConfiguration;
 
 import java.util.regex.Matcher;
@@ -19,8 +18,6 @@ public class TemporalTableFunctionUtils {
     public static void createAndRegister(StreamTableEnvironment tEnv, MobTableConfiguration state) {
         Matcher m = TEMPORAL_TABLE_PATTERN.matcher(state.content);
 
-        QueryOperationCatalogViewTable
-        
         if (m.matches()) {
             Table historyTable = tEnv.sqlQuery(m.group(4));
 
