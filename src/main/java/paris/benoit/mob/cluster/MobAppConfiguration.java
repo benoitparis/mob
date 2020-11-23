@@ -31,7 +31,6 @@ public class MobAppConfiguration {
         this.tests = buildConfigurationItem("tests");
     }
 
-
     private List<MobTableConfiguration> buildConfigurationItem(final String folder) throws RuntimeException {
 
         Spliterator<Path> files;
@@ -47,36 +46,21 @@ public class MobAppConfiguration {
                 .stream(files, false)
                 .filter(it -> !Files.isDirectory(it))
                 .sorted(Comparator.comparing(a -> {
-                            try {
-                                return Integer.valueOf(a.getFileName().toString().split("_")[0]);
-                            } catch (NumberFormatException e) {
-                                return -1; // Arbitrary order
-                            }
+                        try {
+                            return Integer.valueOf(a.getFileName().toString().split("_")[0]);
+                        } catch (NumberFormatException e) {
+                            return -1; // Arbitrary order
                         }
+                    }
                 ))
                 .map(it -> {
                     try {
-                        String[] fileParts = it.getFileName().toString().split("\\.");
-                        return
-                                new MobTableConfiguration(
-                                        name,
-                                        fileParts[0].replaceAll("^\\d*_", ""),
-                                        new String(Files.readAllBytes(it)),
-                                        getConfType(fileParts[1])
-                                );
+                        return new MobTableConfiguration(name, new String(Files.readAllBytes(it)));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 })
                 .collect(Collectors.toList());
-    }
-
-    private MobTableConfiguration.CONF_TYPE getConfType(String filePart) {
-        try {
-            return MobTableConfiguration.CONF_TYPE.valueOf(filePart.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return null;
-        }
     }
 
     public List<MobTableConfiguration> getTests() {

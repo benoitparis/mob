@@ -1,2 +1,0 @@
-CREATE TABLE game_in_retract AS
-CONVERT game_in_v TO RETRACT STREAM

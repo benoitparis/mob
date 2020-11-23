@@ -1,2 +1,0 @@
-CREATE TABLE game_out_to_client_retract AS
-CONVERT game_out_to_client_v TO RETRACT STREAM

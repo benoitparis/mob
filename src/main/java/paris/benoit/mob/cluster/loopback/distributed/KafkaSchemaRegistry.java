@@ -1,8 +1,12 @@
 package paris.benoit.mob.cluster.loopback.distributed;
 
 import paris.benoit.mob.cluster.MobClusterConfiguration;
+import paris.benoit.mob.cluster.MobTableConfiguration;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 // TODO faire tout ça en Flink SQL qui lit Kafka?
@@ -15,10 +19,6 @@ import java.util.stream.Collectors;
 
 public class KafkaSchemaRegistry {
 
-    public static final String MOB_CLIENT_IO_CATEGORY = "mob.client-io.category";
-    public static final String MOB_TABLE_NAME = "mob.table-name";
-    public static final String MOB_CLUSTER_IO_TYPE = "mob.cluster-io.type";
-    public static final String MOB_CLUSTER_IO_FLOW = "mob.cluster-io.flow";
 
     static Map<String, Properties> propertiesMap;
     static final Map<String, String> schemas = new HashMap<>();
@@ -29,21 +29,19 @@ public class KafkaSchemaRegistry {
     }
 
     public static void registerConfiguration(MobClusterConfiguration configuration) {
-
         propertiesMap = configuration.apps.stream()
                 .flatMap(it -> it.sql.stream())
                 .map(it -> it.properties)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toMap(it -> (String) it.get(MOB_TABLE_NAME), it -> it));
+                .collect(Collectors.toMap(it -> (String) it.get(MobTableConfiguration.MOB_TABLE_NAME), it -> it));
     }
 
     static public Map<String, String> getInputSchemas() {
-        return getSchemas("input");
+        return getSchemas("in");
     }
 
     static  public Map<String, String> getOutputSchemas() {
-        System.out.println("getOutputSchemas");
-        return getSchemas("output");
+        return getSchemas("out");
     }
 
     static public Map<String, String> getSchemas(String category) {
@@ -60,8 +58,8 @@ public class KafkaSchemaRegistry {
 
         try {
             return propertiesMap.entrySet().stream()
-                    .filter(it -> !"js-engine".equals(it.getValue().get(MOB_CLUSTER_IO_TYPE))) // TODO faire par defaut client? ou bien demander?
-                    .filter(it -> it.getValue().get(MOB_CLIENT_IO_CATEGORY).equals(category))
+                    .filter(it -> !"js-engine".equals(it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_TYPE))) // TODO faire par defaut client? ou bien demander?
+                    .filter(it -> it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_FLOW).equals(category))
                     .filter(it -> null != it.getKey())
                     .collect(Collectors.toMap(Map.Entry::getKey, it -> schemas.get(it.getKey())));
         } catch (NullPointerException e) {
@@ -75,7 +73,7 @@ public class KafkaSchemaRegistry {
     public static Map<String, Properties> getJsEngineConfiguration() {
         // strings pour le moment
         return propertiesMap.entrySet().stream()
-                .filter(it -> "js-engine".equals(it.getValue().get(MOB_CLUSTER_IO_TYPE)))
-                .collect(Collectors.toMap(it -> (String) it.getValue().get(MOB_CLUSTER_IO_FLOW), Map.Entry::getValue));
+                .filter(it -> "js-engine".equals(it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_TYPE)))
+                .collect(Collectors.toMap(it -> (String) it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_FLOW), Map.Entry::getValue));
     }
 }

@@ -1,0 +1,62 @@
+SELECT `qs`.`client_id`, ROW(`al`.`app_name`, `qs`.`times_asked`) AS `payload`
+FROM (SELECT LAST_VALUE(`subscribe_apps`.`client_id`) AS `client_id`, CAST(COUNT(*) AS VARCHAR) AS `times_asked`
+FROM `mobcatalog`.`conversation`.`subscribe_apps`) AS `qs`
+INNER JOIN `mobcatalog`.`services`.`app_list` AS `al` ON TRUE
+
+
+parser.parse("SELECT ROW(`app_name`, `times_asked`) AS `payload` FROM (SELECT LAST_VALUE(`subscribe_apps`.`client_id`) AS `client_id`, CAST(COUNT(*) AS VARCHAR) AS `times_asked` FROM `mobcatalog`.`conversation`.`subscribe_apps`) AS `qs` INNER JOIN `mobcatalog`.`services`.`app_list` AS `al` ON TRUE")
+
+vs avec `al`.
+
+leur refaire un bugreport?
+  c'est toujours le même bug, et l'utilisation de toappendstream qu'ils aiment pas
+    -> redemander dans la issue
+    ou bien rechercher ce qu'il faut utiliser à la place
+    
+    
+
+
+en tout cas:
+  Caused by: org.apache.flink.sql.parser.impl.ParseException: Encountered "." at line 1, column 34.
+  ->
+  ça veut dire que:
+    pas de . dans les ROW. il aime pas
+      et c'est dans le parser (FlinkPlannerImpl.scala)
+      
+      
+du coup bug report?
+  si il aime pas les vues avec du ROW?
+  tu peux refaire un report, c'est moche en tant que bug
+    ptet regarder dans ce qui génère les sources pour voir comment tu peux aider??
+  sinon toi, tu peux mettre du flat dans la vue, et servir du row dans le sink
+    
+    
+    
+stacktrace:
+
+
+
+	at org.apache.flink.table.planner.calcite.CalciteParser.parse(CalciteParser.java:56)
+	at org.apache.flink.table.planner.calcite.FlinkPlannerImpl$ToRelContextImpl.expandView(FlinkPlannerImpl.scala:239)
+	at org.apache.calcite.plan.ViewExpanders$1.expandView(ViewExpanders.java:52)
+	at org.apache.flink.table.planner.catalog.SqlCatalogViewTable.convertToRel(SqlCatalogViewTable.java:58)
+	at org.apache.flink.table.planner.plan.schema.ExpandingPreparingTable.expand(ExpandingPreparingTable.java:59)
+	at org.apache.flink.table.planner.plan.schema.ExpandingPreparingTable.toRel(ExpandingPreparingTable.java:55)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.toRel(SqlToRelConverter.java:3585)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertIdentifier(SqlToRelConverter.java:2507)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertFrom(SqlToRelConverter.java:2144)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertFrom(SqlToRelConverter.java:2093)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertFrom(SqlToRelConverter.java:2050)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelectImpl(SqlToRelConverter.java:663)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertSelect(SqlToRelConverter.java:644)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQueryRecursive(SqlToRelConverter.java:3438)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQuery(SqlToRelConverter.java:570)
+	at org.apache.flink.table.planner.calcite.FlinkPlannerImpl.org$apache$flink$table$planner$calcite$FlinkPlannerImpl$$rel(FlinkPlannerImpl.scala:165)
+	at org.apache.flink.table.planner.calcite.FlinkPlannerImpl.rel(FlinkPlannerImpl.scala:157)
+	at org.apache.flink.table.planner.operations.SqlToOperationConverter.toQueryOperation(SqlToOperationConverter.java:823)
+	at org.apache.flink.table.planner.operations.SqlToOperationConverter.convertSqlQuery(SqlToOperationConverter.java:795)
+	at org.apache.flink.table.planner.operations.SqlToOperationConverter.convert(SqlToOperationConverter.java:250)
+	at org.apache.flink.table.planner.delegation.ParserImpl.parse(ParserImpl.java:78)
+	at org.apache.flink.table.api.internal.TableEnvironmentImpl.sqlQuery(TableEnvironmentImpl.java:638)
+	at paris.benoit.mob.cluster.utils.sql.RetractStreamTableUtils.convertAndRegister(RetractStreamTableUtils.java:27)
+	at paris.benoit.mob.cluster.MobCluster.registerDataFlow(MobCluster.java:225)

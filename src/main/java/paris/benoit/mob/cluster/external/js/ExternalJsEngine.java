@@ -8,6 +8,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
 
 import javax.script.Invocable;
@@ -44,20 +45,20 @@ public class ExternalJsEngine {
             // TODO avoir les deux dasn une même fichier?
             // TODO enlever les properties
 
-            String fileCodeLocation = jsConf.get("out").getProperty("mob.cluster-io.js-engine.code");
+            String fileCodeLocation = jsConf.get("out").getProperty(MobTableConfiguration.MOB_CLUSTER_IO_JS_ENGINE_CODE);
             // TODO un-hard-code it (pong)
             String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/pong/" + fileCodeLocation)));
 
-            String invokeFunction = jsConf.get("out").getProperty("mob.cluster-io.js-engine.invoke-function");
+            String invokeFunction = jsConf.get("out").getProperty(MobTableConfiguration.MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION);
 
             // TODO chopper le name autrement
-            String tableNameInEngine = jsConf.get("out").getProperty("mob.table-name");
-            String tableNameOutEngine = jsConf.get("in").getProperty("mob.table-name");
+            String tableNameInEngine = jsConf.get("out").getProperty(MobTableConfiguration.MOB_TABLE_NAME);
+            String tableNameOutEngine = jsConf.get("in").getProperty(MobTableConfiguration.MOB_TABLE_NAME);
 
             Properties props = new Properties();
             props.put("bootstrap.servers", "localhost:9092");
             // TODO magic value
-            props.put("group.id", jsConf.get("out").getProperty("mob.cluster-io.type"));
+            props.put("group.id", jsConf.get("out").getProperty(MobTableConfiguration.MOB_CLUSTER_IO_TYPE));
             props.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
             props.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
             props.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");

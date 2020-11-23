@@ -18,9 +18,7 @@ import paris.benoit.mob.cluster.services.DebugTableSink;
 import paris.benoit.mob.cluster.services.DirectoryTableSource;
 import paris.benoit.mob.cluster.services.TickTableSource;
 import paris.benoit.mob.cluster.services.TwitterTableSink;
-import paris.benoit.mob.cluster.utils.RetractStreamTableUtils;
 import paris.benoit.mob.cluster.utils.TableSchemaConverter;
-import paris.benoit.mob.cluster.utils.TemporalTableFunctionUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -44,6 +42,7 @@ public class MobCluster {
 
 
     public void start() throws Exception {
+
         // TODO: have a better startup sequence dependencies understanding / story
         //   not obvious:
         //   - ClusterRegistry.setConf before configuration.clusterFront.start, because ClientSimulators will fail otherwise
@@ -158,38 +157,12 @@ public class MobCluster {
         );
     }
 
-    private void registerDataFlow(MobAppConfiguration app) {
-
+    private void registerDataFlow(MobAppConfiguration app) throws TableAlreadyExistException, DatabaseNotExistException {
 
         for (MobTableConfiguration sqlConf: app.sql) {
-            logger.debug("Adding " + sqlConf.name + " of type " + sqlConf.confType);
-            try {
-                if (null == sqlConf.confType) {
-                    throw new RuntimeException("Configuration type required for " + sqlConf);
-                }
-                switch (sqlConf.confType) {
-                    case STATE:
-                        TemporalTableFunctionUtils.createAndRegister(tEnv, sqlConf);
-                        break;
-                    case RETRACT:
-                        RetractStreamTableUtils.convertAndRegister(tEnv, sqlConf);
-                        break;
-                    case UPDATE:
-                        // TODO refactor avec des statements, pour tout mettre en même temps, et que ça optimize
-                        tEnv.sqlUpdate(sqlConf.content);
-//                        tEnv.executeSql(sqlConf.content);
-                        break;
-                        default:
-                            throw new RuntimeException("No SQL type was specified");
-                }
-                logger.info("Tables are: " + Arrays.asList(tEnv.listTables()));
-            }
-            catch (Throwable t) {
-                throw new RuntimeException("" + sqlConf, t);
-            }
+            MobTableEnvironment.sqlUpdate(tEnv, catalog, sqlConf.content);
         }
 
-
-
     }
+
 }
