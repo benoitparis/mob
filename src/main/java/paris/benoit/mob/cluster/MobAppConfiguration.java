@@ -18,8 +18,8 @@ public class MobAppConfiguration {
     private static final Logger logger = LoggerFactory.getLogger(MobAppConfiguration.class);
 
     public final String name;
-    public final List<MobTableConfiguration> sql;
-    public final List<MobTableConfiguration> tests;
+    public final List<String> sql;
+    public final List<String> tests;
     private final String basePath;
 
     public MobAppConfiguration(String name) {
@@ -31,7 +31,7 @@ public class MobAppConfiguration {
         this.tests = buildConfigurationItem("tests");
     }
 
-    private List<MobTableConfiguration> buildConfigurationItem(final String folder) throws RuntimeException {
+    private List<String> buildConfigurationItem(final String folder) throws RuntimeException {
 
         Spliterator<Path> files;
         try {
@@ -55,7 +55,7 @@ public class MobAppConfiguration {
                 ))
                 .map(it -> {
                     try {
-                        return new MobTableConfiguration(new String(Files.readAllBytes(it)));
+                        return new String(Files.readAllBytes(it));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -63,7 +63,7 @@ public class MobAppConfiguration {
                 .collect(Collectors.toList());
     }
 
-    public List<MobTableConfiguration> getTests() {
+    public List<String> getTests() {
         return tests;
     }
 

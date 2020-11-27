@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import paris.benoit.mob.cluster.MobAppConfiguration;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.server.ClusterFront;
 
 import java.util.List;
@@ -35,9 +34,9 @@ public class AppTestFront implements ClusterFront {
 
     }
 
-    private ClientSimulator getClientSimulator(MobTableConfiguration test) {
+    private ClientSimulator getClientSimulator(String content) {
         logger.debug("Instantiating ClientSimulator");
-        ClientSimulator client = new ClientSimulator("client", test.content);
+        ClientSimulator client = new ClientSimulator("client", content);
         try {
             client.start();
         } catch (Exception e) {

@@ -14,7 +14,6 @@ import org.apache.flink.table.catalog.CatalogTableImpl;
 import org.apache.flink.table.catalog.ObjectIdentifier;
 import org.apache.flink.table.catalog.exceptions.DatabaseNotExistException;
 import org.apache.flink.table.catalog.exceptions.TableAlreadyExistException;
-import org.apache.flink.table.delegation.Parser;
 import org.apache.flink.table.functions.TemporalTableFunction;
 import org.apache.flink.table.operations.Operation;
 import org.apache.flink.table.operations.ddl.CreateTableOperation;
@@ -73,17 +72,13 @@ public class MobTableEnvironment {
         } else if (mDefault.matches()){
 
             String sql = mDefault.group("sql");
-
-            Parser parser = ((TableEnvironmentImpl) tEnv).getParser();
-
             List<Operation> parsed;
             try {
-                parsed = parser.parse(sql);
+                parsed = ((TableEnvironmentImpl) tEnv).getParser().parse(sql);
             } catch (SqlParserException e) {
                 logger.error("Failed to parse:\n" + sql);
                 throw e;
             }
-
 
             if (parsed.size() == 1 && parsed.get(0) instanceof CreateTableOperation) {
                 CreateTableOperation itemCasted = (CreateTableOperation) parsed.get(0);
@@ -105,25 +100,9 @@ public class MobTableEnvironment {
 
                 tableProps.putAll(KafkaGlobals.getTableOptionsForTopic(fullName));
 
-                // TODO Finished? No:
-                //   4. DONE Think about services vs js-engine/client: defined globally? defined locally? prob both?
-                //       globally: global_tick, inter_app_messaging, debug, directory (+rewrite with global registry)
-                //       locally: local_tick, twitter,
-                //    TODO redo this: on a confondu déclaration locale du service vs kafka or not vs
-                //       -> anyway, app conf should not declare services tables, only official services should
-                //      5. Think about defaulting to client
-                //   6. TODO quite à utiliser/parasiter les props des tables, autant faire un connector officiel
-                //        mob-client, mob-js-engine, ?mob-service (pour un appel à un service global/local?)
-                //          par contre faut wrap du kafka? ça fait un peu peur
-                //            on procédera par tests, et tout rentrera dans l'ordre?
-                //              en tout cas on persévère actuellement dans le cleanup
-                //   7. TODO revoir ces copies de map ici
-
-                CatalogTableImpl newTable = CatalogTableImpl.fromProperties(tableProps);
-
                 catalog.createTable(
                         itemCasted.getTableIdentifier().toObjectPath(),
-                        newTable,
+                        CatalogTableImpl.fromProperties(tableProps),
                         itemCasted.isIgnoreIfExists());
 
             } else {

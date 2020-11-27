@@ -14,16 +14,10 @@ import java.util.stream.Collectors;
 
 public class KafkaSchemaRegistry {
 
-    // REM on chasse les enum de conf et ils reviennent à grand pas
     public static final String MOB_CLUSTER_IO_FLOW = "mob.cluster-io.flow"; // in, out
     public static final String MOB_CLUSTER_IO_TYPE = "mob.cluster-io.type"; // client, js-engine, service
     public static final String MOB_CLUSTER_IO_JS_ENGINE_CODE = "mob.js-engine.code"; // location of file containting the code
     public static final String MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION = "mob.js-engine.invoke-function"; // location of file containing the code
-
-    public static final Map<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
-    static {
-        DEFAULT_CONFIGURATION.put(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE, "client");
-    }
 
     static final Map<String, String> schemas = new HashMap<>();
     static final Map<String, Map<String, String>> mobOptions = new HashMap<>();
@@ -60,7 +54,7 @@ public class KafkaSchemaRegistry {
         try {
             return mobOptions.entrySet().stream()
                     .filter(it -> null != it.getValue())
-                    .filter(it -> !"js-engine".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE))) // TODO faire par defaut client? ou bien demander?
+                    .filter(it -> !"js-engine".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE)))
                     .filter(it -> it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_FLOW).equals(category))
                     .filter(it -> null != it.getKey())
                     .collect(Collectors.toMap(Map.Entry::getKey, it -> schemas.get(it.getKey())));

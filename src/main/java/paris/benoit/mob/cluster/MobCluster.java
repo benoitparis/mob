@@ -61,8 +61,8 @@ public class MobCluster {
         for(MobAppConfiguration app : configuration.apps) {
             catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<>(), null), false);
             tEnv.useDatabase(app.name);
-            for (MobTableConfiguration sqlConf: app.sql) {
-                MobTableEnvironment.sqlUpdate(tEnv, catalog, sqlConf.content);
+            for (String content: app.sql) {
+                MobTableEnvironment.sqlUpdate(tEnv, catalog, content);
             }
         }
 
