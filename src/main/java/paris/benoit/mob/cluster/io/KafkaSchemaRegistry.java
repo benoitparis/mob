@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback.distributed;
+package paris.benoit.mob.cluster.io;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class KafkaSchemaRegistry {
 
     // REM on chasse les enum de conf et ils reviennent à grand pas
-    public static final String MOB_TABLE_NAME = "mob.table-name"; // fully qualifed name
     public static final String MOB_CLUSTER_IO_FLOW = "mob.cluster-io.flow"; // in, out
     public static final String MOB_CLUSTER_IO_TYPE = "mob.cluster-io.type"; // client, js-engine, service
     public static final String MOB_CLUSTER_IO_JS_ENGINE_CODE = "mob.js-engine.code"; // location of file containting the code
@@ -66,9 +65,6 @@ public class KafkaSchemaRegistry {
                     .filter(it -> null != it.getKey())
                     .collect(Collectors.toMap(Map.Entry::getKey, it -> schemas.get(it.getKey())));
         } catch (NullPointerException e) {
-            // TODO cleanup that
-            //   no info?
-            //   wrong info -> make it generated (you already have the app name and catalog)
             throw new RuntimeException("Your kafka tables probably did not contain sufficient metadata or did not contain the right one", e);
         }
     }

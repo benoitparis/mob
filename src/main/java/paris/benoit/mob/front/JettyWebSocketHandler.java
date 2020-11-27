@@ -6,7 +6,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
+import paris.benoit.mob.cluster.io.GlobalClusterSenderRegistry;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 import paris.benoit.mob.server.ClusterSender;

@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback;
+package paris.benoit.mob.cluster.io;
 
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterSender;

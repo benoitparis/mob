@@ -6,7 +6,7 @@ import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.GlobalClusterSenderRegistry;
+import paris.benoit.mob.cluster.io.GlobalClusterSenderRegistry;
 import paris.benoit.mob.message.ToClientMessage;
 import paris.benoit.mob.message.ToServerMessage;
 import paris.benoit.mob.server.ClusterSender;

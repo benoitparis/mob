@@ -21,7 +21,8 @@ import org.apache.flink.table.operations.ddl.CreateTableOperation;
 import org.apache.flink.types.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
+import paris.benoit.mob.cluster.io.KafkaGlobals;
+import paris.benoit.mob.cluster.io.KafkaSchemaRegistry;
 import paris.benoit.mob.cluster.utils.TableSchemaConverter;
 
 import java.util.HashMap;
@@ -89,8 +90,6 @@ public class MobTableEnvironment {
                 ObjectIdentifier identifier = itemCasted.getTableIdentifier();
                 CatalogTable catalogTable = itemCasted.getCatalogTable();
 
-                // TODO changer les props ici (nom, conf generation, registration, etc.)
-
                 String fullName = identifier.getCatalogName() + "." + identifier.toObjectPath().getFullName();
 
                 KafkaSchemaRegistry.registerSchema(
@@ -104,17 +103,9 @@ public class MobTableEnvironment {
                 HashMap<String, String> tableProps = new HashMap<>(catalogTable.toProperties());
                 optionsBefore.keySet().forEach(tableProps::remove); // keep only schema info
 
-                HashMap<String, String> optionsAfter = new HashMap<>();
-                optionsAfter.putAll(KAFKA_TABLE_OPTIONS);
-                // TODO have constant
-                optionsAfter.put("connector.topic", fullName);
-
-                tableProps.putAll(optionsAfter);
+                tableProps.putAll(KafkaGlobals.getTableOptionsForTopic(fullName));
 
                 // TODO Finished? No:
-                //   1. DONE Remove MobTableConf Properties
-                //   2. DONE use Options in KafkaSchemaRegistry, remove properties
-                //   3. Modify sql table files
                 //   4. DONE Think about services vs js-engine/client: defined globally? defined locally? prob both?
                 //       globally: global_tick, inter_app_messaging, debug, directory (+rewrite with global registry)
                 //       locally: local_tick, twitter,
@@ -153,15 +144,6 @@ public class MobTableEnvironment {
         } catch (TableException ignored) {}
     }
 
-    protected static final Map<String, String> KAFKA_TABLE_OPTIONS = new HashMap<>();
-    static {
-        // TODO get reference options
-        KAFKA_TABLE_OPTIONS.put("connector.type", "kafka");
-        KAFKA_TABLE_OPTIONS.put("connector.version", "universal");
-        KAFKA_TABLE_OPTIONS.put("connector.property-version", "1");
-        KAFKA_TABLE_OPTIONS.put("connector.properties.bootstrap.servers", "localhost:9092");
-        KAFKA_TABLE_OPTIONS.put("connector.properties.zookeeper.connect", "localhost:2181");
-        KAFKA_TABLE_OPTIONS.put("format.type", "json");
-    }
+
 
 }

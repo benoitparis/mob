@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.loopback.distributed;
+package paris.benoit.mob.cluster.io;
 
 import paris.benoit.mob.cluster.MobClusterConfiguration;
 import paris.benoit.mob.server.ClusterSender;
@@ -6,18 +6,10 @@ import paris.benoit.mob.server.ClusterSenderRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
 
     private MobClusterConfiguration configuration;
-    final Properties props = new Properties();
-
-    {
-        props.put("bootstrap.servers", "localhost:9092");
-        // TODO mettre les mob.cluster-io.type distincts collectés
-        props.put("group.id", "clients");
-    }
 
     @Override
     public void setConf(MobClusterConfiguration configuration) {
@@ -30,7 +22,7 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
         // TODO refactor interface
         KafkaSchemaRegistry
                 .getOutputSchemas()
-                .forEach((key, value) -> new KafkaClusterConsumer(props, key, configuration.clusterReceiver).start());
+                .forEach((key, value) -> new KafkaClusterConsumer(key, configuration.clusterReceiver).start());
 
     }
 
@@ -40,7 +32,9 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
 
         HashMap<String, ClusterSender> result = new HashMap<>();
 
-        KafkaSchemaRegistry.getInputSchemas().forEach((key, value) -> result.put(key, new KafkaClusterSender(props, key)));
+        KafkaSchemaRegistry
+                .getInputSchemas()
+                .forEach((key, value) -> result.put(key, new KafkaClusterSender(key)));
 
         return result;
     }

@@ -2,7 +2,7 @@ package paris.benoit.mob.server;
 
 import paris.benoit.mob.cluster.MobCluster;
 import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.loopback.distributed.KafkaClusterSenderRegistry;
+import paris.benoit.mob.cluster.io.KafkaClusterSenderRegistry;
 import paris.benoit.mob.front.JettyClusterReceiver;
 import paris.benoit.mob.front.JettyFront;
 

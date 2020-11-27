@@ -1,4 +1,4 @@
-package paris.benoit.mob.cluster.external.js;
+package paris.benoit.mob.cluster.external;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +8,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
+import paris.benoit.mob.cluster.io.KafkaGlobals;
+import paris.benoit.mob.cluster.io.KafkaSchemaRegistry;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -21,7 +22,6 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 // REM si la latence est trop haute, passer en datastream
 public class ExternalJsEngine {
@@ -47,15 +47,7 @@ public class ExternalJsEngine {
             String tableNameInEngine = out.getKey();
             String tableNameOutEngine = in.getKey();
 
-            // TODO dedicate something to KafkaGlobals
-            Properties props = new Properties();
-            props.put("bootstrap.servers", "localhost:9092");
-            // TODO magic kv
-            props.put("group.id", out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE));
-            props.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
-            props.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
-            props.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
-            props.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+            Map<String, Object> props = KafkaGlobals.getConnectOptionsForGroupId(out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE));
 
             ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
             graaljsEngine.eval(sourceCode);
