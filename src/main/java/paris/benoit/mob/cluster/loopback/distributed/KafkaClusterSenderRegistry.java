@@ -28,7 +28,9 @@ public class KafkaClusterSenderRegistry implements ClusterSenderRegistry {
     public void waitRegistrationsReady() {
         // TODO nothing to wait for, remove?
         // TODO refactor interface
-        KafkaSchemaRegistry.getOutputSchemas().forEach((key, value) -> new KafkaClusterConsumer(props, key, configuration.clusterReceiver).start());
+        KafkaSchemaRegistry
+                .getOutputSchemas()
+                .forEach((key, value) -> new KafkaClusterConsumer(props, key, configuration.clusterReceiver).start());
 
     }
 

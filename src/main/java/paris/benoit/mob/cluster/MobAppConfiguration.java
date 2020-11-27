@@ -55,7 +55,7 @@ public class MobAppConfiguration {
                 ))
                 .map(it -> {
                     try {
-                        return new MobTableConfiguration(name, new String(Files.readAllBytes(it)));
+                        return new MobTableConfiguration(new String(Files.readAllBytes(it)));
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }

@@ -1,16 +1,5 @@
-/* +moblib (
-  mob.cluster-io.flow=in
-  mob.table-name=mobcatalog.conversation.subscribe_messages
-)
-*/
 CREATE TABLE subscribe_messages (
   client_id STRING
 ) WITH (
-  'connector.type' = 'kafka',
-  'connector.version' = 'universal',
-  'connector.property-version' = '1',
-  'connector.topic' = 'mobcatalog.conversation.subscribe_messages',
-  'connector.properties.bootstrap.servers' = 'localhost:9092',
-  'connector.properties.zookeeper.connect' = 'localhost:2181',
-  'format.type' = 'json'
+  'mob.cluster-io.flow' = 'in'
 )

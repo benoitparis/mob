@@ -1,12 +1,7 @@
 package paris.benoit.mob.cluster.loopback.distributed;
 
-import paris.benoit.mob.cluster.MobClusterConfiguration;
-import paris.benoit.mob.cluster.MobTableConfiguration;
-
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
 import java.util.stream.Collectors;
 
 // TODO faire tout ça en Flink SQL qui lit Kafka?
@@ -19,21 +14,28 @@ import java.util.stream.Collectors;
 
 public class KafkaSchemaRegistry {
 
+    // REM on chasse les enum de conf et ils reviennent à grand pas
+    public static final String MOB_TABLE_NAME = "mob.table-name"; // fully qualifed name
+    public static final String MOB_CLUSTER_IO_FLOW = "mob.cluster-io.flow"; // in, out
+    public static final String MOB_CLUSTER_IO_TYPE = "mob.cluster-io.type"; // client, js-engine, service
+    public static final String MOB_CLUSTER_IO_JS_ENGINE_CODE = "mob.js-engine.code"; // location of file containting the code
+    public static final String MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION = "mob.js-engine.invoke-function"; // location of file containing the code
 
-    static Map<String, Properties> propertiesMap;
+    public static final Map<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
+    static {
+        DEFAULT_CONFIGURATION.put(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE, "client");
+    }
+
     static final Map<String, String> schemas = new HashMap<>();
+    static final Map<String, Map<String, String>> mobOptions = new HashMap<>();
 
     public static void registerSchema(String tableName, String jsonSchema) {
         // TODO Write to kafka, with properties, with category parsed, with client_accessible, schema, etc ? "TableRegistry"
         schemas.put(tableName, jsonSchema);
     }
 
-    public static void registerConfiguration(MobClusterConfiguration configuration) {
-        propertiesMap = configuration.apps.stream()
-                .flatMap(it -> it.sql.stream())
-                .map(it -> it.properties)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toMap(it -> (String) it.get(MobTableConfiguration.MOB_TABLE_NAME), it -> it));
+    public static void registerMobOptions(String tableName,  Map<String, String> options) {
+        mobOptions.put(tableName, options);
     }
 
     static public Map<String, String> getInputSchemas() {
@@ -57,9 +59,10 @@ public class KafkaSchemaRegistry {
         //           avec des events cloud pour kill si < cpu?
 
         try {
-            return propertiesMap.entrySet().stream()
-                    .filter(it -> !"js-engine".equals(it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_TYPE))) // TODO faire par defaut client? ou bien demander?
-                    .filter(it -> it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_FLOW).equals(category))
+            return mobOptions.entrySet().stream()
+                    .filter(it -> null != it.getValue())
+                    .filter(it -> !"js-engine".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE))) // TODO faire par defaut client? ou bien demander?
+                    .filter(it -> it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_FLOW).equals(category))
                     .filter(it -> null != it.getKey())
                     .collect(Collectors.toMap(Map.Entry::getKey, it -> schemas.get(it.getKey())));
         } catch (NullPointerException e) {
@@ -70,10 +73,10 @@ public class KafkaSchemaRegistry {
         }
     }
 
-    public static Map<String, Properties> getJsEngineConfiguration() {
+    public static Map<String, Map<String, String>> getJsEngineConfiguration() {
         // strings pour le moment
-        return propertiesMap.entrySet().stream()
-                .filter(it -> "js-engine".equals(it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_TYPE)))
-                .collect(Collectors.toMap(it -> (String) it.getValue().get(MobTableConfiguration.MOB_CLUSTER_IO_FLOW), Map.Entry::getValue));
+        return mobOptions.entrySet().stream()
+                .filter(it -> "js-engine".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE)))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

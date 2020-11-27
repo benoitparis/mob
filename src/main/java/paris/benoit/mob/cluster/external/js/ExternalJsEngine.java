@@ -8,7 +8,6 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import paris.benoit.mob.cluster.MobTableConfiguration;
 import paris.benoit.mob.cluster.loopback.distributed.KafkaSchemaRegistry;
 
 import javax.script.Invocable;
@@ -24,41 +23,35 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-// TODO REM si la latence est trop haute, passer en datastream avec:
-//   catalog.createTable(
-//           sourceConf.getObjectPath(),
-//           ConnectorCatalogTable.source(source, false),
-//           false
-//   );
-
+// REM si la latence est trop haute, passer en datastream
 public class ExternalJsEngine {
     private static final Logger logger = LoggerFactory.getLogger(ExternalJsEngine.class);
 
     public static void scanAndCreateJsEngine() throws IOException, ScriptException {
 
-        Map<String, Properties> jsConf = KafkaSchemaRegistry.getJsEngineConfiguration();
+        Map<String, Map<String, String>> jsConf = KafkaSchemaRegistry.getJsEngineConfiguration();
         logger.info("Creating js engine with schemas: " + jsConf);
         if (null != jsConf && jsConf.size() > 0) {
             if (2 < jsConf.size()) {
                 throw new RuntimeException("Only one js engine can be created at a time");
             }
-            // TODO avoir les deux dasn une même fichier?
-            // TODO enlever les properties
 
-            String fileCodeLocation = jsConf.get("out").getProperty(MobTableConfiguration.MOB_CLUSTER_IO_JS_ENGINE_CODE);
+            Map.Entry<String, Map<String, String>> out = jsConf.entrySet().stream().filter(it -> "out".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_FLOW))).findFirst().get();
+            Map.Entry<String, Map<String, String>> in = jsConf.entrySet().stream().filter(it -> "in".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_FLOW))).findFirst().get();
+
+            String fileCodeLocation = out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_JS_ENGINE_CODE);
             // TODO un-hard-code it (pong)
             String sourceCode = new String(Files.readAllBytes(Paths.get(System.getProperty("user.dir") + "/apps/pong/" + fileCodeLocation)));
+            String invokeFunction = out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION);
 
-            String invokeFunction = jsConf.get("out").getProperty(MobTableConfiguration.MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION);
+            String tableNameInEngine = out.getKey();
+            String tableNameOutEngine = in.getKey();
 
-            // TODO chopper le name autrement
-            String tableNameInEngine = jsConf.get("out").getProperty(MobTableConfiguration.MOB_TABLE_NAME);
-            String tableNameOutEngine = jsConf.get("in").getProperty(MobTableConfiguration.MOB_TABLE_NAME);
-
+            // TODO dedicate something to KafkaGlobals
             Properties props = new Properties();
             props.put("bootstrap.servers", "localhost:9092");
-            // TODO magic value
-            props.put("group.id", jsConf.get("out").getProperty(MobTableConfiguration.MOB_CLUSTER_IO_TYPE));
+            // TODO magic kv
+            props.put("group.id", out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE));
             props.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
             props.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
             props.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
@@ -80,9 +73,9 @@ public class ExternalJsEngine {
                     records.records(tableNameInEngine).forEach((it) -> {
                         try {
                             // TODO get standard output / err to a Kafka topic
-                            Map out = (Map) inv.invokeFunction(invokeFunction, it.value());
-                            @SuppressWarnings("unchecked") HashMap copy = new HashMap(out); // defensive copying
-                            String result = convertMapToJsonString(copy);
+                            Map resultMap = (Map) inv.invokeFunction(invokeFunction, it.value());
+                            @SuppressWarnings("unchecked") HashMap resultMapCopy = new HashMap(resultMap); // defensive copying
+                            String result = convertMapToJsonString(resultMapCopy);
 
                             ProducerRecord<String, String> msg = new ProducerRecord<>(tableNameOutEngine, result);
                             producer.send(msg);

@@ -33,4 +33,5 @@ public class TwitterSinkFunction extends RichSinkFunction<Tuple2<Boolean, Row>> 
             }
         }
     }
+
 }

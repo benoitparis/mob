@@ -1,8 +1,3 @@
-/* +moblib (
-  mob.cluster-io.flow=out
-  mob.table-name=mobcatalog.pong.game_out_to_client
-)
-*/
 CREATE TABLE game_out_to_client (
   client_id STRING,
   payload ROW(
@@ -17,11 +12,5 @@ CREATE TABLE game_out_to_client (
     scoreRight    DOUBLE
   ) 
 ) WITH (
-  'connector.type' = 'kafka',
-  'connector.version' = 'universal',
-  'connector.property-version' = '1',
-  'connector.topic' = 'mobcatalog.pong.game_out_to_client',
-  'connector.properties.bootstrap.servers' = 'localhost:9092',
-  'connector.properties.zookeeper.connect' = 'localhost:2181',
-  'format.type' = 'json'
+  'mob.cluster-io.flow' = 'out'
 )
