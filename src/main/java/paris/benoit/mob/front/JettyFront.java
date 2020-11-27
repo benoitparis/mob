@@ -52,6 +52,7 @@ public class JettyFront implements ClusterFront {
                     resourceHandler.setDirectoriesListed(true);
                     resourceHandler.setWelcomeFiles(new String[]{"index.html"});
                     resourceHandler.setBaseResource(pathResource);
+                    // resourceHandler.setCacheControl("no-cache"); // FIXME
                     ContextHandler contextHandler = new ContextHandler("/app/" + it);
                     contextHandler.setHandler(resourceHandler);
                     if (it.equalsIgnoreCase(mainApp)) {

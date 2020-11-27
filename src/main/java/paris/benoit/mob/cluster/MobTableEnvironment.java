@@ -101,6 +101,9 @@ public class MobTableEnvironment {
                 tableProps.putAll(KafkaGlobals.getTableOptionsForTopic(fullName));
 
                 catalog.createTable(
+                        // TODO enforce que appli name == schema déclaré
+                        //   sauf si on dit que c'est un service explicitement
+                        //     faudrait faire passer tout ça par une classe dédiée à des security rules
                         itemCasted.getTableIdentifier().toObjectPath(),
                         CatalogTableImpl.fromProperties(tableProps),
                         itemCasted.isIgnoreIfExists());

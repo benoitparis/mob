@@ -19,6 +19,15 @@ public class KafkaSchemaRegistry {
     public static final String MOB_CLUSTER_IO_JS_ENGINE_CODE = "mob.js-engine.code"; // location of file containting the code
     public static final String MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION = "mob.js-engine.invoke-function"; // location of file containing the code
 
+    public static final Map<String, String> DEFAULT_CONFIGURATION = new HashMap<>();
+    static {
+        // TODO c'est brittle que client soit par defaut:
+        //  un oubli d'un app dev, et puis les clients peuvent écrire dans le service
+        //  -> faire une faire politique de sécu, déclarer les services requis autrement?
+        //    locker l'écriture dans ces topics au dessus des apps
+        DEFAULT_CONFIGURATION.put(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE, "client");
+    }
+
     static final Map<String, String> schemas = new HashMap<>();
     static final Map<String, Map<String, String>> mobOptions = new HashMap<>();
 
@@ -28,7 +37,9 @@ public class KafkaSchemaRegistry {
     }
 
     public static void registerMobOptions(String tableName,  Map<String, String> options) {
-        mobOptions.put(tableName, options);
+        Map<String, String> fromDefault = new HashMap<>(DEFAULT_CONFIGURATION);
+        fromDefault.putAll(options);
+        mobOptions.put(tableName, fromDefault);
     }
 
     static public Map<String, String> getInputSchemas() {
@@ -54,7 +65,7 @@ public class KafkaSchemaRegistry {
         try {
             return mobOptions.entrySet().stream()
                     .filter(it -> null != it.getValue())
-                    .filter(it -> !"js-engine".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE)))
+                    .filter(it -> "client".equals(it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE))) // TODO faire par defaut client? ou bien demander?
                     .filter(it -> it.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_FLOW).equals(category))
                     .filter(it -> null != it.getKey())
                     .collect(Collectors.toMap(Map.Entry::getKey, it -> schemas.get(it.getKey())));
