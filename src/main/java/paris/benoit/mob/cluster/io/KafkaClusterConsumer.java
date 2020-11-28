@@ -17,7 +17,7 @@ public class KafkaClusterConsumer {
     public KafkaClusterConsumer(String tableName, ClusterReceiver clusterReceiver) {
         this.tableName = tableName;
         this.clusterReceiver = clusterReceiver;
-        this.consumer = new KafkaConsumer<>(KafkaGlobals.getConnectOptionsForGroupId("client"));
+        this.consumer = new KafkaConsumer<>(KafkaGlobals.getConnectOptions("client"));
     }
 
     public void start() {

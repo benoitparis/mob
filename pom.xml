@@ -25,6 +25,12 @@
 
     <profiles>
         <profile>
+            <id>1.13-SNAPSHOT</id>
+            <properties>
+                <flink.version>1.13-SNAPSHOT</flink.version>
+            </properties>
+        </profile>
+        <profile>
             <id>1.12-SNAPSHOT</id>
             <properties>
                 <flink.version>1.12-SNAPSHOT</flink.version>

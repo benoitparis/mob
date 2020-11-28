@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Message to be sent to the client.
  */
-@SuppressWarnings("unused") // Jasckson
+@SuppressWarnings("unused") // Jackson
 public class ToClientMessage {
 
     @JsonProperty
@@ -16,6 +16,9 @@ public class ToClientMessage {
 
     public String table = "";
 
+    // TODO renommer payload en value
+    // TODO ajouter key
+    // TODO mettre de l'avro
     @JsonProperty
     public JsonNode payload = null;
 

@@ -14,6 +14,9 @@ public class ToServerMessage {
     @JsonProperty
     public final String table;
 
+    // TODO renommer payload en value
+    // TODO ajouter key, vérifier que pas null
+    // TODO mettre de l'avro, vérifier que respecte le schema
     @JsonProperty
     public final JSONObject payload;
     

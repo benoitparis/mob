@@ -12,7 +12,7 @@ public class KafkaClusterSender implements ClusterSender {
 
     public KafkaClusterSender(String tableName) {
         this.tableName = tableName;
-        this.producer = new KafkaProducer<>(KafkaGlobals.getConnectOptionsForGroupId("client"));
+        this.producer = new KafkaProducer<>(KafkaGlobals.getConnectOptions("client"));
     }
 
     @Override

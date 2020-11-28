@@ -2,10 +2,7 @@ package paris.benoit.mob.cluster;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.table.api.ExplainDetail;
-import org.apache.flink.table.api.SqlParserException;
-import org.apache.flink.table.api.Table;
-import org.apache.flink.table.api.TableException;
+import org.apache.flink.table.api.*;
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 import org.apache.flink.table.api.internal.TableEnvironmentImpl;
 import org.apache.flink.table.catalog.Catalog;
@@ -84,12 +81,13 @@ public class MobTableEnvironment {
                 CreateTableOperation itemCasted = (CreateTableOperation) parsed.get(0);
                 ObjectIdentifier identifier = itemCasted.getTableIdentifier();
                 CatalogTable catalogTable = itemCasted.getCatalogTable();
+                TableSchema schema = catalogTable.getSchema();
 
                 String fullName = identifier.getCatalogName() + "." + identifier.toObjectPath().getFullName();
 
                 KafkaSchemaRegistry.registerSchema(
                         fullName,
-                        TableSchemaConverter.toJsonSchema(catalogTable.getSchema())
+                        TableSchemaConverter.toJsonSchema(schema)
                 );
 
                 Map<String, String> optionsBefore = catalogTable.getOptions();
@@ -98,12 +96,13 @@ public class MobTableEnvironment {
                 HashMap<String, String> tableProps = new HashMap<>(catalogTable.toProperties());
                 optionsBefore.keySet().forEach(tableProps::remove); // keep only schema info
 
-                tableProps.putAll(KafkaGlobals.getTableOptionsForTopic(fullName));
+                tableProps.putAll(KafkaGlobals.getTableOptions(fullName, schema.getPrimaryKey().isPresent()));
 
                 catalog.createTable(
                         // TODO enforce que appli name == schema déclaré
                         //   sauf si on dit que c'est un service explicitement
                         //     faudrait faire passer tout ça par une classe dédiée à des security rules
+                        //       cf notes
                         itemCasted.getTableIdentifier().toObjectPath(),
                         CatalogTableImpl.fromProperties(tableProps),
                         itemCasted.isIgnoreIfExists());

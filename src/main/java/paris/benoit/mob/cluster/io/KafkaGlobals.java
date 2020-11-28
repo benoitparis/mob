@@ -5,21 +5,30 @@ import java.util.Map;
 
 public class KafkaGlobals {
 
-    private static final Map<String, String> FLINK_TABLE_OPTIONS = new HashMap<>();
+    private static final Map<String, String> FLINK_KAFKA_TABLE_OPTIONS = new HashMap<>();
     static {
-        // TODO get reference options, have constants (get them from lib?)
-        FLINK_TABLE_OPTIONS.put("connector.type", "kafka");
-        FLINK_TABLE_OPTIONS.put("connector.version", "universal");
-        FLINK_TABLE_OPTIONS.put("connector.property-version", "1");
-        FLINK_TABLE_OPTIONS.put("connector.properties.bootstrap.servers", "localhost:9092");
-        FLINK_TABLE_OPTIONS.put("connector.properties.zookeeper.connect", "localhost:2181");
-        FLINK_TABLE_OPTIONS.put("format.type", "json");
+        FLINK_KAFKA_TABLE_OPTIONS.put("connector", "kafka");
+        FLINK_KAFKA_TABLE_OPTIONS.put("properties.bootstrap.servers", "localhost:9092");
+        FLINK_KAFKA_TABLE_OPTIONS.put("value.format", "json");
     }
-    public static Map<String, String> getTableOptionsForTopic(String topic) {
-        HashMap<String, String> result = new HashMap<>(KafkaGlobals.FLINK_TABLE_OPTIONS);
-        result.put("connector.topic", topic);
+    private static final Map<String, String> FLINK_KAFKA_UPSERT_TABLE_OPTIONS = new HashMap<>();
+    static {
+        FLINK_KAFKA_UPSERT_TABLE_OPTIONS.put("connector", "upsert-kafka");
+        FLINK_KAFKA_UPSERT_TABLE_OPTIONS.put("properties.bootstrap.servers", "localhost:9092");
+        FLINK_KAFKA_UPSERT_TABLE_OPTIONS.put("key.format", "json");
+        FLINK_KAFKA_UPSERT_TABLE_OPTIONS.put("value.format", "json");
+    }
+    public static Map<String, String> getTableOptions(String tableName, boolean upsert) {
+        HashMap<String, String> result = new HashMap<>();
+        if (upsert) {
+            result.putAll(FLINK_KAFKA_UPSERT_TABLE_OPTIONS);
+        } else {
+            result.putAll(FLINK_KAFKA_TABLE_OPTIONS);
+        }
+        result.put("topic", tableName);
         return result;
     }
+
 
     private static final Map<String, Object> KAFKA_CONNECT_OPTIONS = new HashMap<>();
     static {
@@ -30,7 +39,7 @@ public class KafkaGlobals {
         KAFKA_CONNECT_OPTIONS.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
         KAFKA_CONNECT_OPTIONS.put("bootstrap.servers", "localhost:9092");
     }
-    public static Map<String, Object> getConnectOptionsForGroupId(String groupId) {
+    public static Map<String, Object> getConnectOptions(String groupId) {
         HashMap<String, Object> result = new HashMap<>(KafkaGlobals.KAFKA_CONNECT_OPTIONS);
         result.put("group.id", groupId);
         return result;

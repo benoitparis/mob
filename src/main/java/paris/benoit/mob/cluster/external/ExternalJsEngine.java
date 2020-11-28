@@ -47,7 +47,7 @@ public class ExternalJsEngine {
             String tableNameInEngine = out.getKey();
             String tableNameOutEngine = in.getKey();
 
-            Map<String, Object> props = KafkaGlobals.getConnectOptionsForGroupId(out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE));
+            Map<String, Object> props = KafkaGlobals.getConnectOptions(out.getValue().get(KafkaSchemaRegistry.MOB_CLUSTER_IO_TYPE));
 
             ScriptEngine graaljsEngine = new ScriptEngineManager().getEngineByName("graal.js");
             graaljsEngine.eval(sourceCode);
