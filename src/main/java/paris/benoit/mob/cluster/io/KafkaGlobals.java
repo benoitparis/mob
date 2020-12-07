@@ -33,10 +33,10 @@ public class KafkaGlobals {
     private static final Map<String, Object> KAFKA_CONNECT_OPTIONS = new HashMap<>();
     static {
         // TODO passer à avro / protobuf, etc. avec org.apache.kafka.common.serialization.ByteArraySerializer pour du zéro copy?
-        KAFKA_CONNECT_OPTIONS.put("key.serializer","org.apache.kafka.common.serialization.StringSerializer");
-        KAFKA_CONNECT_OPTIONS.put("value.serializer","org.apache.kafka.common.serialization.StringSerializer");
-        KAFKA_CONNECT_OPTIONS.put("key.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
-        KAFKA_CONNECT_OPTIONS.put("value.deserializer","org.apache.kafka.common.serialization.StringDeserializer");
+        KAFKA_CONNECT_OPTIONS.put("key.serializer", org.apache.kafka.common.serialization.StringSerializer.class);
+        KAFKA_CONNECT_OPTIONS.put("value.serializer", org.apache.kafka.common.serialization.StringSerializer.class);
+        KAFKA_CONNECT_OPTIONS.put("key.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
+        KAFKA_CONNECT_OPTIONS.put("value.deserializer", org.apache.kafka.common.serialization.StringDeserializer.class);
         KAFKA_CONNECT_OPTIONS.put("bootstrap.servers", "localhost:9092");
     }
     public static Map<String, Object> getConnectOptions(String groupId) {

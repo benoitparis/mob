@@ -16,7 +16,7 @@ public class KafkaSchemaRegistry {
 
     public static final String MOB_CLUSTER_IO_FLOW = "mob.cluster-io.flow"; // in, out
     public static final String MOB_CLUSTER_IO_TYPE = "mob.cluster-io.type"; // client, js-engine, service
-    public static final String MOB_CLUSTER_IO_JS_ENGINE_CODE = "mob.js-engine.code"; // location of file containting the code
+    public static final String MOB_CLUSTER_IO_JS_ENGINE_CODE = "mob.js-engine.code"; // location of file containing the code
     public static final String MOB_CLUSTER_IO_JS_ENGINE_INVOKE_FUNCTION = "mob.js-engine.invoke-function"; // location of file containing the code
 
     public static final Map<String, String> DEFAULT_CONFIGURATION = new HashMap<>();

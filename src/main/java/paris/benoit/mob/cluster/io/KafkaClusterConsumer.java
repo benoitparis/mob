@@ -18,6 +18,8 @@ public class KafkaClusterConsumer {
         this.tableName = tableName;
         this.clusterReceiver = clusterReceiver;
         this.consumer = new KafkaConsumer<>(KafkaGlobals.getConnectOptions("client"));
+//        KafkaAdminClient.create().
+//        new NewTopic.configs
     }
 
     public void start() {

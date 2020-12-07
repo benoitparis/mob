@@ -7,10 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -21,6 +18,8 @@ public class MobAppConfiguration {
     public final List<String> sql;
     public final List<String> tests;
     private final String basePath;
+
+    public final List<MobTableConfiguration> tableConfiguration = new ArrayList<>();
 
     public MobAppConfiguration(String name) {
         this.name = name;
@@ -65,6 +64,10 @@ public class MobAppConfiguration {
 
     public List<String> getTests() {
         return tests;
+    }
+
+    public void addTableConfiguration(MobTableConfiguration conf) {
+        tableConfiguration.add(conf);
     }
 
 

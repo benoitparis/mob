@@ -24,6 +24,7 @@ import paris.benoit.mob.cluster.utils.TableSchemaConverter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,7 +44,9 @@ public class MobTableEnvironment {
             "(?<sql>.*)",
             Pattern.DOTALL);
 
-    public static void sqlUpdate(StreamTableEnvironment tEnv, Catalog catalog, String content) throws TableAlreadyExistException, DatabaseNotExistException {
+    public static Optional<MobTableConfiguration> sqlUpdate(StreamTableEnvironment tEnv, Catalog catalog, String content) throws TableAlreadyExistException, DatabaseNotExistException {
+
+        MobTableConfiguration result = null;
 
         Matcher mRetract = RETRACT_PATTERN.matcher(content);
         Matcher mTemporal = TEMPORAL_PATTERN.matcher(content);
@@ -82,16 +85,12 @@ public class MobTableEnvironment {
                 ObjectIdentifier identifier = itemCasted.getTableIdentifier();
                 CatalogTable catalogTable = itemCasted.getCatalogTable();
                 TableSchema schema = catalogTable.getSchema();
-
                 String fullName = identifier.getCatalogName() + "." + identifier.toObjectPath().getFullName();
 
-                KafkaSchemaRegistry.registerSchema(
-                        fullName,
-                        TableSchemaConverter.toJsonSchema(schema)
-                );
+                //DescriptorProperties.getTableSchema(schema).toString()
+                //new DescriptorProperties().putTableSchema(fullName, schema);
 
                 Map<String, String> optionsBefore = catalogTable.getOptions();
-                KafkaSchemaRegistry.registerMobOptions(fullName, optionsBefore);
 
                 HashMap<String, String> tableProps = new HashMap<>(catalogTable.toProperties());
                 optionsBefore.keySet().forEach(tableProps::remove); // keep only schema info
@@ -107,6 +106,11 @@ public class MobTableEnvironment {
                         CatalogTableImpl.fromProperties(tableProps),
                         itemCasted.isIgnoreIfExists());
 
+                // TODO refactor le KafkaSchemaRegistry et les MobTableConfiguration, mais seulement quand on voudra séparer les choses
+                KafkaSchemaRegistry.registerMobOptions(fullName, optionsBefore);
+                KafkaSchemaRegistry.registerSchema(fullName, TableSchemaConverter.toJsonSchema(schema));
+                result = new MobTableConfiguration(fullName, TableSchemaConverter.toJsonSchema(schema), optionsBefore);
+
             } else {
                 tryPrintExplain(tEnv, sql);
                 tEnv.sqlUpdate(sql);
@@ -116,6 +120,7 @@ public class MobTableEnvironment {
             throw new RuntimeException("Failed to match default sql matcher");
         }
 
+        return Optional.ofNullable(result);
 
     }
 
@@ -126,5 +131,17 @@ public class MobTableEnvironment {
     }
 
 
+    public static void deployApp(MobAppConfiguration app, StreamTableEnvironment tEnv, Catalog catalog) {
+        app.sql.stream()
+            .map(content -> {
+                try {
+                    return MobTableEnvironment.sqlUpdate(tEnv, catalog, content);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            })
+            .flatMap(Optional::stream)
+            .forEach(app::addTableConfiguration);
 
+    }
 }

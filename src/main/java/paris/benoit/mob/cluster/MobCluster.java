@@ -54,16 +54,13 @@ public class MobCluster {
 
         configuration.clusterSenderRegistry.setConf(configuration);
         GlobalClusterSenderRegistry.setConf(configuration);
-        configuration.clusterFront.configure(configuration);
-
-        configuration.clusterFront.start();
         registerServiceTables();
         for(MobAppConfiguration app : configuration.apps) {
             catalog.createDatabase(app.name, new CatalogDatabaseImpl(new HashMap<>(), null), false);
             tEnv.useDatabase(app.name);
-            for (String content: app.sql) {
-                MobTableEnvironment.sqlUpdate(tEnv, catalog, content);
-            }
+
+            MobTableEnvironment.deployApp(app, tEnv, catalog);
+
         }
 
         ExternalJsEngine.scanAndCreateJsEngine();
@@ -73,6 +70,9 @@ public class MobCluster {
         //   une histoire de taille de programme / threading
 //        String plan = sEnv.getExecutionPlan(); // TODO replace /r?/n / et/ou le mettre dans une url
 
+
+        configuration.clusterFront.configure(configuration);
+        configuration.clusterFront.start();
         configuration.clusterFront.waitReady();
         configuration.clusterSenderRegistry.waitRegistrationsReady();
 
