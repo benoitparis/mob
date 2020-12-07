@@ -18,7 +18,7 @@
         <flink-scala.version>2.11</flink-scala.version>
         <graalvm.version>19.2.0</graalvm.version>
         <twitter4j.version>4.0.6</twitter4j.version>
-        <jetty.version>9.4.31.v20200723</jetty.version>
+        <jetty.version>9.4.35.v20201120</jetty.version>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
