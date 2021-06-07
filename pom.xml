@@ -13,7 +13,7 @@
 
         <!-- versions -->
         <slf4j.version>1.6.4</slf4j.version>
-        <logback.version>1.0.1</logback.version>
+        <logback.version>1.2.0</logback.version>
         <flink.version>1.10.0</flink.version>
         <flink-scala.version>2.11</flink-scala.version>
         <graalvm.version>19.2.0</graalvm.version>
